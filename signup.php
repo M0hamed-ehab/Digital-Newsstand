@@ -1,6 +1,9 @@
 <?php
 include 'config/Database.php';
 
+$database = new Database();
+$conn = $database->connect();
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
@@ -17,15 +20,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        echo "email already taken.";
+        echo "Email already taken.";
         exit;
     }
 
     $stmt = $conn->prepare("INSERT INTO users (name, password, email) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $username, $password, $email); 
+    $stmt->bind_param("sss", $username, $password, $email);
 
     if ($stmt->execute()) {
-        header("Location: product.html");
+        header("Location: index.html");
         exit;
     } else {
         echo "Error: " . $conn->error;
