@@ -24,6 +24,53 @@
     <!--===============================================================================================-->
     <link rel="stylesheet" type="text/css" href="css/main.css">
     <!--===============================================================================================-->
+    <style>
+        .container-game {
+            display: grid;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            border: 1px solid #333;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            border: none;
+            font-size: 18px;
+        }
+
+        input:focus {
+            outline: 2px solid #007BFF;
+        }
+
+        .thick-border-top {
+            border-top: 3px solid #000;
+        }
+
+        .thick-border-left {
+            border-left: 3px solid #000;
+        }
+
+        .thick-border-right {
+            border-right: 3px solid #000;
+        }
+
+        .thick-border-bottom {
+            border-bottom: 3px solid #000;
+        }
+    </style>
 </head>
 
 <body class="animsition">
@@ -2361,132 +2408,27 @@
     </header>
 
 
+    <!--game here-->
 
 
-    <!-- Latest -->
-    <section class="bg0 p-t-60 p-b-35">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-10 col-lg-8 p-b-20">
-                    <div class="how2 how2-cl4 flex-s-c m-r-10 m-r-0-sr991">
-                        <h3 class="f1-m-2 cl3 tab01-title">
-                            Available Games
-                        </h3>
-                    </div>
 
-                    <div class="row p-t-35">
-                        <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                            <!-- Item latest -->
-                            <div class="m-b-45">
-                                <a href="sudoku.html" class="wrap-pic-w hov1 trans-03">
-                                    <img src="images/g1.jpg" alt="Sudoku">
-                                </a>
-
-                                <div class="p-t-16">
-                                    <h5 class="p-b-5">
-                                        <a href="sudoku.html" class="f1-m-3 cl2 hov-cl10 trans-03">
-                                            Sodoku
-                                        </a>
-                                    </h5>
-                                    <span class="cl8">
-
-
-                                        <span class="f1-s-3">
-                                            A logic-based number puzzle where you fill a 9×9 grid so each row,
-                                            column, and 3×3 box contains digits 1 to 9 without repetition
-                                        </span>
-                                    </span>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                            <!-- Item latest -->
-                            <div class="m-b-45">
-                                <a href="" class="wrap-pic-w hov1 trans-03">
-                                    <img src="images/g2.jpg" alt="XO">
-                                </a>
-
-                                <div class="p-t-16">
-                                    <h5 class="p-b-5">
-                                        <a href="blog-detail-01.html" class="f1-m-3 cl2 hov-cl10 trans-03">
-                                            Tic Tac Toe
-                                        </a>
-                                    </h5>
-                                    <span class="cl8">
-
-
-                                        <span class="f1-s-3">
-                                            You play against the computer, trying to align three X's or O's while the
-                                            computer blocks or counters your moves </span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                            <!-- Item latest -->
-                            <div class="m-b-45">
-                                <a href="" class="wrap-pic-w hov1 trans-03">
-                                    <img src="images/g3.webp" alt="Wordle">
-                                </a>
-
-                                <div class="p-t-16">
-                                    <h5 class="p-b-5">
-                                        <a href="" class="f1-m-3 cl2 hov-cl10 trans-03">
-                                            Wordle
-                                        </a>
-                                    </h5>
-
-                                    <span class="cl8">
-
-
-                                        <span class="f1-s-3">
-                                            A word puzzle where you guess a five-letter word in six tries,
-                                            with color hints for accuracy
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                            <!-- Item latest -->
-                            <div class="m-b-45">
-                                <a href="" class="wrap-pic-w hov1 trans-03">
-                                    <img src="images/g4.jpg" alt="Minesweeper">
-                                </a>
-
-                                <div class="p-t-16">
-                                    <h5 class="p-b-5">
-                                        <a href="blog-detail-01.html" class="f1-m-3 cl2 hov-cl10 trans-03">
-                                            Minesweeper
-                                        </a>
-                                    </h5>
-
-                                    <span class="cl8">
-
-
-                                        <span class="f1-s-3">
-                                            A puzzle game where you uncover tiles on a grid, avoiding hidden mines and
-                                            using number clues to find safe spots
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+    <div class="container-game">
+        <h2>Sudoku Game</h2>
+        <table id="sudoku-board"></table>
+        <button onclick="checkSolution()">Check Solution</button>
+        <p id="result"></p>
+    </div>
 
 
 
 
-                    </div>
-                </div>
 
 
-            </div>
-        </div>
-    </section>
+
+
+
+
+
     <!--===============================================================================================-->
     <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
     <!--===============================================================================================-->
@@ -2496,6 +2438,8 @@
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
     <!--===============================================================================================-->
     <script src="js/main.js"></script>
+
+    <script src="sudoku.js"></script>
 
 </body>
 
