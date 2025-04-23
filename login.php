@@ -1,6 +1,9 @@
 <?php
 include 'config/Database.php';
 
+$database = new Database();
+$conn = $database->connect();
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
