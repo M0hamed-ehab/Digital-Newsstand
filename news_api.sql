@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2025 at 07:25 PM
+-- Generation Time: Apr 24, 2025 at 01:19 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,7 +42,8 @@ CREATE TABLE `articles` (
 
 INSERT INTO `articles` (`id`, `title`, `content`, `author`, `created_at`, `category_id`) VALUES
 (21, 'newsportal', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'Mai', '2025-04-23 09:55:23', 3),
-(24, 'Surveying Engineer', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odio', 'mmm', '2025-04-23 15:04:10', 1);
+(24, 'Surveying Engineer', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odio', 'mmm', '2025-04-23 15:04:10', 1),
+(26, 'Data Specialist', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'john', '2025-04-23 20:23:36', 6);
 
 -- --------------------------------------------------------
 
@@ -74,6 +75,19 @@ CREATE TABLE `comment` (
   `comment_id` int(11) NOT NULL,
   `description` varchar(10000) NOT NULL,
   `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `favorites`
+--
+
+CREATE TABLE `favorites` (
+  `favorite_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `saved_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -148,6 +162,14 @@ ALTER TABLE `comment`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD PRIMARY KEY (`favorite_id`),
+  ADD UNIQUE KEY `user_article` (`user_id`,`article_id`),
+  ADD KEY `favorites_ibfk_2` (`article_id`);
+
+--
 -- Indexes for table `notfications`
 --
 ALTER TABLE `notfications`
@@ -175,7 +197,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `articles`
 --
 ALTER TABLE `articles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -188,6 +210,12 @@ ALTER TABLE `category`
 --
 ALTER TABLE `comment`
   MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `favorites`
+--
+ALTER TABLE `favorites`
+  MODIFY `favorite_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `notfications`
@@ -222,6 +250,13 @@ ALTER TABLE `articles`
 --
 ALTER TABLE `comment`
   ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `notfications`
