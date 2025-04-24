@@ -54,12 +54,6 @@ if (isset($_POST['update_profile'])) {
         $update_stmt->close();
     }
 }
-
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header("Location: index.php");
-    exit();
-}
 ?>
 
 <!DOCTYPE html>
@@ -197,7 +191,6 @@ if (isset($_GET['logout'])) {
             <button type="submit" class="btn btn-primary" name="update_profile">Update Profile</button>
         </form>
 
-        <a href="profile.php?logout=true" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
         <div class="mt-3">
             <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Home</a>
         </div>
