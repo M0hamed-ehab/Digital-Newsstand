@@ -1,5 +1,8 @@
 <?php
+
 include_once 'config/Database.php';
+
+
 
 $db = (new Database())->connect();
 
@@ -481,11 +484,15 @@ $popular_articles_result = $db->query($popular_articles_query);
                 <button type="button" onclick="checkSolution()">Check Solution</button>
                 <button type="button" onclick="fillSolution()">Get Solution</button>
                 <button type="button" onclick="resetBoard()">Reset</button>
-                <p id="result">here</p>
+                <p id="result"></p>
             </div>
         </div>
     </div>
     </div>
+
+
+
+
 
 
 
