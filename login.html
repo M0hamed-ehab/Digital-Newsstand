@@ -140,11 +140,6 @@
             return;
         }
 
-        if (password.toLowerCase().includes("admin")) {
-            window.location.href = "admin.php";
-            return;
-        }
-
         fetch("login.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
