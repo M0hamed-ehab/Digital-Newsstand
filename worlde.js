@@ -1,5 +1,16 @@
 (function () {
-    const WORDS = ["APPLE", "BRAVE", "CRANE", "DREAM", "EAGLE", "FAITH", "GHOST", "HONEY", "IDEAL", "JOKER"];
+    const WORDS = ["APPLE", "BRAVE", "CRANE", "DREAM", "EAGLE", "FAITH", "GHOST", "HONEY", "IDEAL", "JOKER",
+        "KNEEL", "LEMON", "MIGHT", "NOBLE", "OCEAN", "PRIZE", "QUICK", "ROAST", "SMILE", "TIGER",
+        "UNION", "VIVID", "WORTH", "XENON", "YOUNG", "ZEBRA", "ANGEL", "BLINK", "CLOUD", "DAILY",
+        "EARTH", "FROST", "GRACE", "HEART", "INPUT", "JUMPY", "KNACK", "LIGHT", "MOVER", "NINJA",
+        "OPERA", "PLANT", "QUEST", "RIVER", "SHINE", "TRUST", "URBAN", "VOTER", "WHILE", "YIELD",
+        "ABOVE", "BERRY", "CHESS", "DOUBT", "ELBOW", "FLAME", "GRIND", "HAPPY", "ICING", "JELLY",
+        "KICKS", "LAYER", "MAGIC", "NURSE", "OVERT", "PAINT", "QUILT", "RAISE", "SCALE", "THINK",
+        "UNCLE", "VOICE", "WINGS", "XYSTI", "YEAST", "ZONED", "ALIVE", "BLADE", "COAST", "DRILL",
+        "EAGER", "FEAST", "GLASS", "HASTE", "ISSUE", "JUICE", "KNOCK", "LUNCH", "MORAL", "NERVE",
+        "OASIS", "PEARL", "QUAKE", "REACT", "STORM", "THUMB", "UNDER", "VOWEL", "WHEAT", "YACHT"]
+
+        ;
     const MAX_GUESSES = 6;
     const WORD_LENGTH = 5;
 
