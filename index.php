@@ -396,10 +396,22 @@ function isSignedUp()
                         background-color: #e9ecef;
                         color: #1e2125;
                 }
+
+                .goog-te-gadget-simple {
+                        position: absolute;
+                        top: 35%;
+                        background-color: #343A40 !important;
+                        border: none !important;
+                }
+
+                .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed span {
+                        color: white;
+                }
         </style>
 </head>
 
 <body>
+
         <nav class="navbar navbar-expand-lg navbar-dark">
                 <div class="container-fluid">
                         <a class="navbar-brand" href="index.php">
@@ -426,6 +438,10 @@ function isSignedUp()
                                         <?php endwhile; ?>
                                         <li>
                                                 <a class="nav-link" href="#games">Games</a>
+                                        </li>
+                                        <li>
+                                                <div id="google_translate_element"></div>
+
                                         </li>
                                 </ul>
                                 <form class="d-flex">
@@ -691,6 +707,8 @@ function isSignedUp()
                                 Service</a></p>
         </footer>
 
+
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -708,6 +726,19 @@ function isSignedUp()
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+        <script type="text/javascript">
+                function googleTranslateElementInit() {
+                        new google.translate.TranslateElement({
+                                pageLanguage: 'en',
+                                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                        }, 'google_translate_element');
+                }
+        </script>
+
+        <script type="text/javascript"
+                src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+        </script>
 </body>
 
 </html>
