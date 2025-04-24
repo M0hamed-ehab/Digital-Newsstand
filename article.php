@@ -41,10 +41,10 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $is_booked = false;
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
-        $bookmaek_query = "
+        $bookmark_query = "
             SELECT 1 FROM bookmarks WHERE user_id = ? AND article_id = ?
         ";
-        $stmt = $db->prepare($bookmaek_query);
+        $stmt = $db->prepare($bookmark_query);
         $stmt->bind_param("ii", $user_id, $article_id);
         $stmt->execute();
         $book_result = $stmt->get_result();

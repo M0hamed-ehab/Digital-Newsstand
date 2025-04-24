@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 24, 2025 at 08:45 PM
+-- Generation Time: Apr 24, 2025 at 09:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,6 +44,19 @@ INSERT INTO `articles` (`id`, `title`, `content`, `author`, `created_at`, `categ
 (21, 'newsportal', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'Mai', '2025-04-23 09:55:23', 3),
 (24, 'Surveying Engineer', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odio', 'mmm', '2025-04-23 15:04:10', 1),
 (26, 'Data Specialist', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'john', '2025-04-23 20:23:36', 6);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bookmarks`
+--
+
+CREATE TABLE `bookmarks` (
+  `bookmark_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `added_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -151,6 +164,14 @@ ALTER TABLE `articles`
   ADD KEY `articles_ibfk_1` (`category_id`);
 
 --
+-- Indexes for table `bookmarks`
+--
+ALTER TABLE `bookmarks`
+  ADD PRIMARY KEY (`bookmark_id`),
+  ADD UNIQUE KEY `user_article` (`user_id`,`article_id`),
+  ADD KEY `article_id` (`article_id`);
+
+--
 -- Indexes for table `category`
 --
 ALTER TABLE `category`
@@ -202,6 +223,12 @@ ALTER TABLE `articles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
+-- AUTO_INCREMENT for table `bookmarks`
+--
+ALTER TABLE `bookmarks`
+  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
@@ -246,6 +273,13 @@ ALTER TABLE `users`
 --
 ALTER TABLE `articles`
   ADD CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `bookmarks`
+--
+ALTER TABLE `bookmarks`
+  ADD CONSTRAINT `bookmarks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `bookmarks_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`);
 
 --
 -- Constraints for table `comment`
