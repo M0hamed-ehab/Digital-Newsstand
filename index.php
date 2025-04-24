@@ -451,25 +451,43 @@ function isSignedUp()
                                 <ul class="navbar-nav ms-auto">
                                         <?php if (isUserLoggedIn() || isSignedUp()): ?>
                                                 <li class="nav-item user-dropdown">
-                                                        <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="User Menu">
+                                                        <a class="nav-link" href="#" id="userDropdown" role="button"
+                                                                data-bs-toggle="dropdown" aria-expanded="false"
+                                                                title="User Menu">
                                                                 <i class="fas fa-user-circle fa-lg"></i>
                                                         </a>
-                                                        <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
-                                                                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i> Profile</a></li>
-                                                                <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i> Favorites</a></li>
-                                                                <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i> Bookmarks</a></li>
+                                                        <ul class="dropdown-menu user-dropdown-menu"
+                                                                aria-labelledby="userDropdown">
+                                                                <li><a class="dropdown-item" href="profile.php"><i
+                                                                                        class="fas fa-user me-2"></i>
+                                                                                Profile</a></li>
+                                                                <li><a class="dropdown-item" href="favorites.php"><i
+                                                                                        class="fas fa-heart me-2"></i>
+                                                                                Favorites</a></li>
+                                                                <li><a class="dropdown-item" href="bookmarks.php"><i
+                                                                                        class="fas fa-bookmark me-2"></i>
+                                                                                Bookmarks</a></li>
+                                                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                                                        <li><a class="dropdown-item" href="admin.php"><i
+                                                                                                class="fas fa-user-shield me-2"></i>
+                                                                                        Admin Dashboard</a></li>
+                                                                <?php endif; ?>
                                                                 <li>
                                                                         <hr class="dropdown-divider">
                                                                 </li>
-                                                                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                                                <li><a class="dropdown-item" href="logout.php"><i
+                                                                                        class="fas fa-sign-out-alt me-2"></i>
+                                                                                Logout</a></li>
                                                         </ul>
                                                 </li>
                                         <?php else: ?>
                                                 <li class="nav-item">
-                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                                                Login</a>
                                                 </li>
                                                 <li class="nav-item">
-                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i> Register</a>
+                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
+                                                                Register</a>
                                                 </li>
                                         <?php endif; ?>
                                 </ul>
@@ -572,7 +590,8 @@ function isSignedUp()
                         <div class="row ify-content-center">
                                 <div class="col-md-10 col-lg-8 p-b-20">
                                         <div class="how2 how2-cl4 flex-s-c m-r-10 m-r-0-sr991">
-                                                <h2 class="section-title"><i class="fas fa-gamepad"></i> Explore Exciting Games</h2>
+                                                <h2 class="section-title"><i class="fas fa-gamepad"></i> Explore
+                                                        Exciting Games</h2>
                                         </div>
 
                                         <div class="row p-t-35">
@@ -711,7 +730,7 @@ function isSignedUp()
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function () {
                         const categoryLinks = document.querySelectorAll('.navbar-nav .nav-link');
                         const sidebarCategoryLinks = document.querySelectorAll('.category-list li a');
                         const currentCategoryId = urlParams.get('category_id');
