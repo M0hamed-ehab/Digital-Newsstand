@@ -26,6 +26,15 @@ $breaking_news_result = $db->query($breaking_news_query);
 
 $popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
 $popular_articles_result = $db->query($popular_articles_query);
+
+function isUserLoggedIn()
+{
+        return isset($_SESSION['user_id']);
+}
+
+if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,10 +59,6 @@ $popular_articles_result = $db->query($popular_articles_query);
                         color: #007bff;
                         text-decoration: none;
                         transition: color 0.3s ease-in-out;
-                }
-
-                a:hover {
-                        color: #0056b3;
                 }
 
                 .navbar {
@@ -196,6 +201,7 @@ $popular_articles_result = $db->query($popular_articles_query);
                         padding: 1rem;
                         border-radius: 0.5rem;
                         margin-bottom: 1.5rem;
+                        max-height: 15rem;
                 }
 
                 .breaking-news h4 {
@@ -227,6 +233,7 @@ $popular_articles_result = $db->query($popular_articles_query);
                         padding: 1rem;
                         border-radius: 0.5rem;
                         margin-bottom: 1.5rem;
+                        max-height: 15rem;
                 }
 
                 .popular-articles h4 {
@@ -329,6 +336,60 @@ $popular_articles_result = $db->query($popular_articles_query);
                                 margin-bottom: 1.5rem;
                         }
                 }
+
+                .user-icons {
+                        display: flex;
+                        align-items: center;
+                }
+
+                .user-icons .nav-link {
+                        padding: 0.7rem 0.8rem;
+                }
+
+                .user-dropdown {
+                        position: relative;
+                }
+
+                .user-dropdown-menu {
+                        position: absolute;
+                        top: 100%;
+                        background-color: #fff;
+                        border: 1px solid rgba(0, 0, 0, 0.15);
+                        border-radius: 0.25rem;
+                        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+                        padding: 0.5rem 0;
+                        min-width: 10rem;
+                        z-index: 1000;
+                        display: none;
+                }
+
+                .dropdown-menu[data-bs-popper] {
+                        left: -360%;
+                }
+
+                .user-dropdown-menu.show {
+                        display: block;
+                }
+
+                .user-dropdown-menu a.dropdown-item {
+                        display: block;
+                        width: 100%;
+                        padding: 0.25rem 1.5rem;
+                        clear: both;
+                        font-weight: 400;
+                        color: #212529;
+                        text-align: inherit;
+                        white-space: nowrap;
+                        background-color: transparent;
+                        border: 0;
+                        text-decoration: none;
+                }
+
+                .user-dropdown-menu a.dropdown-item:hover,
+                .user-dropdown-menu a.dropdown-item:focus {
+                        background-color: #e9ecef;
+                        color: #1e2125;
+                }
         </style>
 </head>
 
@@ -346,9 +407,6 @@ $popular_articles_result = $db->query($popular_articles_query);
                         <div class="collapse navbar-collapse" id="navbarNav">
                                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                                         <li class="nav-item">
-                                                <a class="nav-link <?= $selected_category == 0 ? 'active' : '' ?>"
-                                                        aria-current="page" href="index.php">Home</a>
-
                                         </li>
                                         <?php
                                         $categories_result->data_seek(0); // Reset the result set pointer
@@ -369,12 +427,30 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                 aria-label="Search">
                                         <button class="btn btn-outline-light" type="submit">Search</button>
                                 </form>
-                                <ul class="navbar-nav">
-                                        <li class="nav-item">
-                                                <a class="nav-link" href="profile.php" title="Edit Profile">
-                                                        <i class="fas fa-user"></i>
-                                                </a>
-                                        </li>
+                                <ul class="navbar-nav ms-auto">
+                                        <?php if (isUserLoggedIn()): ?>
+                                                <li class="nav-item user-dropdown">
+                                                        <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="User Menu">
+                                                                <i class="fas fa-user-circle fa-lg"></i>
+                                                        </a>
+                                                        <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
+                                                                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                                                <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i> Favorites</a></li>
+                                                                <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i> Bookmarks</a></li>
+                                                                <li>
+                                                                        <hr class="dropdown-divider">
+                                                                </li>
+                                                                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                                        </ul>
+                                                </li>
+                                        <?php else: ?>
+                                                <li class="nav-item">
+                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i> Register</a>
+                                                </li>
+                                        <?php endif; ?>
                                 </ul>
                         </div>
                 </div>
@@ -386,7 +462,11 @@ $popular_articles_result = $db->query($popular_articles_query);
                                 <div class="breaking-news">
                                         <h4><i class="fas fa-bolt"></i> Breaking News</h4>
                                         <ul>
-                                                <?php if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
+                                                <?php
+                                                        $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                                                        $breaking_news_result = $db->query($breaking_news_query);
+                                                        
+                                                        if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                                                         <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
                                                                 <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
                                                                 </li>
@@ -400,7 +480,11 @@ $popular_articles_result = $db->query($popular_articles_query);
                                 <div class="popular-articles">
                                         <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                                         <ul>
-                                                <?php if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
+                                                <?php 
+                                                        $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                                                        $popular_articles_result = $db->query($popular_articles_query);
+
+                                                        if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
                                                         <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
                                                                 <li><a href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
                                                                 </li>
@@ -467,9 +551,7 @@ $popular_articles_result = $db->query($popular_articles_query);
                         <div class="row justify-content-center">
                                 <div class="col-md-10 col-lg-8 p-b-20">
                                         <div class="how2 how2-cl4 flex-s-c m-r-10 m-r-0-sr991">
-                                                <h3 class="f1-m-2 cl3 tab01-title">
-                                                        Available Games
-                                                </h3>
+                                                <h2 class="section-title"><i class="fas fa-gamepad"></i> Explore Exciting Games</h2>
                                         </div>
 
                                         <div class="row p-t-35">
@@ -592,14 +674,8 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                                 </div>
                                                         </div>
                                                 </div>
-
-
-
-
                                         </div>
                                 </div>
-
-
                         </div>
                 </div>
         </section>
@@ -627,5 +703,4 @@ $popular_articles_result = $db->query($popular_articles_query);
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer" />
 </body>
-
 </html>
