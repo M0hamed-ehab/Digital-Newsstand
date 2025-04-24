@@ -7,19 +7,33 @@ $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
 $categories_result = $db->query($categories_query);
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
+$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$articles_query = "
+if ($search_term !== '') {
+        $search_term_like = '%' . $search_term . '%';
+        $articles_query = "
+        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
+        c.category_name
+        FROM articles a
+        LEFT JOIN category c ON a.category_id = c.category_id
+        WHERE a.content LIKE '$search_term_like'
+        ORDER BY a.created_at DESC
+    ";
+        $articles_result = $db->query($articles_query);
+} else {
+        $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE c.category_id = ? OR ? = 0
         ORDER BY a.created_at DESC
-";
-$stmt = $db->prepare($articles_query);
-$stmt->bind_param("ii", $selected_category, $selected_category);
-$stmt->execute();
-$articles_result = $stmt->get_result();
+    ";
+        $stmt = $db->prepare($articles_query);
+        $stmt->bind_param("ii", $selected_category, $selected_category);
+        $stmt->execute();
+        $articles_result = $stmt->get_result();
+}
 
 $breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
 $breaking_news_result = $db->query($breaking_news_query);
@@ -364,9 +378,10 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                 <a class="nav-link" href="index.php#games">Games</a>
                                         </li>
                                 </ul>
-                                <form class="d-flex">
-                                        <input class="form-control me-2" type="search" placeholder="Search"
-                                                aria-label="Search">
+                                <form class="d-flex" method="GET" action="index.php">
+                                        <input class="form-control me-2" type="search" name="search"
+                                                placeholder="Search" aria-label="Search"
+                                                value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                                         <button class="btn btn-outline-light" type="submit">Search</button>
                                 </form>
                                 <ul class="navbar-nav">
@@ -476,14 +491,15 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="sudoku.php" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="sudoku.php#h2t"
+                                                                        class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g1.jpg" alt="Sudoku"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="sudoku.php"
+                                                                                <a href="sudoku.php#h2t"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Sodoku
                                                                                 </a>
@@ -507,14 +523,15 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="XO.php#game-container"
+                                                                        class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g2.jpg" alt="XO"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="blog-detail-01.html"
+                                                                                <a href="XO.php#game-container"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Tic Tac Toe
                                                                                 </a>
@@ -536,14 +553,15 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="Wordle.php#h3w"
+                                                                        class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g3.webp" alt="Wordle"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href=""
+                                                                                <a href="Wordle.php#h3w"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Wordle
                                                                                 </a>
@@ -565,14 +583,14 @@ $popular_articles_result = $db->query($popular_articles_query);
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="Mine.php#h2m" class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g4.jpg" alt="Minesweeper"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="blog-detail-01.html"
+                                                                                <a href="Mine.php#h2m"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Minesweeper
                                                                                 </a>

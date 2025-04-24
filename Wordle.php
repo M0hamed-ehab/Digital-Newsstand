@@ -98,13 +98,17 @@ $popular_articles_result = $db->query($popular_articles_query);
             border-radius: 0.5rem;
         }
 
+        .row>* {
+            max-width: 70%;
+        }
+
         .row {
             display: flex;
             gap: 1.5rem;
             margin-top: 1.5rem;
             flex-wrap: nowrap;
-            align-items: center;
             flex-direction: row;
+            justify-content: flex-start;
         }
 
         .sidebar {
@@ -148,6 +152,8 @@ $popular_articles_result = $db->query($popular_articles_query);
         .category-list li.active {
             background-color: #007bff;
         }
+
+
 
         .category-list li.active a {
             color: #fff;
@@ -274,71 +280,7 @@ $popular_articles_result = $db->query($popular_articles_query);
             border-bottom: none;
         }
 
-        #container-games {
-            padding: 2rem 0;
-            margin: 0 auto;
-        }
 
-        .row>* {
-            max-width: 70%;
-        }
-
-        #sudoku-board {
-            border-collapse: collapse;
-            width: 60%;
-            height: 450px;
-            table-layout: fixed;
-            margin: 1rem 0 4vh;
-        }
-
-        #sudoku-board td {
-            border: 1px solid #999;
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            vertical-align: middle;
-            padding: 0;
-        }
-
-        #sudoku-board input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            outline: none;
-        }
-
-        .game-item img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        .game-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        .game-item img:hover {
-            transform: scale(1.05);
-        }
-
-        .game-title {
-            font-weight: 600;
-            font-size: 1.25rem;
-            margin-top: 0.5rem;
-        }
-
-        .game-description {
-            font-size: 0.9rem;
-            color: #555;
-        }
 
         .col-sm-6 {
             flex: 0 0 auto;
@@ -372,6 +314,39 @@ $popular_articles_result = $db->query($popular_articles_query);
             color: #f8f9fa;
         }
 
+        #wordle-game .wordle-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        #wordle-game .correct {
+            background-color: #6aaa64;
+            border-color: #6aaa64;
+            color: white;
+        }
+
+        #wordle-game .present {
+            background-color: #c9b458;
+            border-color: #c9b458;
+            color: white;
+        }
+
+        #wordle-game .absent {
+            background-color: #787c7e;
+            border-color: #787c7e;
+            color: white;
+        }
+
+
+
         @media (max-width: 992px) {
 
 
@@ -381,6 +356,7 @@ $popular_articles_result = $db->query($popular_articles_query);
             }
         }
     </style>
+
 </head>
 
 <body>
@@ -482,16 +458,65 @@ $popular_articles_result = $db->query($popular_articles_query);
                     </ul>
                 </div>
             </div>
-            <div id="container-game">
-                <h2 id="h2t">Sudoku Game</h2>
-                <div>
-                    <table id="sudoku-board"></table>
+            <div class="game-container" id="wordle-game" style="margin-top: 2rem; max-width: 400px;">
+
+                <h3 id="h3w">Wordle Game</h3>
+                <p>Guess the 5-letter word in 6 tries.</p>
+
+                <div id="wordle-grid"
+                    style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 1rem;">
+                    <!-- 6 rows of 5 cells each -->
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
                 </div>
-                <button type="button" onclick="checkSolution()">Check Solution</button>
-                <button type="button" onclick="fillSolution()">Get Solution</button>
-                <button type="button" onclick="resetBoard()">Reset</button>
-                <p id="result"></p>
+
+                <input type="text" id="wordle-input" maxlength="5"
+                    style="text-transform: uppercase; width: 100%; padding: 0.5rem; font-size: 1.2rem; letter-spacing: 0.3rem;"
+                    autofocus autocomplete="off" />
+                <button id="wordle-submit" class="btn btn-primary mt-2" style="width: 100%;">Submit Guess</button>
+                <p id="wordle-message" style="margin-top: 1rem; font-weight: bold;"></p>
+
+                <style>
+
+                </style>
+
+
+
             </div>
+
+
+
+
+
+
         </div>
     </div>
     </div>
@@ -514,7 +539,6 @@ $popular_articles_result = $db->query($popular_articles_query);
 
 
 
-    <script src="sudoku.js"></script>
     <footer>
         <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
                 Service</a></p>
@@ -532,12 +556,13 @@ $popular_articles_result = $db->query($popular_articles_query);
                     link.parentElement.classList.add('active');
                 }
             });
+
+
         });
     </script>
+    <script src="worlde.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-</body>
 
 </html>
