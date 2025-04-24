@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'config/Database.php';
 
 $database = new Database();
@@ -28,7 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("sss", $username, $password, $email);
 
     if ($stmt->execute()) {
-        header("Location: index.html");
+        $_SESSION['user_id'] = $stmt->insert_id;
+        $_SESSION['just_signed_up'] = true;  
+        header("Location: index.php");
         exit;
     } else {
         echo "Error: " . $conn->error;
