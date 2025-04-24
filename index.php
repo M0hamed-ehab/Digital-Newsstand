@@ -406,7 +406,6 @@ if (session_status() == PHP_SESSION_NONE) {
                                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                                         <li class="nav-item">
                                                 <a class="nav-link <?= $selected_category == 0 ? 'active' : '' ?>" aria-current="page" href="index.php">Home</a>
-
                                         </li>
                                         <?php
                                         $categories_result->data_seek(0); // Reset the result set pointer
