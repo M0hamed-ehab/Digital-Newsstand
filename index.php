@@ -425,7 +425,7 @@ function isSignedUp()
                                                 </li>
                                         <?php endwhile; ?>
                                         <li>
-                                                <a class="nav-link" href="index.php#games">Games</a>
+                                                <a class="nav-link" href="#games">Games</a>
                                         </li>
                                 </ul>
                                 <form class="d-flex">
