@@ -53,6 +53,10 @@ $popular_articles_result = $db->query($popular_articles_query);
             line-height: 1.7;
         }
 
+        #result {
+            position: absolute;
+        }
+
         a {
             color: #007bff;
             text-decoration: none;
@@ -365,9 +369,7 @@ $popular_articles_result = $db->query($popular_articles_query);
         }
 
         @media (max-width: 992px) {
-            .row {
-                flex-direction: column;
-            }
+
 
             .sidebar {
                 width: 50%;
@@ -509,6 +511,28 @@ $popular_articles_result = $db->query($popular_articles_query);
 
 
     <script src="sudoku.js"></script>
+    <footer>
+        <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
+                Service</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            const sidebarCategoryLinks = document.querySelectorAll('.category-list li a');
+            const currentCategoryId = urlParams.get('category_id');
+
+            sidebarCategoryLinks.forEach(link => {
+                if ((currentCategoryId === null && link.getAttribute('href') === 'index.php') || link.getAttribute('href') === '?category_id=' + currentCategoryId) {
+                    link.parentElement.classList.add('active');
+                }
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 </body>
 
