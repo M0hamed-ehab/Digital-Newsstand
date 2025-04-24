@@ -41,13 +41,18 @@ $breaking_news_result = $db->query($breaking_news_query);
 $popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
 $popular_articles_result = $db->query($popular_articles_query);
 
+if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+}
+
 function isUserLoggedIn()
 {
         return isset($_SESSION['user_id']);
 }
 
-if (session_status() == PHP_SESSION_NONE) {
-        session_start();
+function isSignedUp()
+{
+        return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
 ?>
 
@@ -443,7 +448,7 @@ if (session_status() == PHP_SESSION_NONE) {
                                         <button class="btn btn-outline-light" type="submit">Search</button>
                                 </form>
                                 <ul class="navbar-nav ms-auto">
-                                        <?php if (isUserLoggedIn()): ?>
+                                        <?php if (isUserLoggedIn() || isSignedUp()): ?>
                                                 <li class="nav-item user-dropdown">
                                                         <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="User Menu">
                                                                 <i class="fas fa-user-circle fa-lg"></i>
@@ -478,10 +483,10 @@ if (session_status() == PHP_SESSION_NONE) {
                                         <h4><i class="fas fa-bolt"></i> Breaking News</h4>
                                         <ul>
                                                 <?php
-                                                        $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
-                                                        $breaking_news_result = $db->query($breaking_news_query);
-                                                        
-                                                        if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
+                                                $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                                                $breaking_news_result = $db->query($breaking_news_query);
+
+                                                if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                                                         <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
                                                                 <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
                                                                 </li>
@@ -495,11 +500,11 @@ if (session_status() == PHP_SESSION_NONE) {
                                 <div class="popular-articles">
                                         <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                                         <ul>
-                                                <?php 
-                                                        $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
-                                                        $popular_articles_result = $db->query($popular_articles_query);
+                                                <?php
+                                                $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                                                $popular_articles_result = $db->query($popular_articles_query);
 
-                                                        if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
+                                                if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
                                                         <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
                                                                 <li><a href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
                                                                 </li>
@@ -563,7 +568,7 @@ if (session_status() == PHP_SESSION_NONE) {
         <!-- Latest -->
         <section class="container-games" id="games">
                 <div class="container">
-                        <div class="row justify-content-center">
+                        <div class="row ify-content-center">
                                 <div class="col-md-10 col-lg-8 p-b-20">
                                         <div class="how2 how2-cl4 flex-s-c m-r-10 m-r-0-sr991">
                                                 <h2 class="section-title"><i class="fas fa-gamepad"></i> Explore Exciting Games</h2>
@@ -705,7 +710,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener('DOMContentLoaded', function() {
                         const categoryLinks = document.querySelectorAll('.navbar-nav .nav-link');
                         const sidebarCategoryLinks = document.querySelectorAll('.category-list li a');
                         const currentCategoryId = urlParams.get('category_id');
@@ -721,4 +726,5 @@ if (session_status() == PHP_SESSION_NONE) {
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer" />
 </body>
+
 </html>
