@@ -1,4 +1,5 @@
 <?php
+session_start();
 include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/Category.php';
