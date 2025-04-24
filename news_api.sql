@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 24, 2025 at 01:19 PM
+-- Generation Time: Apr 24, 2025 at 08:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -126,16 +126,18 @@ CREATE TABLE `users` (
   `password` varchar(25) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `email` varchar(255) NOT NULL,
-  `subscription` varchar(255) NOT NULL
+  `role` enum('admin','member','subscriber') NOT NULL DEFAULT 'member'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `name`, `password`, `created_at`, `email`, `subscription`) VALUES
-(7, 'mm', 'mm', '2025-04-23 12:38:40', 'bakerymai0@gmail.com', ''),
-(8, 'Mai', 'm', '2025-04-23 16:01:37', 'bakerymai0@gmail.comm', '');
+INSERT INTO `users` (`user_id`, `name`, `password`, `created_at`, `email`, `role`) VALUES
+(7, 'mm', 'mm', '2025-04-24 18:36:53', 'bakerymai0@gmail.com', 'admin'),
+(8, 'Mai', 'm', '2025-04-24 18:37:05', 'bakerymai0@gmail.comm', 'admin'),
+(20, 'mo', 'momo', '2025-04-24 18:37:55', 'momoehab@gmail.com', 'subscriber'),
+(33, 'member', '123', '2025-04-24 18:43:10', 'A@a.com', 'member');
 
 --
 -- Indexes for dumped tables
@@ -233,7 +235,7 @@ ALTER TABLE `subscription`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- Constraints for dumped tables
