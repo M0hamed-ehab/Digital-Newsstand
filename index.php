@@ -399,29 +399,32 @@ if (session_status() == PHP_SESSION_NONE) {
                         <a class="navbar-brand" href="index.php">
                                 <i class="fas fa-newspaper"></i> The Global Herald
                         </a>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                                aria-label="Toggle navigation">
                                 <span class="navbar-toggler-icon"></span>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarNav">
                                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                                         <li class="nav-item">
-                                                <a class="nav-link <?= $selected_category == 0 ? 'active' : '' ?>" aria-current="page" href="index.php">Home</a>
                                         </li>
                                         <?php
                                         $categories_result->data_seek(0); // Reset the result set pointer
                                         while ($category = $categories_result->fetch_assoc()): ?>
                                                 <li class="nav-item">
-                                                        <a class="nav-link <?= $selected_category == $category['category_id'] ? 'active' : '' ?>" href="?category_id=<?= $category['category_id'] ?>">
+                                                        <a class="nav-link <?= $selected_category == $category['category_id'] ? 'active' : '' ?>"
+                                                                href="?category_id=<?= $category['category_id'] ?>">
                                                                 <?= htmlspecialchars($category['category_name']) ?>
                                                         </a>
                                                 </li>
                                         <?php endwhile; ?>
                                         <li>
-                                                <a class="nav-link" href="#games">Games</a>
+                                                <a class="nav-link" href="index.php#games">Games</a>
                                         </li>
                                 </ul>
                                 <form class="d-flex">
-                                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                                        <input class="form-control me-2" type="search" placeholder="Search"
+                                                aria-label="Search">
                                         <button class="btn btn-outline-light" type="submit">Search</button>
                                 </form>
                                 <ul class="navbar-nav ms-auto">
@@ -465,7 +468,8 @@ if (session_status() == PHP_SESSION_NONE) {
                                                         
                                                         if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                                                         <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
-                                                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a></li>
+                                                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
+                                                                </li>
                                                         <?php endwhile; ?>
                                                 <?php else: ?>
                                                         <li>No breaking news at the moment.</li>
@@ -482,7 +486,8 @@ if (session_status() == PHP_SESSION_NONE) {
 
                                                         if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
                                                         <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
-                                                                <li><a href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a></li>
+                                                                <li><a href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
+                                                                </li>
                                                         <?php endwhile; ?>
                                                 <?php else: ?>
                                                         <li>No trending stories yet.</li>
@@ -499,7 +504,8 @@ if (session_status() == PHP_SESSION_NONE) {
                                                 <?php
                                                 $categories_result->data_seek(0); // Reset again for the category list
                                                 while ($category = $categories_result->fetch_assoc()): ?>
-                                                        <li class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
+                                                        <li
+                                                                class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
                                                                 <a href="?category_id=<?= $category['category_id'] ?>">
                                                                         <?= htmlspecialchars($category['category_name']) ?>
                                                                 </a>
@@ -518,13 +524,17 @@ if (session_status() == PHP_SESSION_NONE) {
                                                                 <h2><?= htmlspecialchars($article['title']) ?></h2>
                                                                 <p class="article-meta">
                                                                         By <?= htmlspecialchars($article['author']) ?> |
-                                                                        <i class="fas fa-folder"></i> <?= htmlspecialchars($article['category_name']) ?> |
-                                                                        <i class="far fa-clock"></i> <?= date("F j, Y", strtotime($article['created_at'])) ?>
+                                                                        <i class="fas fa-folder"></i>
+                                                                        <?= htmlspecialchars($article['category_name']) ?> |
+                                                                        <i class="far fa-clock"></i>
+                                                                        <?= date("F j, Y", strtotime($article['created_at'])) ?>
                                                                 </p>
                                                         </div>
                                                         <div class="article-content">
                                                                 <p><?= nl2br(htmlspecialchars($article['short_content'])) ?>...</p>
-                                                                <a href="article.php?id=<?= $article['id'] ?>" class="read-more-btn">Continue Reading <i class="fas fa-arrow-right"></i></a>
+                                                                <a href="article.php?id=<?= $article['id'] ?>"
+                                                                        class="read-more-btn">Continue Reading <i
+                                                                                class="fas fa-arrow-right"></i></a>
                                                         </div>
                                                 </div>
                                         <?php endwhile; ?>
@@ -548,13 +558,15 @@ if (session_status() == PHP_SESSION_NONE) {
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="sudoku.html" class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g1.jpg" alt="Sudoku" class="game-img">
+                                                                <a href="sudoku.php" class="wrap-pic-w hov1 trans-03">
+                                                                        <img src="images/g1.jpg" alt="Sudoku"
+                                                                                class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="sudoku.html" class="f1-m-3 cl2 hov-cl10 trans-03">
+                                                                                <a href="sudoku.php"
+                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Sodoku
                                                                                 </a>
                                                                         </h5>
@@ -562,8 +574,11 @@ if (session_status() == PHP_SESSION_NONE) {
 
 
                                                                                 <span class="f1-s-3">
-                                                                                        A logic-based number puzzle where you fill a 9×9 grid so each row,
-                                                                                        column, and 3×3 box contains digits 1 to 9 without repetition
+                                                                                        A logic-based number puzzle
+                                                                                        where you fill a 9×9 grid so
+                                                                                        each row,
+                                                                                        column, and 3×3 box contains
+                                                                                        digits 1 to 9 without repetition
                                                                                 </span>
                                                                         </span>
 
@@ -575,12 +590,14 @@ if (session_status() == PHP_SESSION_NONE) {
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
                                                                 <a href="" class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g2.jpg" alt="XO" class="game-img">
+                                                                        <img src="images/g2.jpg" alt="XO"
+                                                                                class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="blog-detail-01.html" class="f1-m-3 cl2 hov-cl10 trans-03">
+                                                                                <a href="blog-detail-01.html"
+                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Tic Tac Toe
                                                                                 </a>
                                                                         </h5>
@@ -588,8 +605,11 @@ if (session_status() == PHP_SESSION_NONE) {
 
 
                                                                                 <span class="f1-s-3">
-                                                                                        You play against the computer, trying to align three X's or O's while the
-                                                                                        computer blocks or counters your moves </span>
+                                                                                        You play against the computer,
+                                                                                        trying to align three X's or O's
+                                                                                        while the
+                                                                                        computer blocks or counters your
+                                                                                        moves </span>
                                                                         </span>
                                                                 </div>
                                                         </div>
@@ -599,12 +619,14 @@ if (session_status() == PHP_SESSION_NONE) {
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
                                                                 <a href="" class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g3.webp" alt="Wordle" class="game-img">
+                                                                        <img src="images/g3.webp" alt="Wordle"
+                                                                                class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="" class="f1-m-3 cl2 hov-cl10 trans-03">
+                                                                                <a href=""
+                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Wordle
                                                                                 </a>
                                                                         </h5>
@@ -613,7 +635,8 @@ if (session_status() == PHP_SESSION_NONE) {
 
 
                                                                                 <span class="f1-s-3">
-                                                                                        A word puzzle where you guess a five-letter word in six tries,
+                                                                                        A word puzzle where you guess a
+                                                                                        five-letter word in six tries,
                                                                                         with color hints for accuracy
                                                                                 </span>
                                                                         </span>
@@ -625,12 +648,14 @@ if (session_status() == PHP_SESSION_NONE) {
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
                                                                 <a href="" class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g4.jpg" alt="Minesweeper" class="game-img">
+                                                                        <img src="images/g4.jpg" alt="Minesweeper"
+                                                                                class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="blog-detail-01.html" class="f1-m-3 cl2 hov-cl10 trans-03">
+                                                                                <a href="blog-detail-01.html"
+                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Minesweeper
                                                                                 </a>
                                                                         </h5>
@@ -639,8 +664,11 @@ if (session_status() == PHP_SESSION_NONE) {
 
 
                                                                                 <span class="f1-s-3">
-                                                                                        A puzzle game where you uncover tiles on a grid, avoiding hidden mines and
-                                                                                        using number clues to find safe spots
+                                                                                        A puzzle game where you uncover
+                                                                                        tiles on a grid, avoiding hidden
+                                                                                        mines and
+                                                                                        using number clues to find safe
+                                                                                        spots
                                                                                 </span>
                                                                         </span>
                                                                 </div>
@@ -653,12 +681,13 @@ if (session_status() == PHP_SESSION_NONE) {
         </section>
 
         <footer>
-                <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
+                                Service</a></p>
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function () {
                         const categoryLinks = document.querySelectorAll('.navbar-nav .nav-link');
                         const sidebarCategoryLinks = document.querySelectorAll('.category-list li a');
                         const currentCategoryId = urlParams.get('category_id');
@@ -670,6 +699,8 @@ if (session_status() == PHP_SESSION_NONE) {
                         });
                 });
         </script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+                integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+                crossorigin="anonymous" referrerpolicy="no-referrer" />
 </body>
 </html>
