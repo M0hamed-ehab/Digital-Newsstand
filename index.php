@@ -109,6 +109,7 @@ function isSignedUp()
                         display: flex;
                         gap: 1.5rem;
                         margin-top: 1.5rem;
+                        justify-content: center;
                 }
 
                 .sidebar {
