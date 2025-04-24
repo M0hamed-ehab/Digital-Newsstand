@@ -6,6 +6,10 @@ include_once 'classes/Category.php';
 $db = (new Database())->connect();
 $article = new Article($db);
 $category = new Category($db);
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
+    header("Location: index.php");
+    exit();
+}
 
 if (isset($_POST['create_category'])) {
     $category->name = $_POST['category_name'];
@@ -43,19 +47,23 @@ $categoryList = $category->readAll(); // For dropdown
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | News Website</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <style>
         body {
             background-color: #f4f4f4;
             font-family: 'Open Sans', sans-serif;
             color: #333;
         }
+
         header {
             background-color: #1e3a8a;
             padding: 20px 0;
@@ -63,10 +71,12 @@ $categoryList = $category->readAll(); // For dropdown
             color: #fff;
             font-family: 'Merriweather', serif;
         }
+
         header h1 {
             font-size: 2.5rem;
             font-weight: 700;
         }
+
         header p {
             font-size: 1.2rem;
         }
@@ -136,131 +146,139 @@ $categoryList = $category->readAll(); // For dropdown
         }
     </style>
 </head>
+
 <body>
 
-<header>
-    <h1>Admin Panel | News Website</h1>
-    <p>Manage Your News Website</p>
-</header>
+    <header>
+        <h1>Admin Panel | News Website</h1>
+        <p>Manage Your News Website</p>
+    </header>
 
-<div class="container">
-    <?php if (isset($message)): ?>
-        <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
-    <?php endif; ?>
+    <div class="container">
+        <?php if (isset($message)): ?>
+            <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
 
-    <!-- CATEGORY MANAGEMENT -->
-    <div class="section">
-        <h2>📁 Manage Categories</h2>
+        <!-- CATEGORY MANAGEMENT -->
+        <div class="section">
+            <h2>📁 Manage Categories</h2>
 
-        <form method="POST">
-            <div class="mb-3">
-                <label for="category_name" class="form-label">New Category</label>
-                <input type="text" class="form-control" name="category_name" placeholder="Enter category name" required>
-            </div>
-            <button type="submit" name="create_category" class="btn btn-custom w-100">Add Category</button>
-        </form>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="category_name" class="form-label">New Category</label>
+                    <input type="text" class="form-control" name="category_name" placeholder="Enter category name"
+                        required>
+                </div>
+                <button type="submit" name="create_category" class="btn btn-custom w-100">Add Category</button>
+            </form>
 
-        <table class="table mt-4">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Category Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($cat = $categories->fetch_assoc()): ?>
+            <table class="table mt-4">
+                <thead>
                     <tr>
-                        <form method="POST">
-                            <td><?= $cat['category_id'] ?></td>
-                            <td><?= htmlspecialchars($cat['category_name']) ?></td>
-                            <td>
-                                <input type="hidden" name="category_id" value="<?= $cat['category_id'] ?>">
-                                <button type="submit" name="delete_category" class="btn btn-danger">Delete</button>
-                            </td>
-                        </form>
+                        <th>ID</th>
+                        <th>Category Name</th>
+                        <th>Actions</th>
                     </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- ARTICLE MANAGEMENT -->
-    <div class="section">
-        <h2>📰 Manage Articles</h2>
-
-        <form method="POST">
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                <input type="text" class="form-control" name="title" placeholder="Enter article title" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Content</label>
-                <textarea class="form-control" name="content" rows="5" placeholder="Write the article content here..." required></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Author</label>
-                <input type="text" class="form-control" name="author" placeholder="e.g., John Doe" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-                <select class="form-select" name="category_id" required>
-                    <option value="">-- Select Category --</option>
-                    <?php while ($cat = $categoryList->fetch_assoc()): ?>
-                        <option value="<?= $cat['category_id'] ?>"><?= htmlspecialchars($cat['category_name']) ?></option>
+                </thead>
+                <tbody>
+                    <?php while ($cat = $categories->fetch_assoc()): ?>
+                        <tr>
+                            <form method="POST">
+                                <td><?= $cat['category_id'] ?></td>
+                                <td><?= htmlspecialchars($cat['category_name']) ?></td>
+                                <td>
+                                    <input type="hidden" name="category_id" value="<?= $cat['category_id'] ?>">
+                                    <button type="submit" name="delete_category" class="btn btn-danger">Delete</button>
+                                </td>
+                            </form>
+                        </tr>
                     <?php endwhile; ?>
-                </select>
-            </div>
+                </tbody>
+            </table>
+        </div>
 
-            <button type="submit" name="create" class="btn btn-custom w-100">Publish Article</button>
-        </form>
+        <!-- ARTICLE MANAGEMENT -->
+        <div class="section">
+            <h2>📰 Manage Articles</h2>
 
-        <table class="table mt-4">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Content</th>
-                    <th>Author</th>
-                    <th>Category</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $articles->fetch_assoc()): ?>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" placeholder="Enter article title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea class="form-control" name="content" rows="5"
+                        placeholder="Write the article content here..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <input type="text" class="form-control" name="author" placeholder="e.g., John Doe" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="category_id" required>
+                        <option value="">-- Select Category --</option>
+                        <?php while ($cat = $categoryList->fetch_assoc()): ?>
+                            <option value="<?= $cat['category_id'] ?>"><?= htmlspecialchars($cat['category_name']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+
+                <button type="submit" name="create" class="btn btn-custom w-100">Publish Article</button>
+            </form>
+
+            <table class="table mt-4">
+                <thead>
                     <tr>
-                    <form method="POST">
-                        <td><?= $row['id'] ?></td>
-                        <td><input type="text" class="form-control" name="title" value="<?= htmlspecialchars($row['title']) ?>"></td>
-                        <td><input type="text" class="form-control" name="content" value="<?= htmlspecialchars($row['content']) ?>"></td> <!-- Updated -->
-                        <td><input type="text" class="form-control" name="author" value="<?= htmlspecialchars($row['author']) ?>"></td>
-                        <td>
-                            <select class="form-select" name="category_id">
-                                <?php
-                                $cats = $category->readAll();
-                                while ($c = $cats->fetch_assoc()): ?>
-                                    <option value="<?= $c['category_id'] ?>" <?= $c['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($c['category_name']) ?>
-                                    </option>
-                                <?php endwhile; ?>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                            <button type="submit" name="update" class="btn btn-warning">Update</button>
-                            <button type="submit" name="delete" class="btn btn-danger">Delete</button>
-                        </td>
-                    </form>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Content</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Actions</th>
                     </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php while ($row = $articles->fetch_assoc()): ?>
+                        <tr>
+                            <form method="POST">
+                                <td><?= $row['id'] ?></td>
+                                <td><input type="text" class="form-control" name="title"
+                                        value="<?= htmlspecialchars($row['title']) ?>"></td>
+                                <td><input type="text" class="form-control" name="content"
+                                        value="<?= htmlspecialchars($row['content']) ?>"></td> <!-- Updated -->
+                                <td><input type="text" class="form-control" name="author"
+                                        value="<?= htmlspecialchars($row['author']) ?>"></td>
+                                <td>
+                                    <select class="form-select" name="category_id">
+                                        <?php
+                                        $cats = $category->readAll();
+                                        while ($c = $cats->fetch_assoc()): ?>
+                                            <option value="<?= $c['category_id'] ?>" <?= $c['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($c['category_name']) ?>
+                                            </option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                    <button type="submit" name="update" class="btn btn-warning">Update</button>
+                                    <button type="submit" name="delete" class="btn btn-danger">Delete</button>
+                                </td>
+                            </form>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
