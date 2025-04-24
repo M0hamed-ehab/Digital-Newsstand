@@ -41,6 +41,23 @@ if (isset($_POST['delete'])) {
     $message = $article->delete() ? "Article deleted." : "Failed to delete article.";
 }
 
+if (isset($_POST['send'])) {
+    $articleId = $_POST['id'];
+    $stmt = $db->prepare("SELECT id FROM articles WHERE id = ?");
+    $stmt->bind_param("i", $articleId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result && $result->num_rows > 0) {
+        $subscribers = $db->query("SELECT email FROM users WHERE role = 'subscriber'");
+        if ($subscribers && $subscribers->num_rows > 0) {
+            $count = $subscribers->num_rows;
+            $message = "Summary sent to $count subscribers.";
+        } else {
+            $message = "No subscribers found to send the summary.";
+        }
+    }
+}
+
 $categories = $category->readAll();
 $articles = $article->readAll();
 $categoryList = $category->readAll(); // For dropdown
@@ -145,14 +162,22 @@ $categoryList = $category->readAll(); // For dropdown
                 padding: 20px;
             }
         }
+
+        .bbbtn {
+            display: flex;
+            gap: 10px;
+            flex-direction: row;
+            justify-content: space-between;
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <h1>Admin Panel | News Website</h1>
+        <h1>Admin Panel | <a href="index.php" style="text-decoration: none; color: #fff;">News Website</a></h1>
         <p>Manage Your News Website</p>
+
     </header>
 
     <div class="container">
@@ -266,10 +291,11 @@ $categoryList = $category->readAll(); // For dropdown
                                         <?php endwhile; ?>
                                     </select>
                                 </td>
-                                <td>
+                                <td class="bbbtn">
                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                     <button type="submit" name="update" class="btn btn-warning">Update</button>
                                     <button type="submit" name="delete" class="btn btn-danger">Delete</button>
+                                    <button type="submit" name="send" class="btn btn-primary">Send</button>
                                 </td>
                             </form>
                         </tr>
