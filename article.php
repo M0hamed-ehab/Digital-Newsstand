@@ -135,6 +135,12 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             align-items: center;
         }
 
+        .article-actions i{
+            color: #6C757D;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
         #translate-icon {
             margin-right: 0.5rem;
             /* Adjust spacing between icon and dropdown */
@@ -150,13 +156,14 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
         .article-actions a {
             margin-left: 1rem;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: #6c757d;
             cursor: pointer;
             transition: color 0.2s ease-in-out;
         }
 
-        .article-actions a:hover {
+        .article-actions a:hover,
+        .article-actions i:hover{
             color: #007bff;
         }
 
@@ -218,7 +225,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
 
         .goog-te-gadget img {
-            left: 15%;
+            left: 35%;
             position: relative;
         }
     </style>
@@ -242,6 +249,8 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     </p>
                 </div>
                 <div class="article-actions">
+                    <i id="download-icon" class="fa-solid fa-download" style="margin-right: 0.66rem;" title="Download Article"></i>
+                    <i id="read-aloud-icon" class="fas fa-volume-up" title="Read Aloud"></i>
                     <div id="google_translate_element" title="Translate Article"></div>
                     <a href="#" title="Add to Favorites" class="<?= $is_favorited ? 'fas' : 'far' ?> fa-heart" onclick="toggleFavorite(<?= $article['id'] ?>, this); return false;"></a>
                     <a href="#" title="Add to Bookmark" class="<?= $is_booked ? 'fas' : 'far' ?> fa-bookmark" onclick="toggleBookmark(<?= $article['id'] ?>, this); return false;"></a>
@@ -338,6 +347,68 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     alert('An error occurred while updating bookmarks.');
                 });
         }
+
+        const btn = document.getElementById("read-aloud-icon");
+        const synth = window.speechSynthesis;
+
+        let selectedVoice = null;
+        let utterance = null;
+        let isPaused = false;
+
+        function loadVoice() {
+            const voices = synth.getVoices();
+            selectedVoice = voices.find(voice => voice.lang === "en-US") || voices[0];
+        }
+
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoice;
+        } else {
+            loadVoice();
+        }
+
+        function startSpeaking(text) {
+            if (synth.speaking || synth.paused) {
+                synth.cancel();
+            }
+
+            utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = selectedVoice;
+            utterance.rate = 1;
+            utterance.pitch = 1;
+
+            synth.speak(utterance);
+        }
+
+        btn.addEventListener("click", e => {
+            e.preventDefault();
+
+            const article = document.querySelector(".article-content");
+            if (!article) return;
+
+            const text = article.textContent.trim();
+
+            if (!utterance || (!synth.speaking && !synth.paused)) {
+                startSpeaking(text);
+                btn.classList.remove("fa-play", "fa-volume-up");
+                btn.classList.add("fa-pause");
+                btn.title = "Pause Reading";
+            } else if (synth.speaking && !synth.paused) {
+                synth.pause();
+                isPaused = true;
+                btn.classList.remove("fa-pause");
+                btn.classList.add("fa-play");
+                btn.title = "Resume Reading";
+            } else if (synth.paused) {
+                synth.resume();
+                isPaused = false;
+                btn.classList.remove("fa-play");
+                btn.classList.add("fa-pause");
+                btn.title = "Pause Reading";
+            }
+        });
+
+        synth.addEventListener("end", resetIcon);
+        synth.addEventListener("cancel", resetIcon);
     </script>
     <script type="text/javascript">
         function googleTranslateElementInit() {
@@ -351,6 +422,38 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    document.getElementById("download-icon").addEventListener("click", async function () {
+        const { jsPDF } = window.jspdf;
+        const articleElement = document.querySelector(".article-content");
+
+        if (!articleElement) {
+            console.error("Could not find the .article-content element to download.");
+            return;
+        }
+
+        try {
+            const canvas = await html2canvas(articleElement, {
+                logging: false
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save('article.pdf');
+
+        } catch (error) {
+            console.error("Error during PDF generation:", error);
+            alert("An error occurred while generating the PDF.");
+        }
+    });
+</script>
 </body>
 
 </html>
