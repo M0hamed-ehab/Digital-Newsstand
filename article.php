@@ -218,7 +218,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
 
         .goog-te-gadget img {
-            left: 15%;
+            left: 35%;
             position: relative;
         }
     </style>
@@ -242,7 +242,8 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     </p>
                 </div>
                 <div class="article-actions">
-                    <div id="google_translate_element" title="Translate Article"></div>
+                    <i id="read-aloud-icon" class="fas fa-volume-up" title="Read Aloud"></i>
+                    <div id="google_translate_element"></div>
                     <a href="#" title="Add to Favorites" class="<?= $is_favorited ? 'fas' : 'far' ?> fa-heart" onclick="toggleFavorite(<?= $article['id'] ?>, this); return false;"></a>
                     <a href="#" title="Add to Bookmark" class="<?= $is_booked ? 'fas' : 'far' ?> fa-bookmark" onclick="toggleBookmark(<?= $article['id'] ?>, this); return false;"></a>
                 </div>
@@ -338,6 +339,68 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     alert('An error occurred while updating bookmarks.');
                 });
         }
+
+        const btn = document.getElementById("read-aloud-icon");
+        const synth = window.speechSynthesis;
+
+        let selectedVoice = null;
+        let utterance = null;
+        let isPaused = false;
+
+        function loadVoice() {
+            const voices = synth.getVoices();
+            selectedVoice = voices.find(voice => voice.lang === "en-US") || voices[0];
+        }
+
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoice;
+        } else {
+            loadVoice();
+        }
+
+        function startSpeaking(text) {
+            if (synth.speaking || synth.paused) {
+                synth.cancel();
+            }
+
+            utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = selectedVoice;
+            utterance.rate = 1;
+            utterance.pitch = 1;
+
+            synth.speak(utterance);
+        }
+
+        btn.addEventListener("click", e => {
+            e.preventDefault();
+
+            const article = document.querySelector(".article-content");
+            if (!article) return;
+
+            const text = article.textContent.trim();
+
+            if (!utterance || (!synth.speaking && !synth.paused)) {
+                startSpeaking(text);
+                btn.classList.remove("fa-play", "fa-volume-up");
+                btn.classList.add("fa-pause");
+                btn.title = "Pause Reading";
+            } else if (synth.speaking && !synth.paused) {
+                synth.pause();
+                isPaused = true;
+                btn.classList.remove("fa-pause");
+                btn.classList.add("fa-play");
+                btn.title = "Resume Reading";
+            } else if (synth.paused) {
+                synth.resume();
+                isPaused = false;
+                btn.classList.remove("fa-play");
+                btn.classList.add("fa-pause");
+                btn.title = "Pause Reading";
+            }
+        });
+        
+        synth.addEventListener("end", resetIcon);
+        synth.addEventListener("cancel", resetIcon);
     </script>
     <script type="text/javascript">
         function googleTranslateElementInit() {
