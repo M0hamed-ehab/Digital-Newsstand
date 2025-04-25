@@ -57,6 +57,19 @@ function isSignedUp()
 {
     return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
+$dbx = (new Database())->connect();
+$notfications_count = 0;
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $stmt = $dbx->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $notfications_count = $row['count'];
+    }
+    $stmt->close();
+}
 ?>
 
 
@@ -461,16 +474,13 @@ function isSignedUp()
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link <?= $selected_category == 0 ? 'active' : '' ?>" aria-current="page"
-                            href="index.php">Home</a>
-
                     </li>
                     <?php
                     $categories_result->data_seek(0); // Reset the result set pointer
                     while ($category = $categories_result->fetch_assoc()): ?>
                         <li class="nav-item">
                             <a class="nav-link <?= $selected_category == $category['category_id'] ? 'active' : '' ?>"
-                                href="index.php?category_id=<?= $category['category_id'] ?>">
+                                href="?category_id=<?= $category['category_id'] ?>">
                                 <?= htmlspecialchars($category['category_name']) ?>
                             </a>
                         </li>
@@ -487,6 +497,19 @@ function isSignedUp()
                 </form>
                 <ul class="navbar-nav ms-auto">
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="noti.php" title="Notifications">
+                                <i class="fas fa-bell fa-lg"></i>
+                                <?php if ($notfications_count > 0): ?>
+                                    <span
+                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        <?= $notfications_count ?>
+                                        <span class="visually-hidden">unread
+                                            notifications</span>
+                                    </span>
+                                <?php endif; ?>
+                            </a>
+                        </li>
                         <li class="nav-item user-dropdown">
                             <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false" title="User Menu">
@@ -649,6 +672,7 @@ function isSignedUp()
             });
         });
     </script>
+    <script src="xo-game.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
