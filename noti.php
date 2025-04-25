@@ -1,13 +1,5 @@
 <?php
-session_start();
 include_once 'config/Database.php';
-$database = new Database();
-$conn = $database->connect();
-
-
-
-
-
 
 $db = (new Database())->connect();
 
@@ -53,6 +45,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
+}
 function isUserLoggedIn()
 {
     return isset($_SESSION['user_id']);
@@ -63,156 +59,39 @@ function isSignedUp()
     return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['delete_notfication_id']) || isset($_POST['delete_all']))) {
+    $user_id = $_SESSION['user_id'] ?? 0;
 
+    if ($user_id > 0) {
+        if (isset($_POST['delete_notfication_id'])) {
+            $notfication_id = intval($_POST['delete_notfication_id']);
+            $delete_stmt = $db->prepare("DELETE FROM notfications WHERE notfication_id = ? AND user_id = ?");
+            $delete_stmt->bind_param("ii", $notfication_id, $user_id);
+            $delete_stmt->execute();
+            $delete_stmt->close();
+        } elseif (isset($_POST['delete_all'])) {
+            $delete_all_stmt = $db->prepare("DELETE FROM notfications WHERE user_id = ?");
+            $delete_all_stmt->bind_param("i", $user_id);
+            $delete_all_stmt->execute();
+            $delete_all_stmt->close();
+        }
+    }
 
-
-
-
-
-
-
-
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
+    header("Location: noti.php");
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['plan'])) {
-        $new_plan = $_POST['plan'];
-
-        $stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $role = $row['role'];
-
-        if ($role === 'admin') {
-            if ($new_plan === 'free') {
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium') {
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium_plus') {
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            }
-            $message = "Your subscription has been changed to " . ucfirst(str_replace('_', ' ', $new_plan)) . ".";
-        } else {
-            if ($new_plan === 'free') {
-                $update_role = $conn->prepare("UPDATE users SET role = 'member' WHERE user_id = ?");
-                $update_role->bind_param("i", $user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'member';
-
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium') {
-                $update_role = $conn->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
-                $update_role->bind_param("i", $user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'subscriber';
-
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium_plus') {
-                $update_role = $conn->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
-                $update_role->bind_param("i", $user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'subscriber';
-
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            }
-            $message = "Your subscription has been changed to " . ucfirst(str_replace('_', ' ', $new_plan)) . ".";
-        }
-        header("Location: subscription.php?message=" . urlencode($message));
-        exit();
-    } elseif (isset($_POST['auto_renew'])) {
-        $auto_renew = $_POST['auto_renew'] === '1' ? 1 : 0;
-        $stmt = $conn->prepare("UPDATE subscription SET auto_renew = ? WHERE user_id = ?");
-        $stmt->bind_param("ii", $auto_renew, $user_id);
-        $stmt->execute();
-        $message = "Auto-renewal has been " . ($auto_renew ? "enabled" : "disabled") . ".";
-        header("Location: subscription.php?message=" . urlencode($message));
-        exit();
+$notfications = [];
+if (isUserLoggedIn()) {
+    $user_id = $_SESSION['user_id'];
+    $notif_stmt = $db->prepare("SELECT notfication_id, article_id, notfication_description FROM notfications WHERE user_id = ? ORDER BY notfication_id DESC");
+    $notif_stmt->bind_param("i", $user_id);
+    $notif_stmt->execute();
+    $notif_result = $notif_stmt->get_result();
+    while ($row = $notif_result->fetch_assoc()) {
+        $notfications[] = $row;
     }
-}
-
-$stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$row = $result->fetch_assoc();
-$role = $row['role'];
-
-$highlight_plan = 'free';
-
-if ($role === 'member') {
-    $highlight_plan = 'free';
-} elseif ($role === 'admin') {
-    $highlight_plan = 'premium_plus';
-} elseif ($role === 'subscriber') {
-    $stmt_sub = $conn->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
-    $stmt_sub->bind_param("i", $user_id);
-    $stmt_sub->execute();
-    $result_sub = $stmt_sub->get_result();
-    if ($result_sub->num_rows > 0) {
-        $sub_row = $result_sub->fetch_assoc();
-        $subscription_name = $sub_row['subscription_name'];
-        $auto_renew = $sub_row['auto_renew'];
-        if ($subscription_name === 'none') {
-            $highlight_plan = 'free';
-        } elseif ($subscription_name === 'semi') {
-            $highlight_plan = 'premium';
-        } elseif ($subscription_name === 'full') {
-            $highlight_plan = 'premium_plus';
-        }
-    } else {
-        $highlight_plan = 'free';
-        $auto_renew = 0;
-    }
-} else {
-    $highlight_plan = 'free';
-    $auto_renew = 0;
-}
-
-$today = date('Y-m-d');
-$articles = [];
-$stmt_articles = $conn->prepare("SELECT title, content FROM articles WHERE DATE(created_at) = ?");
-$stmt_articles->bind_param("s", $today);
-$stmt_articles->execute();
-$result_articles = $stmt_articles->get_result();
-while ($row_article = $result_articles->fetch_assoc()) {
-    $articles[] = $row_article;
-}
-
-function planClass($plan, $highlight_plan)
-{
-    return $plan === $highlight_plan ? 'plan highlight' : 'plan';
-}
-
-function buttonLabel($plan, $highlight_plan)
-{
-    return $plan === $highlight_plan ? 'Your Plan' : 'Choose Plan';
-}
-
-$message = '';
-if (isset($_GET['message'])) {
-    $message = htmlspecialchars($_GET['message']);
+    $notif_stmt->close();
 }
 $dbx = (new Database())->connect();
 $notfications_count = 0;
@@ -234,7 +113,8 @@ if (isset($_SESSION['user_id'])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Subscription Plans</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Global Herald - Your Source for Trusted News</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -246,24 +126,10 @@ if (isset($_SESSION['user_id'])) {
             line-height: 1.7;
         }
 
-        #result {
-            position: absolute;
-        }
-
         a {
             color: #007bff;
             text-decoration: none;
             transition: color 0.3s ease-in-out;
-        }
-
-        a:hover {
-            color: #0056b3;
-        }
-
-        #sudoku-board {
-
-            margin: 20px auto;
-            width: 80%;
         }
 
         .navbar {
@@ -284,7 +150,7 @@ if (isset($_SESSION['user_id'])) {
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 5% 5% 10% 5%;
             padding: 1.5rem;
             background-color: #fff;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
@@ -295,13 +161,11 @@ if (isset($_SESSION['user_id'])) {
             display: flex;
             gap: 1.5rem;
             margin-top: 1.5rem;
-            flex-wrap: nowrap;
-            align-items: center;
-            flex-direction: row;
+            justify-content: center;
         }
 
         .sidebar {
-            flex: 0 0 25%;
+            flex: 0 0 28%;
             padding: 1rem;
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -388,8 +252,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 1.25rem;
         }
 
-        .read-more-btn,
-        button {
+        .read-more-btn {
             display: inline-block;
             background-color: #007bff;
             color: #fff;
@@ -400,8 +263,7 @@ if (isset($_SESSION['user_id'])) {
             transition: background-color 0.2s ease-in-out;
         }
 
-        .read-more-btn:hover,
-        button:hover {
+        .read-more-btn:hover {
             background-color: #0056b3;
         }
 
@@ -411,6 +273,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 1rem;
             border-radius: 0.5rem;
             margin-bottom: 1.5rem;
+            max-height: 15rem;
         }
 
         .breaking-news h4 {
@@ -442,6 +305,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 1rem;
             border-radius: 0.5rem;
             margin-bottom: 1.5rem;
+            max-height: 15rem;
         }
 
         .popular-articles h4 {
@@ -467,22 +331,40 @@ if (isset($_SESSION['user_id'])) {
             border-bottom: none;
         }
 
-        #container-games {
+        .container-games {
             padding: 2rem 0;
             margin: 0 auto;
         }
 
-        .row>* {
-            max-width: 70%;
+        .game-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
         }
 
-        h1 {
-            margin: 2%;
+        .game-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
         }
 
+        .game-item img:hover {
+            transform: scale(1.05);
+        }
 
+        .game-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-top: 0.5rem;
+        }
 
-
+        .game-description {
+            font-size: 0.9rem;
+            color: #555;
+        }
 
         .col-sm-6 {
             flex: 0 0 auto;
@@ -517,18 +399,14 @@ if (isset($_SESSION['user_id'])) {
         }
 
         @media (max-width: 992px) {
-
+            .row {
+                flex-direction: column;
+            }
 
             .sidebar {
-                width: 50%;
+                width: 100%;
                 margin-bottom: 1.5rem;
             }
-        }
-
-        .sidebar {
-            width: 100%;
-            margin-bottom: 1.5rem;
-        }
         }
 
         .user-icons {
@@ -584,252 +462,11 @@ if (isset($_SESSION['user_id'])) {
             background-color: #e9ecef;
             color: #1e2125;
         }
-
-
-        .plans {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
-        }
-
-        .plan {
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            width: 200px;
-            text-align: center;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .plan.highlight {
-            border-color: #007bff;
-            box-shadow: 0 0 10px #007bff;
-            background-color: #e6f0ff;
-        }
-
-        .plan h2 {
-            margin-top: 0;
-        }
-
-        .plan p {
-            font-size: 14px;
-            color: #555;
-        }
-
-        .plan button {
-            margin-top: 15px;
-            padding: 10px 15px;
-            font-size: 14px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-
-        .plan button:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-
-        .plan button:disabled {
-            background-color: #6c757d;
-            cursor: default;
-        }
-
-        /* Message box styles */
-        #messageBox {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #007bff;
-            color: white;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            font-size: 18px;
-            display: none;
-            z-index: 1000;
-        }
-
-        #messageBox button {
-            margin: 10px;
-            padding: 8px 16px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #messageBox .closeBtn {
-            background-color: #28a745;
-            color: white;
-        }
-
-        /* Auto-renew toggle styles */
-        .auto-renew-container {
-            margin: 30px auto;
-            width: 300px;
-            text-align: center;
-        }
-
-        .auto-renew-label {
-            font-size: 16px;
-            margin-right: 10px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: #007bff;
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(26px);
-        }
-
-        #Daily {
-            margin: 40px auto;
-            width: 80%;
-            max-width: 800px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            min-height: 150px;
-        }
-
-        #Daily h2 {
-            margin-top: 0;
-        }
-
-
-
-
-
-
-
-
-        .plans {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 30px;
-        }
-
-        .plan-card {
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            width: 250px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .plan-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        #premium {
-            border-color: #B8860B;
-
-        }
-
-        .plan-card h2 {
-            font-size: 22px;
-            margin: 10px 0;
-        }
-
-        .plan-card .price {
-            font-size: 26px;
-            font-weight: bold;
-            color: rgb(32, 113, 218);
-            margin: 10px 0;
-        }
-
-        .plan-card button {
-            padding: 10px 20px;
-            font-size: 16px;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-
-        .plan-card .features {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .plan-card .features li {
-            font-size: 16px;
-            line-height: 1.6;
-            padding-left: 20px;
-            position: relative;
-            margin-bottom: 10px;
-        }
-
-        .plan-card .features li::before {
-            content: "✔";
-            font-size: 18px;
-            color: rgb(30, 67, 235);
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .plan-card .features li:hover {
-            color: #333;
-            cursor: pointer;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-        }
     </style>
-    <script src="subs.js"></script>
 </head>
 
 <body>
+
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">
@@ -915,107 +552,76 @@ if (isset($_SESSION['user_id'])) {
             </div>
         </div>
     </nav>
-    <h1>Subscription Plans</h1>
 
 
+    <div class="container mt-4">
+        <h2>Your Notfications</h2>
 
-
-
-
-
-
-
-
-    <form id="subscriptionForm" method="POST" action="subscription.php">
-        <input type="hidden" name="plan" id="planInput" value="">
-        <section class="plans">
-            <div class="<?php echo planClass('free', $highlight_plan); ?> plan-card" id="free">
-                <h2>Free</h2>
-                <p class="price">0 EGP</p>
-                <p>Free!</p>
-
-                <ul class="features">
-                    <li>Access Articles</li>
-                    <li>Translation</li>
-                    <li>Games</li>
-                    <li>Ads</li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'free' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('free')" class="select-btn">
-                    <?php echo buttonLabel('free', $highlight_plan); ?>
-                </button>
+        <?php if (count($notfications) === 0): ?>
+            <p>No notfications found.</p>
+        <?php else: ?>
+            <div id="notfications-list" class="list-group">
+                <?php foreach ($notfications as $notfication): ?>
+                    <div class="list-group-item d-flex justify-content-between align-items-center"
+                        data-notfication-id="<?= $notfication['notfication_id'] ?>">
+                        <div class="notfication-description"><?= htmlspecialchars($notfication['notfication_description']) ?>
+                        </div>
+                        <div>
+                            <a href="article.php?id=<?= $notfication['article_id'] ?>"
+                                class="btn btn-primary btn-sm me-2">Read</a>
+                            <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-            <div class="<?php echo planClass('premium', $highlight_plan); ?> plan-card" id="premium">
-                <h2>Premium</h2>
-                <label style="font-size: small; color: gray;">Popular</label>
-                <p class="price">10 EGP</p>
-                <p>Billed monthly. Ideal for light readers.</p>
-                <ul class="features">
-                    <li>Recieve Email Updates</li>
-                    <li>Download Articles</li>
-                    <li>Ads</li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'premium' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('premium')" class="select-btn">
-                    <?php echo buttonLabel('premium', $highlight_plan); ?>
-                </button>
+            <div id="delete-confirmation" class="alert alert-warning mt-3 d-none">
+                <p>Are you sure you want to delete this notfication?</p>
+                <button id="confirm-delete" class="btn btn-danger me-2">Yes</button>
+                <button id="cancel-delete" class="btn btn-secondary">No</button>
             </div>
-            <div class="<?php echo planClass('premium_plus', $highlight_plan); ?> plan-card" id="premium_plus">
-                <h2>Premium+</h2>
-                <p class="price">50 EGP</p>
-                <p>Billed monthly. Perfect for avid readers and families.</p>
-                <ul class="features">
-                    <li>Daily Briefing</li>
-                    <li>Priority customer support</li>
-                    <li>No Ads</li>
-
-                    <li></li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'premium_plus' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('premium_plus')" class="select-btn">
-                    <?php echo buttonLabel('premium_plus', $highlight_plan); ?>
-                </button>
-            </div>
-        </section>
-    </form>
-
-    <?php if ($role === 'subscriber'): ?>
-        <div class="auto-renew-container">
-            <h2>Auto-Renewal</h2>
-            <form id="autoRenewForm" method="POST" action="subscription.php">
-                <input type="hidden" name="auto_renew" id="autoRenewInput" value="<?php echo $auto_renew ? '1' : '0'; ?>">
-                <label class="auto-renew-label" for="autoRenewToggle">Enable Auto-Renewal:</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoRenewToggle" <?php echo $auto_renew ? 'checked' : ''; ?>
-                        onchange="toggleAutoRenew(this)">
-                    <span class="slider"></span>
-                </label>
+            <form id="delete-form" method="POST" style="display:none;">
+                <input type="hidden" name="delete_notfication_id" id="delete-notfication-id" value="">
             </form>
-        </div>
-        <?php if ($highlight_plan === 'premium_plus'): ?>
-
-            <div id="Daily">
-                <h2>Daily</h2>
-                <?php if (count($articles) > 0): ?>
-                    <?php foreach ($articles as $article): ?>
-                        <article>
-                            <h3><?php echo htmlspecialchars($article['title']); ?></h3>
-                            <p><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No news articles for today.</p>
-                <?php endif; ?>
-            </div>
         <?php endif; ?>
+    </div>
+
+    <?php if (isUserLoggedIn() && count($notfications) > 0): ?>
+        <div class="container mt-3">
+            <form id="delete-all-form" method="POST" style="display:inline;">
+                <input type="hidden" name="delete_all" value="1">
+                <button type="button" id="delete-all-btn" class="btn btn-danger">Delete All</button>
+            </form>
+            <div id="delete-all-confirmation" class="alert alert-warning mt-3 d-none">
+                <p>Are you sure you want to delete all your notifications?</p>
+                <button id="confirm-delete-all" class="btn btn-danger me-2">Yes</button>
+                <button id="cancel-delete-all" class="btn btn-secondary">No</button>
+            </div>
+        </div>
     <?php endif; ?>
 
-    <div id="messageBox"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <footer>
         <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
                 Service</a></p>
     </footer>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1038,6 +644,7 @@ if (isset($_SESSION['user_id'])) {
 
 
 
+    <script src="noti.js"></script>
 </body>
 
 </html>
