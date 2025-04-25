@@ -410,8 +410,6 @@ function isSignedUp()
                         background-color: #e9ecef;
                         color: #1e2125;
                 }
-
-                
         </style>
 </head>
 
@@ -751,7 +749,7 @@ function isSignedUp()
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-        
+
 </body>
 
 </html>
