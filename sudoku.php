@@ -10,25 +10,53 @@ $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
 $categories_result = $db->query($categories_query);
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
+$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$articles_query = "
+if ($search_term !== '') {
+    $search_term_like = '%' . $search_term . '%';
+    $articles_query = "
+        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
+        c.category_name
+        FROM articles a
+        LEFT JOIN category c ON a.category_id = c.category_id
+        WHERE a.content LIKE '$search_term_like'
+        ORDER BY a.created_at DESC
+    ";
+    $articles_result = $db->query($articles_query);
+} else {
+    $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE c.category_id = ? OR ? = 0
         ORDER BY a.created_at DESC
-";
-$stmt = $db->prepare($articles_query);
-$stmt->bind_param("ii", $selected_category, $selected_category);
-$stmt->execute();
-$articles_result = $stmt->get_result();
+    ";
+    $stmt = $db->prepare($articles_query);
+    $stmt->bind_param("ii", $selected_category, $selected_category);
+    $stmt->execute();
+    $articles_result = $stmt->get_result();
+}
 
 $breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
 $breaking_news_result = $db->query($breaking_news_query);
 
 $popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
 $popular_articles_result = $db->query($popular_articles_query);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+function isUserLoggedIn()
+{
+    return isset($_SESSION['user_id']);
+}
+
+function isSignedUp()
+{
+    return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
+}
 ?>
 
 
@@ -380,6 +408,66 @@ $popular_articles_result = $db->query($popular_articles_query);
                 margin-bottom: 1.5rem;
             }
         }
+
+        .sidebar {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        }
+
+        .user-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-icons .nav-link {
+            padding: 0.7rem 0.8rem;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.25rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 10rem;
+            z-index: 1000;
+            display: none;
+        }
+
+        .dropdown-menu[data-bs-popper] {
+            left: -360%;
+        }
+
+        .user-dropdown-menu.show {
+            display: block;
+        }
+
+        .user-dropdown-menu a.dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.25rem 1.5rem;
+            clear: both;
+            font-weight: 400;
+            color: #212529;
+            text-align: inherit;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+            text-decoration: none;
+        }
+
+        .user-dropdown-menu a.dropdown-item:hover,
+        .user-dropdown-menu a.dropdown-item:focus {
+            background-color: #e9ecef;
+            color: #1e2125;
+        }
     </style>
 </head>
 
@@ -416,16 +504,47 @@ $popular_articles_result = $db->query($popular_articles_query);
                         <a class="nav-link" href="index.php#games">Games</a>
                     </li>
                 </ul>
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex" method="GET" action="index.php">
+                    <input class="form-control me-2" type="search" name="search" placeholder="Search"
+                        aria-label="Search"
+                        value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                     <button class="btn btn-outline-light" type="submit">Search</button>
                 </form>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="profile.php" title="Edit Profile">
-                            <i class="fas fa-user"></i>
-                        </a>
-                    </li>
+                <ul class="navbar-nav ms-auto">
+                    <?php if (isUserLoggedIn() || isSignedUp()): ?>
+                        <li class="nav-item user-dropdown">
+                            <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false" title="User Menu">
+                                <i class="fas fa-user-circle fa-lg"></i>
+                            </a>
+                            <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>
+                                        Profile</a></li>
+                                <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i>
+                                        Favorites</a></li>
+                                <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i>
+                                        Bookmarks</a></li>
+                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                    <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
+                                            Admin Dashboard</a></li>
+                                <?php endif; ?>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>
+                                        Logout</a></li>
+                            </ul>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
+                                Register</a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -537,6 +656,7 @@ $popular_articles_result = $db->query($popular_articles_query);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
 </body>
 

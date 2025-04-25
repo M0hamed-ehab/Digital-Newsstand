@@ -5,7 +5,7 @@ $database = new Database();
 $conn = $database->connect();
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login.html");
     exit();
 }
 
