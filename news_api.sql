@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 24, 2025 at 09:32 PM
+-- Generation Time: Apr 25, 2025 at 08:13 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -87,7 +87,8 @@ INSERT INTO `category` (`category_id`, `category_name`) VALUES
 CREATE TABLE `comment` (
   `comment_id` int(11) NOT NULL,
   `description` varchar(10000) NOT NULL,
-  `user_id` int(11) NOT NULL
+  `user_id` int(11) NOT NULL,
+  `article_id` int(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -124,8 +125,19 @@ CREATE TABLE `notfications` (
 CREATE TABLE `subscription` (
   `subscription_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `subscription_name` varchar(255) NOT NULL
+  `subscription_name` enum('none','semi','full') NOT NULL DEFAULT 'none',
+  `auto_renew` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `subscription`
+--
+
+INSERT INTO `subscription` (`subscription_id`, `user_id`, `subscription_name`, `auto_renew`) VALUES
+(1, 7, 'full', 1),
+(2, 8, 'full', 1),
+(3, 20, 'full', 1),
+(4, 33, 'none', 1);
 
 -- --------------------------------------------------------
 
@@ -149,8 +161,19 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`user_id`, `name`, `password`, `created_at`, `email`, `role`) VALUES
 (7, 'mm', 'mm', '2025-04-24 18:36:53', 'bakerymai0@gmail.com', 'admin'),
 (8, 'Mai', 'm', '2025-04-24 18:37:05', 'bakerymai0@gmail.comm', 'admin'),
-(20, 'mo', 'momo', '2025-04-24 18:37:55', 'momoehab@gmail.com', 'subscriber'),
+(20, 'mo', 'momo', '2025-04-25 17:36:08', 'momoehab@gmail.com', 'subscriber'),
 (33, 'member', '123', '2025-04-24 18:43:10', 'A@a.com', 'member');
+
+--
+-- Triggers `users`
+--
+DELIMITER $$
+CREATE TRIGGER `after_user_insert` AFTER INSERT ON `users` FOR EACH ROW BEGIN
+    INSERT INTO subscription (user_id)
+    VALUES (NEW.user_id);
+END
+$$
+DELIMITER ;
 
 --
 -- Indexes for dumped tables
@@ -182,7 +205,8 @@ ALTER TABLE `category`
 --
 ALTER TABLE `comment`
   ADD PRIMARY KEY (`comment_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `articlllllll` (`article_id`);
 
 --
 -- Indexes for table `favorites`
@@ -256,7 +280,7 @@ ALTER TABLE `notfications`
 -- AUTO_INCREMENT for table `subscription`
 --
 ALTER TABLE `subscription`
-  MODIFY `subscription_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `subscription_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -285,6 +309,7 @@ ALTER TABLE `bookmarks`
 -- Constraints for table `comment`
 --
 ALTER TABLE `comment`
+  ADD CONSTRAINT `articlllllll` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`),
   ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
