@@ -130,6 +130,24 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             text-decoration: underline;
         }
 
+        .article-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        #translate-icon {
+            margin-right: 0.5rem;
+            /* Adjust spacing between icon and dropdown */
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #6c757d;
+            transition: color 0.2s ease-in-out;
+        }
+
+        #translate-icon:hover {
+            color: #007bff;
+        }
+
         .article-actions a {
             margin-left: 1rem;
             font-size: 1.5rem;
@@ -186,6 +204,23 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         .bookmarked {
             color: #007BFF !important;
         }
+
+        .goog-te-gadget-simple {
+            border: none !important;
+        }
+
+        .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed {
+            display: none !important;
+        }
+
+        .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed span {
+            display: none !important;
+        }
+
+        .goog-te-gadget img {
+            left: 15%;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -207,6 +242,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     </p>
                 </div>
                 <div class="article-actions">
+                    <div id="google_translate_element" title="Translate Article"></div>
                     <a href="#" title="Add to Favorites" class="<?= $is_favorited ? 'fas' : 'far' ?> fa-heart" onclick="toggleFavorite(<?= $article['id'] ?>, this); return false;"></a>
                     <a href="#" title="Add to Bookmark" class="<?= $is_booked ? 'fas' : 'far' ?> fa-bookmark" onclick="toggleBookmark(<?= $article['id'] ?>, this); return false;"></a>
                 </div>
@@ -302,6 +338,18 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     alert('An error occurred while updating bookmarks.');
                 });
         }
+    </script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
     </script>
 </body>
 

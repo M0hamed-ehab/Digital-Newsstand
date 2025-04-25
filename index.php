@@ -411,16 +411,7 @@ function isSignedUp()
                         color: #1e2125;
                 }
 
-                .goog-te-gadget-simple {
-                        position: absolute;
-                        top: 35%;
-                        background-color: #343A40 !important;
-                        border: none !important;
-                }
-
-                .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed span {
-                        color: white;
-                }
+                
         </style>
 </head>
 
@@ -452,10 +443,6 @@ function isSignedUp()
                                         <?php endwhile; ?>
                                         <li>
                                                 <a class="nav-link" href="#games">Games</a>
-                                        </li>
-                                        <li>
-                                                <div id="google_translate_element"></div>
-
                                         </li>
                                 </ul>
                                 <form class="d-flex" method="GET" action="index.php">
@@ -764,18 +751,7 @@ function isSignedUp()
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-        <script type="text/javascript">
-                function googleTranslateElementInit() {
-                        new google.translate.TranslateElement({
-                                pageLanguage: 'en',
-                                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                        }, 'google_translate_element');
-                }
-        </script>
-
-        <script type="text/javascript"
-                src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-        </script>
+        
 </body>
 
 </html>
