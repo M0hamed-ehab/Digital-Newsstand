@@ -57,7 +57,6 @@ function isSignedUp()
 {
     return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
-
 $dbx = (new Database())->connect();
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
@@ -71,20 +70,7 @@ if (isset($_SESSION['user_id'])) {
     }
     $stmt->close();
 }
-
-
-
-
-
-
-
-
-
-
-
 ?>
-
-
 
 
 <!DOCTYPE html>
@@ -153,13 +139,17 @@ if (isset($_SESSION['user_id'])) {
             border-radius: 0.5rem;
         }
 
+        .row>* {
+            max-width: 70%;
+        }
+
         .row {
             display: flex;
             gap: 1.5rem;
             margin-top: 1.5rem;
             flex-wrap: nowrap;
-            align-items: center;
             flex-direction: row;
+            justify-content: flex-start;
         }
 
         .sidebar {
@@ -203,6 +193,8 @@ if (isset($_SESSION['user_id'])) {
         .category-list li.active {
             background-color: #007bff;
         }
+
+
 
         .category-list li.active a {
             color: #fff;
@@ -329,71 +321,7 @@ if (isset($_SESSION['user_id'])) {
             border-bottom: none;
         }
 
-        #container-games {
-            padding: 2rem 0;
-            margin: 0 auto;
-        }
 
-        .row>* {
-            max-width: 70%;
-        }
-
-        #sudoku-board {
-            border-collapse: collapse;
-            width: 60%;
-            height: 450px;
-            table-layout: fixed;
-            margin: 1rem 0 4vh;
-        }
-
-        #sudoku-board td {
-            border: 1px solid #999;
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            vertical-align: middle;
-            padding: 0;
-        }
-
-        #sudoku-board input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            outline: none;
-        }
-
-        .game-item img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        .game-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        .game-item img:hover {
-            transform: scale(1.05);
-        }
-
-        .game-title {
-            font-weight: 600;
-            font-size: 1.25rem;
-            margin-top: 0.5rem;
-        }
-
-        .game-description {
-            font-size: 0.9rem;
-            color: #555;
-        }
 
         .col-sm-6 {
             flex: 0 0 auto;
@@ -425,6 +353,38 @@ if (isset($_SESSION['user_id'])) {
 
         footer a:hover {
             color: #f8f9fa;
+        }
+
+        caption {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        #XO {
+            margin: 10%;
+            border-collapse: collapse;
+            width: 55%;
+            height: 55%;
+            aspect-ratio: 1 / 1;
+            table-layout: fixed;
+            user-select: none;
+            text-align: center;
+        }
+
+        #XO td {
+            border: 5px solid #000;
+            font-size: 48px;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 33.33%;
+            height: 33.33%;
+            aspect-ratio: 1 / 1;
+        }
+
+        #XO td:hover {
+            background-color: #f0f0f0;
         }
 
         @media (max-width: 992px) {
@@ -496,6 +456,7 @@ if (isset($_SESSION['user_id'])) {
             color: #1e2125;
         }
     </style>
+
 </head>
 
 <body>
@@ -638,16 +599,38 @@ if (isset($_SESSION['user_id'])) {
                     </ul>
                 </div>
             </div>
-            <div id="container-game">
-                <h2 id="h2t">Sudoku Game</h2>
-                <div>
-                    <table id="sudoku-board"></table>
-                </div>
-                <button type="button" onclick="checkSolution()">Check Solution</button>
-                <button type="button" onclick="fillSolution()">Get Solution</button>
-                <button type="button" onclick="resetBoard()">Reset</button>
-                <p id="result"></p>
+            <div id="game-container">
+
+                <table id="XO">
+                    <caption>Winner: <span id="result"></span>
+                        <br>
+                        <button id="reset" onclick="window.location.reload();">Reset</button>
+                    </caption>
+
+
+                    <tr>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                    </tr>
+                    <tr>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                    </tr>
+                    <tr>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                    </tr>
+                </table>
             </div>
+
+
+
+
+
+
         </div>
     </div>
     </div>
@@ -670,7 +653,6 @@ if (isset($_SESSION['user_id'])) {
 
 
 
-    <script src="sudoku.js"></script>
     <footer>
         <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
                 Service</a></p>
@@ -690,10 +672,10 @@ if (isset($_SESSION['user_id'])) {
             });
         });
     </script>
+    <script src="xo-game.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 
 </body>
 

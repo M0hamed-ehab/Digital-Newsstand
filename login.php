@@ -13,19 +13,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    $stmt = $conn->prepare("SELECT user_id, password FROM users WHERE name = ?");
+    $stmt = $conn->prepare("SELECT user_id, password, role FROM users WHERE name = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $storedPassword);
+        $stmt->bind_result($user_id, $storedPassword, $role);
         $stmt->fetch();
 
         if ($password === $storedPassword) {
             session_start();
             $_SESSION['user_id'] = $user_id;
             $_SESSION['name'] = $username;
+            $_SESSION['role'] = $role;
             echo "success";
             exit;
         } else {

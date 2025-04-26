@@ -7,19 +7,33 @@ $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
 $categories_result = $db->query($categories_query);
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
+$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$articles_query = "
+if ($search_term !== '') {
+        $search_term_like = '%' . $search_term . '%';
+        $articles_query = "
+        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
+        c.category_name
+        FROM articles a
+        LEFT JOIN category c ON a.category_id = c.category_id
+        WHERE a.content LIKE '$search_term_like'
+        ORDER BY a.created_at DESC
+    ";
+        $articles_result = $db->query($articles_query);
+} else {
+        $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE c.category_id = ? OR ? = 0
         ORDER BY a.created_at DESC
-";
-$stmt = $db->prepare($articles_query);
-$stmt->bind_param("ii", $selected_category, $selected_category);
-$stmt->execute();
-$articles_result = $stmt->get_result();
+    ";
+        $stmt = $db->prepare($articles_query);
+        $stmt->bind_param("ii", $selected_category, $selected_category);
+        $stmt->execute();
+        $articles_result = $stmt->get_result();
+}
 
 $breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
 $breaking_news_result = $db->query($breaking_news_query);
@@ -40,6 +54,34 @@ function isSignedUp()
 {
         return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
+
+
+
+
+$dbx = (new Database())->connect();
+$notfications_count = 0;
+if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+        $stmt = $dbx->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+                $notfications_count = $row['count'];
+        }
+        $stmt->close();
+}
+
+
+
+
+
+
+
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -396,8 +438,6 @@ function isSignedUp()
                         background-color: #e9ecef;
                         color: #1e2125;
                 }
-
-                
         </style>
 </head>
 
@@ -428,36 +468,69 @@ function isSignedUp()
                                                 </li>
                                         <?php endwhile; ?>
                                         <li>
-                                                <a class="nav-link" href="#games">Games</a>
+                                                <a class="nav-link" href="index.php#games">Games</a>
                                         </li>
                                 </ul>
-                                <form class="d-flex">
-                                        <input class="form-control me-2" type="search" placeholder="Search"
-                                                aria-label="Search">
+                                <form class="d-flex" method="GET" action="index.php">
+                                        <input class="form-control me-2" type="search" name="search"
+                                                placeholder="Search" aria-label="Search"
+                                                value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                                         <button class="btn btn-outline-light" type="submit">Search</button>
                                 </form>
                                 <ul class="navbar-nav ms-auto">
                                         <?php if (isUserLoggedIn() || isSignedUp()): ?>
+                                                <li class="nav-item">
+                                                        <a class="nav-link position-relative" href="noti.php"
+                                                                title="Notifications">
+                                                                <i class="fas fa-bell fa-lg"></i>
+                                                                <?php if ($notfications_count > 0): ?>
+                                                                        <span
+                                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                                                <?= $notfications_count ?>
+                                                                                <span class="visually-hidden">unread
+                                                                                        notifications</span>
+                                                                        </span>
+                                                                <?php endif; ?>
+                                                        </a>
+                                                </li>
                                                 <li class="nav-item user-dropdown">
-                                                        <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="User Menu">
+                                                        <a class="nav-link" href="#" id="userDropdown" role="button"
+                                                                data-bs-toggle="dropdown" aria-expanded="false"
+                                                                title="User Menu">
                                                                 <i class="fas fa-user-circle fa-lg"></i>
                                                         </a>
-                                                        <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
-                                                                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i> Profile</a></li>
-                                                                <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i> Favorites</a></li>
-                                                                <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i> Bookmarks</a></li>
+                                                        <ul class="dropdown-menu user-dropdown-menu"
+                                                                aria-labelledby="userDropdown">
+                                                                <li><a class="dropdown-item" href="profile.php"><i
+                                                                                        class="fas fa-user me-2"></i>
+                                                                                Profile</a></li>
+                                                                <li><a class="dropdown-item" href="favorites.php"><i
+                                                                                        class="fas fa-heart me-2"></i>
+                                                                                Favorites</a></li>
+                                                                <li><a class="dropdown-item" href="bookmarks.php"><i
+                                                                                        class="fas fa-bookmark me-2"></i>
+                                                                                Bookmarks</a></li>
+                                                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                                                        <li><a class="dropdown-item" href="admin.php"><i
+                                                                                                class="fas fa-user-shield me-2"></i>
+                                                                                        Admin Dashboard</a></li>
+                                                                <?php endif; ?>
                                                                 <li>
                                                                         <hr class="dropdown-divider">
                                                                 </li>
-                                                                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                                                <li><a class="dropdown-item" href="logout.php"><i
+                                                                                        class="fas fa-sign-out-alt me-2"></i>
+                                                                                Logout</a></li>
                                                         </ul>
                                                 </li>
                                         <?php else: ?>
                                                 <li class="nav-item">
-                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                                                Login</a>
                                                 </li>
                                                 <li class="nav-item">
-                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i> Register</a>
+                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
+                                                                Register</a>
                                                 </li>
                                         <?php endif; ?>
                                 </ul>
@@ -560,21 +633,23 @@ function isSignedUp()
                         <div class="row ify-content-center">
                                 <div class="col-md-10 col-lg-8 p-b-20">
                                         <div class="how2 how2-cl4 flex-s-c m-r-10 m-r-0-sr991">
-                                                <h2 class="section-title"><i class="fas fa-gamepad"></i> Explore Exciting Games</h2>
+                                                <h2 class="section-title"><i class="fas fa-gamepad"></i> Explore
+                                                        Exciting Games</h2>
                                         </div>
 
                                         <div class="row p-t-35">
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="sudoku.php" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="sudoku.php#h2t"
+                                                                        class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g1.jpg" alt="Sudoku"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="sudoku.php"
+                                                                                <a href="sudoku.php#h2t"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Sodoku
                                                                                 </a>
@@ -598,14 +673,15 @@ function isSignedUp()
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="XO.php#game-container"
+                                                                        class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g2.jpg" alt="XO"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="blog-detail-01.html"
+                                                                                <a href="XO.php#game-container"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Tic Tac Toe
                                                                                 </a>
@@ -627,14 +703,15 @@ function isSignedUp()
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="Wordle.php#h3w"
+                                                                        class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g3.webp" alt="Wordle"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href=""
+                                                                                <a href="Wordle.php#h3w"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Wordle
                                                                                 </a>
@@ -656,14 +733,14 @@ function isSignedUp()
                                                 <div class="col-sm-6 p-r-25 p-r-15-sr991">
                                                         <!-- Item latest -->
                                                         <div class="m-b-45">
-                                                                <a href="" class="wrap-pic-w hov1 trans-03">
+                                                                <a href="Mine.php#h2m" class="wrap-pic-w hov1 trans-03">
                                                                         <img src="images/g4.jpg" alt="Minesweeper"
                                                                                 class="game-img">
                                                                 </a>
 
                                                                 <div class="p-t-16">
                                                                         <h5 class="p-b-5">
-                                                                                <a href="blog-detail-01.html"
+                                                                                <a href="Mine.php#h2m"
                                                                                         class="f1-m-3 cl2 hov-cl10 trans-03">
                                                                                         Minesweeper
                                                                                 </a>
@@ -698,7 +775,7 @@ function isSignedUp()
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function () {
                         const categoryLinks = document.querySelectorAll('.navbar-nav .nav-link');
                         const sidebarCategoryLinks = document.querySelectorAll('.category-list li a');
                         const currentCategoryId = urlParams.get('category_id');
@@ -714,7 +791,7 @@ function isSignedUp()
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-        
+
 </body>
 
 </html>

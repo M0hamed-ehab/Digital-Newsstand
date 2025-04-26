@@ -5,7 +5,7 @@ $database = new Database();
 $conn = $database->connect();
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login.html");
     exit();
 }
 
@@ -58,6 +58,7 @@ if (isset($_POST['update_profile'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -155,6 +156,7 @@ if (isset($_POST['update_profile'])) {
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2><i class="fas fa-user-cog"></i> Edit Profile</h2>
@@ -180,15 +182,19 @@ if (isset($_POST['update_profile'])) {
         <form method="post">
             <div class="form-group">
                 <label for="username">Username:</label>
-                <input type="text" class="form-control" id="username" name="username" value="<?= htmlspecialchars($user['name']) ?>">
+                <input type="text" class="form-control" id="username" name="username"
+                    value="<?= htmlspecialchars($user['name']) ?>">
             </div>
 
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>">
+                <input type="email" class="form-control" id="email" name="email"
+                    value="<?= htmlspecialchars($user['email']) ?>">
             </div>
 
             <button type="submit" class="btn btn-primary" name="update_profile">Update Profile</button>
+            <button type="button" class="btn btn-primary" name="Subscription"
+                onclick="window.location.href='subscription.php'">Subscription</button>
         </form>
 
         <div class="mt-3">
@@ -198,4 +204,5 @@ if (isset($_POST['update_profile'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

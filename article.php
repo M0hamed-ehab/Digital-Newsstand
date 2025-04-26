@@ -4,6 +4,22 @@ include_once 'config/Database.php';
 $db = (new Database())->connect();
 session_start();
 
+$full = false;
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $subscription_query = "SELECT subscription_name FROM subscription WHERE user_id = ?";
+    $stmt = $db->prepare($subscription_query);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $subscription_result = $stmt->get_result();
+    if ($subscription_result->num_rows > 0) {
+        $subscription = $subscription_result->fetch_assoc();
+        if ($subscription['subscription_name'] === 'full') {
+            $full = true;
+        }
+    }
+}
+
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $article_id = $_GET['id'];
 
@@ -63,7 +79,8 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($article['title']) ? htmlspecialchars($article['title']) : 'Article Detail' ?> - The Global Herald</title>
+    <title><?= isset($article['title']) ? htmlspecialchars($article['title']) : 'Article Detail' ?> - The Global Herald
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -250,11 +267,16 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     </p>
                 </div>
                 <div class="article-actions">
-                    <i id="download-icon" class="fa-solid fa-download" style="margin-right: 0.66rem;" title="Download Article"></i>
+                    <?php if ($full): ?>
+                        <i id="download-icon" class="fa-solid fa-download" style="margin-right: 0.66rem;"
+                            title="Download Article"></i>
+                    <?php endif; ?>
                     <i id="read-aloud-icon" class="fas fa-volume-up" title="Read Aloud"></i>
                     <div id="google_translate_element" title="Translate Article"></div>
-                    <a href="#" title="Add to Favorites" class="<?= $is_favorited ? 'fas' : 'far' ?> fa-heart" onclick="toggleFavorite(<?= $article['id'] ?>, this); return false;"></a>
-                    <a href="#" title="Add to Bookmark" class="<?= $is_booked ? 'fas' : 'far' ?> fa-bookmark" onclick="toggleBookmark(<?= $article['id'] ?>, this); return false;"></a>
+                    <a href="#" title="Add to Favorites" class="<?= $is_favorited ? 'fas' : 'far' ?> fa-heart"
+                        onclick="toggleFavorite(<?= $article['id'] ?>, this); return false;"></a>
+                    <a href="#" title="Add to Bookmark" class="<?= $is_booked ? 'fas' : 'far' ?> fa-bookmark"
+                        onclick="toggleBookmark(<?= $article['id'] ?>, this); return false;"></a>
                 </div>
             </div>
 
@@ -272,11 +294,15 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
             <div class="share-icons">
                 <h5>Share this article:</h5>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($article_url) ?>" target="_blank" rel="noopener noreferrer" class="fab fa-facebook"></a>
-                <a href="https://twitter.com/intent/tweet?url=<?= urlencode($article_url) ?>&text=<?= urlencode($article['title']) ?>" target="_blank" rel="noopener noreferrer" class="fab fa-twitter"></a>
-                <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode($article_url) ?>&title=<?= urlencode($article['title']) ?>" target="_blank" rel="noopener noreferrer" class="fab fa-linkedin"></a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($article_url) ?>" target="_blank"
+                    rel="noopener noreferrer" class="fab fa-facebook"></a>
+                <a href="https://twitter.com/intent/tweet?url=<?= urlencode($article_url) ?>&text=<?= urlencode($article['title']) ?>"
+                    target="_blank" rel="noopener noreferrer" class="fab fa-twitter"></a>
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?= urlencode($article_url) ?>&title=<?= urlencode($article['title']) ?>"
+                    target="_blank" rel="noopener noreferrer" class="fab fa-linkedin"></a>
                 <a href="whatsapp://send?text=<?= urlencode($article_url) ?>" target="_blank" class="fab fa-whatsapp"></a>
-                <a href="mailto:?subject=<?= urlencode('Check out this article: ' . $article['title']) ?>&body=<?= urlencode('I thought you might find this interesting: ' . $article_url) ?>" class="fas fa-envelope"></a>
+                <a href="mailto:?subject=<?= urlencode('Check out this article: ' . $article['title']) ?>&body=<?= urlencode('I thought you might find this interesting: ' . $article_url) ?>"
+                    class="fas fa-envelope"></a>
             </div>
         <?php endif; ?>
 
@@ -298,12 +324,12 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             let action = iconElement.classList.contains('far') ? 'add' : 'remove';
 
             fetch('add_to_favorites.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=<span class="math-inline">\{userId\}&article\_id\=</span>{articleId}&action=${action}`,
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+            })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -333,12 +359,12 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             let action = iconElement.classList.contains('far') ? 'add' : 'remove';
 
             fetch('add_to_bookmarks.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=<span class="math-inline">\{userId\}&article\_id\=</span>{articleId}&action=${action}`,
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+            })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -429,4 +455,40 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     </script>
 
     <script type="text/javascript"
-        src
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        document.getElementById("download-icon").addEventListener("click", async function () {
+            const { jsPDF } = window.jspdf;
+            const articleElement = document.querySelector(".article-content");
+
+            if (!articleElement) {
+                console.error("Could not find the .article-content element to download.");
+                return;
+            }
+
+            try {
+                const canvas = await html2canvas(articleElement, {
+                    logging: false
+                });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF();
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('article.pdf');
+
+            } catch (error) {
+                console.error("Error during PDF generation:", error);
+                alert("An error occurred while generating the PDF.");
+            }
+        });
+    </script>
+</body>
+
+</html>

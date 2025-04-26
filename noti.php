@@ -1,8 +1,5 @@
 <?php
-
 include_once 'config/Database.php';
-
-
 
 $db = (new Database())->connect();
 
@@ -48,6 +45,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
+}
 function isUserLoggedIn()
 {
     return isset($_SESSION['user_id']);
@@ -58,6 +59,40 @@ function isSignedUp()
     return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['delete_notfication_id']) || isset($_POST['delete_all']))) {
+    $user_id = $_SESSION['user_id'] ?? 0;
+
+    if ($user_id > 0) {
+        if (isset($_POST['delete_notfication_id'])) {
+            $notfication_id = intval($_POST['delete_notfication_id']);
+            $delete_stmt = $db->prepare("DELETE FROM notfications WHERE notfication_id = ? AND user_id = ?");
+            $delete_stmt->bind_param("ii", $notfication_id, $user_id);
+            $delete_stmt->execute();
+            $delete_stmt->close();
+        } elseif (isset($_POST['delete_all'])) {
+            $delete_all_stmt = $db->prepare("DELETE FROM notfications WHERE user_id = ?");
+            $delete_all_stmt->bind_param("i", $user_id);
+            $delete_all_stmt->execute();
+            $delete_all_stmt->close();
+        }
+    }
+
+    header("Location: noti.php");
+    exit();
+}
+
+$notfications = [];
+if (isUserLoggedIn()) {
+    $user_id = $_SESSION['user_id'];
+    $notif_stmt = $db->prepare("SELECT notfication_id, article_id, notfication_description FROM notfications WHERE user_id = ? ORDER BY notfication_id DESC");
+    $notif_stmt->bind_param("i", $user_id);
+    $notif_stmt->execute();
+    $notif_result = $notif_stmt->get_result();
+    while ($row = $notif_result->fetch_assoc()) {
+        $notfications[] = $row;
+    }
+    $notif_stmt->close();
+}
 $dbx = (new Database())->connect();
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
@@ -71,29 +106,12 @@ if (isset($_SESSION['user_id'])) {
     }
     $stmt->close();
 }
-
-
-
-
-
-
-
-
-
-
-
 ?>
 
-
-
-
 <!DOCTYPE html>
-
 <html lang="en">
 
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Global Herald - Your Source for Trusted News</title>
@@ -108,24 +126,10 @@ if (isset($_SESSION['user_id'])) {
             line-height: 1.7;
         }
 
-        #result {
-            position: absolute;
-        }
-
         a {
             color: #007bff;
             text-decoration: none;
             transition: color 0.3s ease-in-out;
-        }
-
-        a:hover {
-            color: #0056b3;
-        }
-
-        #sudoku-board {
-
-            margin: 20px auto;
-            width: 80%;
         }
 
         .navbar {
@@ -146,7 +150,7 @@ if (isset($_SESSION['user_id'])) {
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 5% 5% 10% 5%;
             padding: 1.5rem;
             background-color: #fff;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
@@ -157,13 +161,11 @@ if (isset($_SESSION['user_id'])) {
             display: flex;
             gap: 1.5rem;
             margin-top: 1.5rem;
-            flex-wrap: nowrap;
-            align-items: center;
-            flex-direction: row;
+            justify-content: center;
         }
 
         .sidebar {
-            flex: 0 0 25%;
+            flex: 0 0 28%;
             padding: 1rem;
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -250,8 +252,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 1.25rem;
         }
 
-        .read-more-btn,
-        button {
+        .read-more-btn {
             display: inline-block;
             background-color: #007bff;
             color: #fff;
@@ -262,8 +263,7 @@ if (isset($_SESSION['user_id'])) {
             transition: background-color 0.2s ease-in-out;
         }
 
-        .read-more-btn:hover,
-        button:hover {
+        .read-more-btn:hover {
             background-color: #0056b3;
         }
 
@@ -273,6 +273,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 1rem;
             border-radius: 0.5rem;
             margin-bottom: 1.5rem;
+            max-height: 15rem;
         }
 
         .breaking-news h4 {
@@ -304,6 +305,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 1rem;
             border-radius: 0.5rem;
             margin-bottom: 1.5rem;
+            max-height: 15rem;
         }
 
         .popular-articles h4 {
@@ -329,40 +331,9 @@ if (isset($_SESSION['user_id'])) {
             border-bottom: none;
         }
 
-        #container-games {
+        .container-games {
             padding: 2rem 0;
             margin: 0 auto;
-        }
-
-        .row>* {
-            max-width: 70%;
-        }
-
-        #sudoku-board {
-            border-collapse: collapse;
-            width: 60%;
-            height: 450px;
-            table-layout: fixed;
-            margin: 1rem 0 4vh;
-        }
-
-        #sudoku-board td {
-            border: 1px solid #999;
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            vertical-align: middle;
-            padding: 0;
-        }
-
-        #sudoku-board input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            outline: none;
         }
 
         .game-item img {
@@ -428,18 +399,14 @@ if (isset($_SESSION['user_id'])) {
         }
 
         @media (max-width: 992px) {
-
+            .row {
+                flex-direction: column;
+            }
 
             .sidebar {
-                width: 50%;
+                width: 100%;
                 margin-bottom: 1.5rem;
             }
-        }
-
-        .sidebar {
-            width: 100%;
-            margin-bottom: 1.5rem;
-        }
         }
 
         .user-icons {
@@ -499,7 +466,6 @@ if (isset($_SESSION['user_id'])) {
 </head>
 
 <body>
-
 
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
@@ -587,70 +553,51 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </nav>
 
+
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-3 sidebar">
-                <div class="breaking-news">
-                    <h4><i class="fas fa-bolt"></i> Breaking News</h4>
-                    <ul>
-                        <?php if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
-                            <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
-                                <li><a href="#">
-                                        <?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...
-                                    </a></li>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <li>No breaking news at the moment.</li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
+        <h2>Your Notfications</h2>
 
-                <div class="popular-articles">
-                    <h4><i class="fas fa-fire"></i> Trending Stories</h4>
-                    <ul>
-                        <?php if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
-                            <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
-                                <li><a href="article.php?id=<?= $popular['id'] ?>">
-                                        <?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...
-                                    </a></li>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <li>No trending stories yet.</li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4><i class="fas fa-list-alt"></i> Categories</h4>
-                    <ul class="category-list">
-                        <li class="<?= $selected_category == 0 ? 'active' : '' ?>">
-                            <a href="index.php">All</a>
-                        </li>
-                        <?php
-                        $categories_result->data_seek(0); // Reset again for the category list
-                        while ($category = $categories_result->fetch_assoc()): ?>
-                            <li class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
-                                <a href="index.php?category_id=<?= $category['category_id'] ?>">
-                                    <?= htmlspecialchars($category['category_name']) ?>
-                                </a>
-                            </li>
-                        <?php endwhile; ?>
-                    </ul>
-                </div>
+        <?php if (count($notfications) === 0): ?>
+            <p>No notfications found.</p>
+        <?php else: ?>
+            <div id="notfications-list" class="list-group">
+                <?php foreach ($notfications as $notfication): ?>
+                    <div class="list-group-item d-flex justify-content-between align-items-center"
+                        data-notfication-id="<?= $notfication['notfication_id'] ?>">
+                        <div class="notfication-description"><?= htmlspecialchars($notfication['notfication_description']) ?>
+                        </div>
+                        <div>
+                            <a href="article.php?id=<?= $notfication['article_id'] ?>"
+                                class="btn btn-primary btn-sm me-2">Read</a>
+                            <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-            <div id="container-game">
-                <h2 id="h2t">Sudoku Game</h2>
-                <div>
-                    <table id="sudoku-board"></table>
-                </div>
-                <button type="button" onclick="checkSolution()">Check Solution</button>
-                <button type="button" onclick="fillSolution()">Get Solution</button>
-                <button type="button" onclick="resetBoard()">Reset</button>
-                <p id="result"></p>
+            <div id="delete-confirmation" class="alert alert-warning mt-3 d-none">
+                <p>Are you sure you want to delete this notfication?</p>
+                <button id="confirm-delete" class="btn btn-danger me-2">Yes</button>
+                <button id="cancel-delete" class="btn btn-secondary">No</button>
+            </div>
+            <form id="delete-form" method="POST" style="display:none;">
+                <input type="hidden" name="delete_notfication_id" id="delete-notfication-id" value="">
+            </form>
+        <?php endif; ?>
+    </div>
+
+    <?php if (isUserLoggedIn() && count($notfications) > 0): ?>
+        <div class="container mt-3">
+            <form id="delete-all-form" method="POST" style="display:inline;">
+                <input type="hidden" name="delete_all" value="1">
+                <button type="button" id="delete-all-btn" class="btn btn-danger">Delete All</button>
+            </form>
+            <div id="delete-all-confirmation" class="alert alert-warning mt-3 d-none">
+                <p>Are you sure you want to delete all your notifications?</p>
+                <button id="confirm-delete-all" class="btn btn-danger me-2">Yes</button>
+                <button id="cancel-delete-all" class="btn btn-secondary">No</button>
             </div>
         </div>
-    </div>
-    </div>
+    <?php endif; ?>
 
 
 
@@ -669,12 +616,12 @@ if (isset($_SESSION['user_id'])) {
 
 
 
-
-    <script src="sudoku.js"></script>
     <footer>
         <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
                 Service</a></p>
     </footer>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -695,6 +642,9 @@ if (isset($_SESSION['user_id'])) {
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
+
+
+    <script src="noti.js"></script>
 </body>
 
 </html>
