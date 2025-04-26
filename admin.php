@@ -28,9 +28,9 @@ if (isset($_POST['create'])) {
         $targetFile = $targetDirectory . $imageName;
 
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-            $article->image_path = $imageName; 
+            $article->image_path = $imageName;
         } else {
-            $article->image_path = null; 
+            $article->image_path = null;
         }
     } else {
         $article->image_path = null;
@@ -195,62 +195,76 @@ $categoryList = $category->readAll(); // For dropdown
                             </td>
                         </form>
                     </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    <?php while ($cat = $categories->fetch_assoc()): ?>
+                        <tr>
+                            <form method="POST">
+                                <td><?= $cat['category_id'] ?></td>
+                                <td><?= htmlspecialchars($cat['category_name']) ?></td>
+                                <td>
+                                    <input type="hidden" name="category_id" value="<?= $cat['category_id'] ?>">
+                                    <button type="submit" name="delete_category" class="btn btn-danger">Delete</button>
+                                </td>
+                            </form>
+                        </tr>
 
-    <!-- ARTICLE MANAGEMENT -->
-    <div class="section">
-        <h2>📰 Manage Articles</h2>
-
-        <form method="POST">
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                <input type="text" class="form-control" name="title" placeholder="Enter article title" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Content</label>
-                <textarea class="form-control" name="content" rows="5" placeholder="Write the article content here..." required></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Author</label>
-                <input type="text" class="form-control" name="author" placeholder="e.g., John Doe" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-                <select class="form-select" name="category_id" required>
-                    <option value="">-- Select Category --</option>
-                    <?php while ($cat = $categoryList->fetch_assoc()): ?>
-                        <option value="<?= $cat['category_id'] ?>"><?= htmlspecialchars($cat['category_name']) ?></option>
                     <?php endwhile; ?>
-                </select>
-            </div>
+                </tbody>
+            </table>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Image</label>
-                <input type="file" class="form-control" name="image" placeholder="e.g., .jpg">
-            </div>
 
-            <button type="submit" name="create" class="btn btn-custom w-100">Publish Article</button>
-        </form>
 
-        <table class="table mt-4">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Content</th>
-                    <th>Author</th>
-                    <th>Category</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $articles->fetch_assoc()): ?>
+
+
+
+
+
+
+
+        <!-- ARTICLE MANAGEMENT -->
+        <div class="section">
+            <h2>📰 Manage Articles</h2>
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" placeholder="Enter article title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea class="form-control" name="content" rows="5"
+                        placeholder="Write the article content here..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <input type="text" class="form-control" name="author" placeholder="e.g., John Doe" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="category_id" required>
+                        <option value="">-- Select Category --</option>
+                        <?php while ($cat = $categoryList->fetch_assoc()): ?>
+                            <option value="<?= $cat['category_id'] ?>"><?= htmlspecialchars($cat['category_name']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image</label>
+                    <input type="file" class="form-control" name="image" placeholder="e.g., .jpg">
+                </div>
+
+
+                <button type="submit" name="create" class="btn btn-custom w-100">Publish Article</button>
+            </form>
+
+            <table class="table mt-4">
+                <thead>
                     <tr>
                     <form method="POST">
                         <td><?= $row['id'] ?></td>
