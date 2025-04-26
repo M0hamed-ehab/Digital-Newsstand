@@ -8,7 +8,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $article_id = $_GET['id'];
 
     $article_query = "
-        SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name
+        SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name, a.image_path
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE a.id = ?
@@ -135,7 +135,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             align-items: center;
         }
 
-        .article-actions i{
+        .article-actions i {
             color: #6C757D;
             font-size: 1.2rem;
             cursor: pointer;
@@ -163,7 +163,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
 
         .article-actions a:hover,
-        .article-actions i:hover{
+        .article-actions i:hover {
             color: #007bff;
         }
 
@@ -172,6 +172,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             line-height: 1.8;
             color: #495057;
             margin-bottom: 2rem;
+            display: grid;
         }
 
         .share-icons {
@@ -258,6 +259,14 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             </div>
 
             <div class="article-content">
+                <?php
+                if (!empty($article['image_path'])) {
+                    echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
+                }
+                ?>
+
+
+
                 <?= nl2br(htmlspecialchars($article['content'])) ?>
             </div>
 
@@ -293,7 +302,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+                    body: `user_id=<span class="math-inline">\{userId\}&article\_id\=</span>{articleId}&action=${action}`,
                 })
                 .then(response => response.text())
                 .then(data => {
@@ -328,7 +337,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+                    body: `user_id=<span class="math-inline">\{userId\}&article\_id\=</span>{articleId}&action=${action}`,
                 })
                 .then(response => response.text())
                 .then(data => {
@@ -420,40 +429,4 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     </script>
 
     <script type="text/javascript"
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<script>
-    document.getElementById("download-icon").addEventListener("click", async function () {
-        const { jsPDF } = window.jspdf;
-        const articleElement = document.querySelector(".article-content");
-
-        if (!articleElement) {
-            console.error("Could not find the .article-content element to download.");
-            return;
-        }
-
-        try {
-            const canvas = await html2canvas(articleElement, {
-                logging: false
-            });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save('article.pdf');
-
-        } catch (error) {
-            console.error("Error during PDF generation:", error);
-            alert("An error occurred while generating the PDF.");
-        }
-    });
-</script>
-</body>
-
-</html>
+        src

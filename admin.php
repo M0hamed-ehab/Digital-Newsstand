@@ -21,8 +21,24 @@ if (isset($_POST['create'])) {
     $article->content = $_POST['content'];
     $article->author = $_POST['author'];
     $article->category_id = $_POST['category_id'];
+
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $imageName = basename($_FILES['image']['name']);
+        $targetDirectory = "images/";
+        $targetFile = $targetDirectory . $imageName;
+
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+            $article->image_path = $imageName; 
+        } else {
+            $article->image_path = null; 
+        }
+    } else {
+        $article->image_path = null;
+    }
+
     $message = $article->create() ? "Article published." : "Failed to publish article.";
 }
+
 if (isset($_POST['update'])) {
     $article->id = $_POST['id'];
     $article->title = $_POST['title'];
@@ -189,7 +205,7 @@ $categoryList = $category->readAll(); // For dropdown
     <div class="section">
         <h2>📰 Manage Articles</h2>
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label class="form-label">Title</label>
                 <input type="text" class="form-control" name="title" placeholder="Enter article title" required>
@@ -213,6 +229,11 @@ $categoryList = $category->readAll(); // For dropdown
                         <option value="<?= $cat['category_id'] ?>"><?= htmlspecialchars($cat['category_name']) ?></option>
                     <?php endwhile; ?>
                 </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Image</label>
+                <input type="file" class="form-control" name="image" placeholder="e.g., .jpg">
             </div>
 
             <button type="submit" name="create" class="btn btn-custom w-100">Publish Article</button>
