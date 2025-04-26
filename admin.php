@@ -38,7 +38,6 @@ if (isset($_POST['create'])) {
 
     $message = $article->create() ? "Article published." : "Failed to publish article.";
 }
-
 if (isset($_POST['update'])) {
     $article->id = $_POST['id'];
     $article->title = $_POST['title'];
@@ -205,7 +204,7 @@ $categoryList = $category->readAll(); // For dropdown
     <div class="section">
         <h2>📰 Manage Articles</h2>
 
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST">
             <div class="mb-3">
                 <label class="form-label">Title</label>
                 <input type="text" class="form-control" name="title" placeholder="Enter article title" required>
