@@ -281,14 +281,11 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             </div>
 
             <div class="article-content">
-                <?php
+            <?php
                 if (!empty($article['image_path'])) {
                     echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
                 }
                 ?>
-
-
-
                 <?= nl2br(htmlspecialchars($article['content'])) ?>
             </div>
 
