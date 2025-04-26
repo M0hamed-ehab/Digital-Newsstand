@@ -3,6 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
+
 -- Generation Time: Apr 26, 2025 at 01:24 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
@@ -33,20 +34,23 @@ CREATE TABLE `articles` (
   `content` text NOT NULL,
   `author` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `category_id` int(11) NOT NULL
+  `category_id` int(11) NOT NULL,
+  `image_path` mediumtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `articles`
 --
 
-INSERT INTO `articles` (`id`, `title`, `content`, `author`, `created_at`, `category_id`) VALUES
+INSERT INTO `articles` (`id`, `title`, `content`, `author`, `created_at`, `category_id`, `image_path`) VALUES
 (21, 'newsportal', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'Mai', '2025-04-23 09:55:23', 3),
 (24, 'Surveying Engineer', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odio', 'mmm', '2025-04-23 15:04:10', 1),
 (26, 'Data Specialist', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'john', '2025-04-23 20:23:36', 6),
 (27, 'Cats', 'Cats are one of the most popular and lovable pets in the world. They are small, furry animals known for their playful and curious nature. Cats have sharp claws and teeth, which they use for hunting and climbing. They are very clean animals and groom themselves by licking their fur.', 'Meow', '2025-04-25 22:58:54', 3),
 (28, 'Dogs', 'Dogs are sometimes referred to as man\'s best friend because they are kept as domestic pets and are usually loyal and like being around humans. They are also helpful in reducing stress, anxiety, and depression, loneliness, encourage exercise and playfulness and even improve your cardiovascular health.', 'Bark', '2025-04-25 23:00:35', 3);
-
+(41, 'Test ', 'Test Test Test ', 'Test ', '2025-04-26 13:46:25', 6, 'g2.jpg'),
+(42, 'img-fluid mb-3', 'img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:52:23', 6, 'g3.webp'),
+(43, 'img-fluid mb-3', 'img-fluid mb-3img-fluid mb-3img-fluid mb-3img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:54:24', 3, '');
 --
 -- Triggers `articles`
 --

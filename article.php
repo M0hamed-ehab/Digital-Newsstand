@@ -24,7 +24,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $article_id = $_GET['id'];
 
     $article_query = "
-        SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name
+        SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name, a.image_path
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE a.id = ?
@@ -189,6 +189,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             line-height: 1.8;
             color: #495057;
             margin-bottom: 2rem;
+            display: grid;
         }
 
         .share-icons {
@@ -280,6 +281,14 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             </div>
 
             <div class="article-content">
+                <?php
+                if (!empty($article['image_path'])) {
+                    echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
+                }
+                ?>
+
+
+
                 <?= nl2br(htmlspecialchars($article['content'])) ?>
             </div>
 

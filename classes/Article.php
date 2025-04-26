@@ -1,16 +1,22 @@
 <?php
 class Article {
     private $conn;
-    public $id, $title, $content, $author, $category_id;
+    public $id, $title, $content, $author, $category_id, $image_path; 
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
     public function create() {
-        $stmt = $this->conn->prepare("INSERT INTO articles (title, content, author, category_id) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("sssi", $this->title, $this->content, $this->author, $this->category_id);
-        return $stmt->execute();
+        if($this->image_path){
+            $stmt = $this->conn->prepare("INSERT INTO articles (title, content, author, category_id, image_path) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssis", $this->title, $this->content, $this->author, $this->category_id, $this->image_path);
+            return $stmt->execute();
+        } else{
+            $stmt = $this->conn->prepare("INSERT INTO articles (title, content, author, category_id) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("sssi", $this->title, $this->content, $this->author, $this->category_id);
+            return $stmt->execute();
+        }
     }
 
     public function update() {
@@ -35,3 +41,4 @@ class Article {
         return $this->conn->query("SELECT * FROM category");
     }
 }
+?>
