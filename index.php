@@ -97,7 +97,8 @@ if (isset($_SESSION['user_id'])) {
         <style>
                 body {
                         font-family: 'Open Sans', sans-serif;
-                        background-color: #f8f9fa;
+                        background-image: url('images/g5.jpg');
+                        background-size: auto;
                         color: #343a40;
                         line-height: 1.7;
                 }
@@ -538,6 +539,30 @@ if (isset($_SESSION['user_id'])) {
                 </div>
         </nav>
 
+        <?php
+        $BNQ = "
+            SELECT content FROM breaking_news
+            WHERE NOW() < DATE_ADD(creation_date, INTERVAL duration MINUTE)
+            ORDER BY creation_date DESC
+        ";
+        $BNR = $db->query($BNQ);
+        if ($BNR && $BNR->num_rows > 0):
+                ?>
+                <div class="breaking-news-strip bg-primary text-dark py-4 px-4 d-flex align-items-center justify-content-center"
+                        style="overflow:hidden; white-space: nowrap; position: sticky;  top: 0;  width: 100%; z-index: 1050; font-size: 1.5rem; font-weight: 700; height: 60px;">
+                        <div id="breakingNewsContent" style="white-space: nowrap; will-change: transform; color: #fff;">
+                                <?php
+                                echo "<strong>Breaking News:</strong> ";
+                                $breaking_contents = '';
+                                while ($row = $BNR->fetch_assoc()) {
+                                        $breaking_contents = $row['content'];
+                                }
+                                echo $breaking_contents;
+                                ?>
+                        </div>
+                </div>
+        <?php endif; ?>
+
         <div class="container mt-4">
                 <div class="row">
                         <div class="col-md-3 sidebar">
@@ -785,6 +810,13 @@ if (isset($_SESSION['user_id'])) {
                                         link.parentElement.classList.add('active');
                                 }
                         });
+
+                        // Breaking news scrolling animation
+                        const breakingNewsContent = document.getElementById('breakingNewsContent');
+                        if (breakingNewsContent) {
+                                // Disable scrolling animation to keep text centered and fully visible
+                                breakingNewsContent.style.transform = 'none';
+                        }
                 });
         </script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"

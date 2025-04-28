@@ -87,7 +87,8 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+            background-image: url('images/g5.jpg');
+            background-size: auto;
             color: #343a40;
             line-height: 1.7;
         }
@@ -281,7 +282,7 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             </div>
 
             <div class="article-content">
-            <?php
+                <?php
                 if (!empty($article['image_path'])) {
                     echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
                 }
@@ -303,8 +304,68 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             </div>
         <?php endif; ?>
 
-        <div class="back-link">
+        <div class="back-link" style="display: flex; gap: 10px; align-items: center;">
             <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Headlines</a>
+            <button id="comment-toggle-btn" class="btn btn-outline-primary" title="Toggle Comments"
+                style="display: flex; align-items: center;">
+                <i class="fas fa-comments"></i>
+            </button>
+        </div>
+
+        <div id="comment-section" style="margin-top: 20px; display: none;">
+            <h3>Comments</h3>
+            <?php
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_description'])) {
+                if (isset($_SESSION['user_id'])) {
+                    $comment_desc = trim($_POST['comment_description']);
+                    if (!empty($comment_desc)) {
+                        $insert_comment_query = "INSERT INTO comment (description, user_id, article_id) VALUES (?, ?, ?)";
+                        $stmt = $db->prepare($insert_comment_query);
+                        $stmt->bind_param("sii", $comment_desc, $_SESSION['user_id'], $article_id);
+                        $stmt->execute();
+                    }
+                } else {
+                    echo '<div class="alert alert-warning">You must be logged in to post a comment.</div>';
+                }
+            }
+
+            $comments_query = "
+                SELECT c.description, u.name
+                FROM comment c
+                JOIN users u ON c.user_id = u.user_id
+                WHERE c.article_id = ?
+                ORDER BY c.comment_id DESC
+            ";
+            $stmt = $db->prepare($comments_query);
+            $stmt->bind_param("i", $article_id);
+            $stmt->execute();
+            $comments_result = $stmt->get_result();
+
+            if ($comments_result->num_rows > 0) {
+                echo '<ul class="list-group mb-3">';
+                while ($comment = $comments_result->fetch_assoc()) {
+                    echo '<li class="list-group-item"><strong>' . htmlspecialchars($comment['name']) . ':</strong> <br>' . htmlspecialchars($comment['description']) . '</li>';
+                }
+                echo '</ul>';
+            } else {
+                echo '<p>No comments yet.</p>';
+            }
+
+            if (isset($_SESSION['user_id'])) {
+                ?>
+                <form method="POST" id="comment-form">
+                    <div class="mb-3">
+                        <label for="comment_description" class="form-label">Leave a Comment</label>
+                        <textarea class="form-control" id="comment_description" name="comment_description" rows="3"
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit Comment</button>
+                </form>
+                <?php
+            } else {
+                echo '<p>Please <a href="login.html">log in</a> to leave a comment.</p>';
+            }
+            ?>
         </div>
     </div>
 
@@ -441,6 +502,22 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
         synth.addEventListener("end", resetIcon);
         synth.addEventListener("cancel", resetIcon);
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const commentToggleBtn = document.getElementById("comment-toggle-btn");
+            if (commentToggleBtn) {
+                commentToggleBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const commentSection = document.getElementById("comment-section");
+                    if (commentSection.style.display === "none" || commentSection.style.display === "") {
+                        commentSection.style.display = "block";
+                    } else {
+                        commentSection.style.display = "none";
+                    }
+                });
+            }
+        });
     </script>
     <script type="text/javascript">
         function googleTranslateElementInit() {

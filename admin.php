@@ -51,9 +51,46 @@ if (isset($_POST['delete'])) {
     $message = $article->delete() ? "Article deleted." : "Failed to delete article.";
 }
 
+if (isset($_POST['send'])) {
+    $articleId = $_POST['id'];
+    $stmt = $db->prepare("SELECT id FROM articles WHERE id = ?");
+    $stmt->bind_param("i", $articleId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result && $result->num_rows > 0) {
+        $subscribers = $db->query("SELECT email FROM users WHERE role = 'subscriber'");
+        if ($subscribers && $subscribers->num_rows > 0) {
+            $count = $subscribers->num_rows;
+            $message = "Summary sent to $count  Premium+ subscribers.";
+        } else {
+            $message = "No subscribers found to send the summary.";
+        }
+    }
+}
+
 $categories = $category->readAll();
 $articles = $article->readAll();
 $categoryList = $category->readAll(); // For dropdown
+
+// Handle breaking news creation
+if (isset($_POST['create_breaking_news'])) {
+    $content = trim($_POST['breaking_content']);
+    $duration = intval($_POST['breaking_duration']);
+    if ($duration < 1 || $duration > 60) {
+        $message = "Duration must be between 1 and 60 minutes.";
+    } elseif (empty($content)) {
+        $message = "Content cannot be empty.";
+    } else {
+        $stmt = $db->prepare("INSERT INTO breaking_news (content, duration) VALUES (?, ?)");
+        $stmt->bind_param("si", $content, $duration);
+        if ($stmt->execute()) {
+            $message = "Breaking news created successfully.";
+        } else {
+            $message = "Failed to create breaking news.";
+        }
+        $stmt->close();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -76,7 +113,7 @@ $categoryList = $category->readAll(); // For dropdown
         }
 
         header {
-            background-color: #1e3a8a;
+            background-color: #343a40;
             padding: 20px 0;
             text-align: center;
             color: #fff;
@@ -124,19 +161,26 @@ $categoryList = $category->readAll(); // For dropdown
         }
 
         .form-control:focus {
-            border-color: #1e3a8a;
+            border-color: #343a40;
             box-shadow: 0 0 8px rgba(30, 58, 138, 0.5);
         }
 
+        .bbbtn {
+            display: flex;
+            gap: 10px;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
         .btn-custom {
-            background: #1e3a8a;
+            background: #343a40;
             color: #fff;
             border-radius: 8px;
             transition: 0.3s;
         }
 
         .btn-custom:hover {
-            background: #1e40af;
+            background: rgb(66, 74, 82);
         }
 
         .input-group-text {
@@ -161,7 +205,7 @@ $categoryList = $category->readAll(); // For dropdown
 <body>
 
     <header>
-        <h1>Admin Panel | News Website</h1>
+        <h1>Admin Panel | <a href="index.php" style="text-decoration: none; color: #fff;">News Website</a></h1>
         <p>Manage Your News Website</p>
     </header>
 
@@ -173,6 +217,13 @@ $categoryList = $category->readAll(); // For dropdown
         <!-- CATEGORY MANAGEMENT -->
         <div class="section">
             <h2>📁 Manage Categories</h2>
+        </div>
+
+
+
+        <!-- ARTICLE MANAGEMENT -->
+        <div class="section">
+            <h2>📰 Manage Articles</h2>
 
             <form method="POST">
                 <div class="mb-3">
@@ -289,19 +340,43 @@ $categoryList = $category->readAll(); // For dropdown
                                     <?php endwhile; ?>
                                 </select>
                             </td>
-                            <td>
-                                <form method="POST">
+                            <form method="POST">
+                                <td class="bbbtn">
+
                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                     <button type="submit" name="update" class="btn btn-warning">Update</button>
                                     <button type="submit" name="delete" class="btn btn-danger">Delete</button>
-                                </form>
-                            </td>
+                                    <button type="submit" name="send" class="btn btn-primary">Send</button>
+                                </td>
+
+                            </form>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
             </table>
         </div>
+        <!-- BREAKING NEWS MANAGEMENT -->
+        <div class="section">
+            <h2>🚨 Create Breaking News</h2>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="breaking_content" class="form-label">Content</label>
+                    <textarea class="form-control" id="breaking_content" name="breaking_content" rows="3"
+                        placeholder="Enter breaking news content" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="breaking_duration" class="form-label">Duration (minutes)</label>
+                    <input type="number" class="form-control" id="breaking_duration" name="breaking_duration" min="1"
+                        max="60" value="1" required>
+                    <div class="form-text">Duration must be between 1 and 60 minutes.</div>
+                </div>
+                <button type="submit" name="create_breaking_news" class="btn btn-custom w-100">Create Breaking
+                    News</button>
+            </form>
+        </div>
     </div>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

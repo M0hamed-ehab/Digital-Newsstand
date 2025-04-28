@@ -121,7 +121,8 @@ if (isset($_SESSION['user_id'])) {
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+            background-image: url('images/g5.jpg');
+            background-size: auto;
             color: #343a40;
             line-height: 1.7;
         }
@@ -569,7 +570,7 @@ if (isset($_SESSION['user_id'])) {
                         <div>
                             <a href="article.php?id=<?= $notfication['article_id'] ?>"
                                 class="btn btn-primary btn-sm me-2">Read</a>
-                            <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                            <button class="btn btn-danger btn-sm delete-btn">X</button>
                         </div>
                     </div>
                 <?php endforeach; ?>
