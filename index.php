@@ -8,19 +8,95 @@ $categories_result = $db->query($categories_query);
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
+$page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? intval($_GET['page']) : 1;
+
+$selected_category_name = '';
+if ($selected_category !== 0) {
+        $categories_result->data_seek(0);
+        while ($category = $categories_result->fetch_assoc()) {
+                if ($category['category_id'] == $selected_category) {
+                        $selected_category_name = $category['category_name'];
+                        break;
+                }
+        }
+}
 
 if ($search_term !== '') {
-        $search_term_like = '%' . $search_term . '%';
+        $heading_text = "Results for: \"" . htmlspecialchars($search_term) . "\"";
+} elseif ($selected_category !== 0 && $selected_category_name !== '') {
+        $heading_text = "Category: " . htmlspecialchars($selected_category_name);
+} else {
+        $heading_text = "Latest Headlines";
+}
+$articles_per_page = 5;
+$offset = ($page - 1) * $articles_per_page;
+
+if ($search_term !== '') {
+        $keywords = preg_split('/\s+/', $search_term, -1, PREG_SPLIT_NO_EMPTY);
+
+        $count_conditions = [];
+        $count_params = [];
+        $count_types = '';
+        foreach ($keywords as $keyword) {
+                $count_conditions[] = "(a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?)";
+                $like_keyword = '%' . $keyword . '%';
+                $count_params[] = $like_keyword;
+                $count_params[] = $like_keyword;
+                $count_params[] = $like_keyword;
+                $count_types .= 'sss';
+        }
+        $count_where = implode(' AND ', $count_conditions);
+        $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE $count_where";
+        $count_stmt = $db->prepare($count_query);
+        $count_stmt->bind_param($count_types, ...$count_params);
+        $count_stmt->execute();
+        $count_result = $count_stmt->get_result();
+        $total_articles = 0;
+        if ($count_result && $row = $count_result->fetch_assoc()) {
+                $total_articles = $row['total'];
+        }
+        $count_stmt->close();
+
+        $article_conditions = [];
+        $article_params = [];
+        $article_types = '';
+        foreach ($keywords as $keyword) {
+                $article_conditions[] = "(a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?)";
+                $like_keyword = '%' . $keyword . '%';
+                $article_params[] = $like_keyword;
+                $article_params[] = $like_keyword;
+                $article_params[] = $like_keyword;
+                $article_types .= 'sss';
+        }
+        $article_where = implode(' AND ', $article_conditions);
         $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.content LIKE '$search_term_like'
+        WHERE $article_where
         ORDER BY a.created_at DESC
+        LIMIT ? OFFSET ?
     ";
-        $articles_result = $db->query($articles_query);
+        $stmt = $db->prepare($articles_query);
+        $article_types .= 'ii';
+        $article_params[] = $articles_per_page;
+        $article_params[] = $offset;
+        $stmt->bind_param($article_types, ...$article_params);
+        $stmt->execute();
+        $articles_result = $stmt->get_result();
 } else {
+        $count_query = "SELECT COUNT(*) as total FROM articles WHERE category_id = ? OR ? = 0";
+        $count_stmt = $db->prepare($count_query);
+        $count_stmt->bind_param("ii", $selected_category, $selected_category);
+        $count_stmt->execute();
+        $count_result = $count_stmt->get_result();
+        $total_articles = 0;
+        if ($count_result && $row = $count_result->fetch_assoc()) {
+                $total_articles = $row['total'];
+        }
+        $count_stmt->close();
+
         $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
@@ -28,9 +104,10 @@ if ($search_term !== '') {
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE c.category_id = ? OR ? = 0
         ORDER BY a.created_at DESC
+        LIMIT ? OFFSET ?
     ";
         $stmt = $db->prepare($articles_query);
-        $stmt->bind_param("ii", $selected_category, $selected_category);
+        $stmt->bind_param("iiii", $selected_category, $selected_category, $articles_per_page, $offset);
         $stmt->execute();
         $articles_result = $stmt->get_result();
 }
@@ -43,6 +120,21 @@ $popular_articles_result = $db->query($popular_articles_query);
 
 if (session_status() === PHP_SESSION_NONE) {
         session_start();
+}
+
+$show_ads = true;
+if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+        $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
+        $sub_stmt->bind_param("i", $user_id);
+        $sub_stmt->execute();
+        $sub_result = $sub_stmt->get_result();
+        if ($sub_result && $row = $sub_result->fetch_assoc()) {
+                if ($row['subscription_name'] === 'full') {
+                        $show_ads = false;
+                }
+        }
+        $sub_stmt->close();
 }
 
 function isUserLoggedIn()
@@ -94,10 +186,13 @@ if (isset($_SESSION['user_id'])) {
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="icon" type="image/png" href="/images/home.png">
+
         <style>
                 body {
                         font-family: 'Open Sans', sans-serif;
-                        background-color: #f8f9fa;
+                        background-image: url('images/g5.jpg');
+                        background-size: auto;
                         color: #343a40;
                         line-height: 1.7;
                 }
@@ -462,7 +557,7 @@ if (isset($_SESSION['user_id'])) {
                                         while ($category = $categories_result->fetch_assoc()): ?>
                                                 <li class="nav-item">
                                                         <a class="nav-link <?= $selected_category == $category['category_id'] ? 'active' : '' ?>"
-                                                                href="?category_id=<?= $category['category_id'] ?>">
+                                                                href="index.php?category_id=<?= $category['category_id'] ?>">
                                                                 <?= htmlspecialchars($category['category_name']) ?>
                                                         </a>
                                                 </li>
@@ -470,6 +565,7 @@ if (isset($_SESSION['user_id'])) {
                                         <li>
                                                 <a class="nav-link" href="index.php#games">Games</a>
                                         </li>
+
                                 </ul>
                                 <form class="d-flex" method="GET" action="index.php">
                                         <input class="form-control me-2" type="search" name="search"
@@ -478,65 +574,99 @@ if (isset($_SESSION['user_id'])) {
                                         <button class="btn btn-outline-light" type="submit">Search</button>
                                 </form>
                                 <ul class="navbar-nav ms-auto">
+                                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                                                <li>
+                                                        <a class="nav-link"
+                                                                href="random_article.php" ">Discover</a>
+</li>
+</ul>
                                         <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                <li class="nav-item">
-                                                        <a class="nav-link position-relative" href="noti.php"
-                                                                title="Notifications">
-                                                                <i class="fas fa-bell fa-lg"></i>
-                                                                <?php if ($notfications_count > 0): ?>
-                                                                        <span
-                                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                                                <?= $notfications_count ?>
-                                                                                <span class="visually-hidden">unread
-                                                                                        notifications</span>
-                                                                        </span>
-                                                                <?php endif; ?>
-                                                        </a>
-                                                </li>
-                                                <li class="nav-item user-dropdown">
-                                                        <a class="nav-link" href="#" id="userDropdown" role="button"
-                                                                data-bs-toggle="dropdown" aria-expanded="false"
-                                                                title="User Menu">
-                                                                <i class="fas fa-user-circle fa-lg"></i>
-                                                        </a>
-                                                        <ul class="dropdown-menu user-dropdown-menu"
-                                                                aria-labelledby="userDropdown">
-                                                                <li><a class="dropdown-item" href="profile.php"><i
-                                                                                        class="fas fa-user me-2"></i>
-                                                                                Profile</a></li>
-                                                                <li><a class="dropdown-item" href="favorites.php"><i
-                                                                                        class="fas fa-heart me-2"></i>
-                                                                                Favorites</a></li>
-                                                                <li><a class="dropdown-item" href="bookmarks.php"><i
-                                                                                        class="fas fa-bookmark me-2"></i>
-                                                                                Bookmarks</a></li>
-                                                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                                                                        <li><a class="dropdown-item" href="admin.php"><i
-                                                                                                class="fas fa-user-shield me-2"></i>
-                                                                                        Admin Dashboard</a></li>
-                                                                <?php endif; ?>
-                                                                <li>
-                                                                        <hr class="dropdown-divider">
-                                                                </li>
-                                                                <li><a class="dropdown-item" href="logout.php"><i
-                                                                                        class="fas fa-sign-out-alt me-2"></i>
-                                                                                Logout</a></li>
-                                                        </ul>
-                                                </li>
-                                        <?php else: ?>
-                                                <li class="nav-item">
-                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
-                                                                Login</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
-                                                                Register</a>
-                                                </li>
-                                        <?php endif; ?>
-                                </ul>
+                                                                                                                                                        <li class="
+                                                                nav-item">
+                                                                        <a class="nav-link position-relative" href="noti.php"
+                                                                                title="Notifications">
+                                                                                <i class="fas fa-bell fa-lg"></i>
+                                                                                <?php if ($notfications_count > 0): ?>
+                                                                                        <span
+                                                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                                                                <?= $notfications_count ?>
+                                                                                                <span class="visually-hidden">unread
+                                                                                                        notifications</span>
+                                                                                        </span>
+                                                                                <?php endif; ?>
+                                                                        </a>
+                                                        </li>
+                                                        <li class="nav-item user-dropdown">
+                                                                <a class="nav-link" href="#" id="userDropdown" role="button"
+                                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                                        title="User Menu">
+                                                                        <i class="fas fa-user-circle fa-lg"></i>
+                                                                </a>
+                                                                <ul class="dropdown-menu user-dropdown-menu"
+                                                                        aria-labelledby="userDropdown">
+                                                                        <li><a class="dropdown-item" href="profile.php"><i
+                                                                                                class="fas fa-user me-2"></i>
+                                                                                        Profile</a></li>
+                                                                        <li><a class="dropdown-item" href="favorites.php"><i
+                                                                                                class="fas fa-heart me-2"></i>
+                                                                                        Favorites</a></li>
+                                                                        <li><a class="dropdown-item" href="bookmarks.php"><i
+                                                                                                class="fas fa-bookmark me-2"></i>
+                                                                                        Bookmarks</a></li>
+                                                                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                                                                <li><a class="dropdown-item" href="admin.php"><i
+                                                                                                        class="fas fa-user-shield me-2"></i>
+                                                                                                Admin Panel</a></li>
+                                                                        <?php endif; ?>
+                                                                        <li>
+                                                                                <hr class="dropdown-divider">
+                                                                        </li>
+                                                                        <li><a class="dropdown-item" href="logout.php"><i
+                                                                                                class="fas fa-sign-out-alt me-2"></i>
+                                                                                        Logout</a></li>
+                                                                </ul>
+                                                        </li>
+                                                <?php else: ?>
+                                                        <li class="nav-item">
+                                                                <a class="nav-link" href="login.html"><i
+                                                                                class="fas fa-sign-in-alt"></i>
+                                                                        Login</a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                                <a class="nav-link" href="signup.html"><i
+                                                                                class="fas fa-user-plus"></i>
+                                                                        Signup</a>
+                                                        </li>
+                                                <?php endif; ?>
+                                        </ul>
                         </div>
                 </div>
         </nav>
+
+        <?php
+        $BNQ = "
+            SELECT content FROM breaking_news
+            WHERE NOW() < DATE_ADD(creation_date, INTERVAL duration MINUTE)
+            ORDER BY creation_date DESC
+        ";
+        $BNR = $db->query($BNQ);
+        if ($BNR && $BNR->num_rows > 0):
+                ?>
+                <div class="breaking-news-strip bg-primary text-dark py-4 px-4 d-flex align-items-center justify-content-center"
+                        style="overflow:hidden; white-space: nowrap; position: sticky;  top: 0;  width: 100%; z-index: 1050; font-size: 1.5rem; font-weight: 700; height: 60px;">
+                        <div id="breakingNewsContent" style="white-space: nowrap; will-change: transform; color: #fff;">
+                                <?php
+                                echo "<strong>Breaking News:</strong> ";
+                                $breaking_contents = '';
+                                while ($row = $BNR->fetch_assoc()) {
+                                        $breaking_contents = $row['content'];
+                                }
+                                echo $breaking_contents;
+                                ?>
+                        </div>
+                </div>
+        <?php endif; ?>
 
         <div class="container mt-4">
                 <div class="row">
@@ -563,7 +693,7 @@ if (isset($_SESSION['user_id'])) {
                                         <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                                         <ul>
                                                 <?php
-                                                $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                                                $popular_articles_query = "SELECT id, title FROM articles ORDER BY views DESC LIMIT 3";
                                                 $popular_articles_result = $db->query($popular_articles_query);
 
                                                 if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
@@ -588,7 +718,7 @@ if (isset($_SESSION['user_id'])) {
                                                 while ($category = $categories_result->fetch_assoc()): ?>
                                                         <li
                                                                 class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
-                                                                <a href="?category_id=<?= $category['category_id'] ?>">
+                                                                <a href="index.php?category_id=<?= $category['category_id'] ?>">
                                                                         <?= htmlspecialchars($category['category_name']) ?>
                                                                 </a>
                                                         </li>
@@ -598,7 +728,7 @@ if (isset($_SESSION['user_id'])) {
                         </div>
 
                         <div class="col-md-9 main-content">
-                                <h2>Latest Headlines</h2>
+                                <h2><?= $heading_text ?></h2>
                                 <?php if ($articles_result->num_rows > 0): ?>
                                         <?php while ($article = $articles_result->fetch_assoc()): ?>
                                                 <div class="article-card">
@@ -620,6 +750,44 @@ if (isset($_SESSION['user_id'])) {
                                                         </div>
                                                 </div>
                                         <?php endwhile; ?>
+
+                                        <!-- Pagination Controls -->
+                                        <?php
+                                        $total_pages = ceil($total_articles / $articles_per_page);
+                                        if ($total_pages > 1):
+                                                ?>
+                                                <nav aria-label="Page navigation">
+                                                        <ul class="pagination justify-content-center">
+                                                                <?php if ($page > 1): ?>
+                                                                        <li class="page-item">
+                                                                                <a class="page-link"
+                                                                                        href="?category_id=<?= $selected_category ?>&search=<?= urlencode($search_term) ?>&page=<?= $page - 1 ?>"
+                                                                                        aria-label="Previous">
+                                                                                        <span aria-hidden="true">&laquo;</span>
+                                                                                </a>
+                                                                        </li>
+                                                                <?php endif; ?>
+
+                                                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                                                        <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                                                                <a class="page-link"
+                                                                                        href="?category_id=<?= $selected_category ?>&search=<?= urlencode($search_term) ?>&page=<?= $i ?>"><?= $i ?></a>
+                                                                        </li>
+                                                                <?php endfor; ?>
+
+                                                                <?php if ($page < $total_pages): ?>
+                                                                        <li class="page-item">
+                                                                                <a class="page-link"
+                                                                                        href="?category_id=<?= $selected_category ?>&search=<?= urlencode($search_term) ?>&page=<?= $page + 1 ?>"
+                                                                                        aria-label="Next">
+                                                                                        <span aria-hidden="true">&raquo;</span>
+                                                                                </a>
+                                                                        </li>
+                                                                <?php endif; ?>
+                                                        </ul>
+                                                </nav>
+                                        <?php endif; ?>
+
                                 <?php else: ?>
                                         <p class="lead">No articles available in this category.</p>
                                 <?php endif; ?>
@@ -628,6 +796,26 @@ if (isset($_SESSION['user_id'])) {
         </div>
 
         <!-- Latest -->
+        <?php if ($show_ads): ?>
+                <section class="ads-section"
+                        style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                        <div class="container">
+                                <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
+                                <div style="display: flex; justify-content: center; gap: 1rem;">
+                                        <a href="subscription.php" target="_blank">
+
+                                                <div
+                                                        style="width: 100%; height: 20rem;  border-radius: 0.25rem; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                                        <img src="images/g6.png" alt="Ad1"
+                                                                style="width: 100%; height: 100%; object-fit: contain;">
+                                                </div>
+                                        </a>
+
+                                </div>
+                        </div>
+                </section>
+        <?php endif; ?>
+
         <section class="container-games" id="games">
                 <div class="container">
                         <div class="row ify-content-center">
@@ -785,7 +973,9 @@ if (isset($_SESSION['user_id'])) {
                                         link.parentElement.classList.add('active');
                                 }
                         });
-                });
+
+                }
+                );
         </script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="

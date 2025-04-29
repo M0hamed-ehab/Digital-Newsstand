@@ -19,15 +19,31 @@ $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 if ($search_term !== '') {
     $search_term_like = '%' . $search_term . '%';
+
+    $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?";
+    $count_stmt = $db->prepare($count_query);
+    $count_stmt->bind_param("sss", $search_term_like, $search_term_like, $search_term_like);
+    $count_stmt->execute();
+    $count_result = $count_stmt->get_result();
+    $total_articles = 0;
+    if ($count_result && $row = $count_result->fetch_assoc()) {
+        $total_articles = $row['total'];
+    }
+    $count_stmt->close();
+
     $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.content LIKE '$search_term_like'
-        ORDER BY a.created_at DESC
-    ";
-    $articles_result = $db->query($articles_query);
+    SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
+    c.category_name
+    FROM articles a
+    LEFT JOIN category c ON a.category_id = c.category_id
+    WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?
+    ORDER BY a.created_at DESC
+    LIMIT ? OFFSET ?
+";
+    $stmt = $db->prepare($articles_query);
+    $stmt->bind_param("sssii", $search_term_like, $search_term_like, $search_term_like, $articles_per_page, $offset);
+    $stmt->execute();
+    $articles_result = $stmt->get_result();
 } else {
     $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
@@ -163,9 +179,7 @@ $highlight_plan = 'free';
 
 if ($role === 'member') {
     $highlight_plan = 'free';
-} elseif ($role === 'admin') {
-    $highlight_plan = 'premium_plus';
-} elseif ($role === 'subscriber') {
+} elseif ($role === 'subscriber' || $role === 'admin') {
     $stmt_sub = $conn->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
     $stmt_sub->bind_param("i", $user_id);
     $stmt_sub->execute();
@@ -234,14 +248,17 @@ if (isset($_SESSION['user_id'])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Subscription Plans</title>
+    <title>Subscription Plans - The Global Herald</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="/images/subs.png">
+
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+            background-image: url('images/g5.jpg');
+            background-size: auto;
             color: #343a40;
             line-height: 1.7;
         }
@@ -848,7 +865,7 @@ if (isset($_SESSION['user_id'])) {
                     while ($category = $categories_result->fetch_assoc()): ?>
                         <li class="nav-item">
                             <a class="nav-link <?= $selected_category == $category['category_id'] ? 'active' : '' ?>"
-                                href="?category_id=<?= $category['category_id'] ?>">
+                                href="index.php?category_id=<?= $category['category_id'] ?>">
                                 <?= htmlspecialchars($category['category_name']) ?>
                             </a>
                         </li>
@@ -856,6 +873,7 @@ if (isset($_SESSION['user_id'])) {
                     <li>
                         <a class="nav-link" href="index.php#games">Games</a>
                     </li>
+
                 </ul>
                 <form class="d-flex" method="GET" action="index.php">
                     <input class="form-control me-2" type="search" name="search" placeholder="Search"
@@ -864,58 +882,65 @@ if (isset($_SESSION['user_id'])) {
                     <button class="btn btn-outline-light" type="submit">Search</button>
                 </form>
                 <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <li>
+                            <a class="nav-link" href="random_article.php" ">Discover</a>
+</li>
+</ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="noti.php" title="Notifications">
-                                <i class="fas fa-bell fa-lg"></i>
-                                <?php if ($notfications_count > 0): ?>
-                                    <span
-                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        <?= $notfications_count ?>
-                                        <span class="visually-hidden">unread
-                                            notifications</span>
-                                    </span>
-                                <?php endif; ?>
-                            </a>
-                        </li>
-                        <li class="nav-item user-dropdown">
-                            <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false" title="User Menu">
-                                <i class="fas fa-user-circle fa-lg"></i>
-                            </a>
-                            <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>
-                                        Profile</a></li>
-                                <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i>
-                                        Favorites</a></li>
-                                <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i>
-                                        Bookmarks</a></li>
-                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                                    <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
-                                            Admin Dashboard</a></li>
-                                <?php endif; ?>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>
-                                        Logout</a></li>
-                            </ul>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
-                                Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
-                                Register</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
+                            <li class=" nav-item">
+                                    <a class="nav-link position-relative" href="noti.php" title="Notifications">
+                                        <i class="fas fa-bell fa-lg"></i>
+                                        <?php if ($notfications_count > 0): ?>
+                                            <span
+                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                <?= $notfications_count ?>
+                                                <span class="visually-hidden">unread
+                                                    notifications</span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </a>
+                            </li>
+                            <li class="nav-item user-dropdown">
+                                <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false" title="User Menu">
+                                    <i class="fas fa-user-circle fa-lg"></i>
+                                </a>
+                                <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>
+                                            Profile</a></li>
+                                    <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i>
+                                            Favorites</a></li>
+                                    <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i>
+                                            Bookmarks</a></li>
+                                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                        <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
+                                                Admin Panel</a></li>
+                                    <?php endif; ?>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>
+                                            Logout</a></li>
+                                </ul>
+                            </li>
+                        <?php else: ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                    Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
+                                    Signup</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
             </div>
         </div>
     </nav>
-    <h1>Subscription Plans</h1>
+    <div class="container mt-4">
+        <h1>Subscription Plans</h1>
 
 
 
@@ -926,90 +951,91 @@ if (isset($_SESSION['user_id'])) {
 
 
 
-    <form id="subscriptionForm" method="POST" action="subscription.php">
-        <input type="hidden" name="plan" id="planInput" value="">
-        <section class="plans">
-            <div class="<?php echo planClass('free', $highlight_plan); ?> plan-card" id="free">
-                <h2>Free</h2>
-                <p class="price">0 EGP</p>
-                <p>Free!</p>
+        <form id="subscriptionForm" method="POST" action="subscription.php">
+            <input type="hidden" name="plan" id="planInput" value="">
+            <section class="plans">
+                <div class="<?php echo planClass('free', $highlight_plan); ?> plan-card" id="free">
+                    <h2>Free</h2>
+                    <p class="price">0 EGP</p>
+                    <p>Free!</p>
 
-                <ul class="features">
-                    <li>Access Articles</li>
-                    <li>Translation</li>
-                    <li>Games</li>
-                    <li>Ads</li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'free' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('free')" class="select-btn">
-                    <?php echo buttonLabel('free', $highlight_plan); ?>
-                </button>
+                    <ul class="features">
+                        <li>Access Articles</li>
+                        <li>Translation</li>
+                        <li>Games</li>
+                        <li>Ads</li>
+                    </ul>
+                    <button type="button" <?php echo $highlight_plan === 'free' ? 'disabled' : ''; ?>
+                        onclick="confirmChange('free')" class="select-btn">
+                        <?php echo buttonLabel('free', $highlight_plan); ?>
+                    </button>
+                </div>
+                <div class="<?php echo planClass('premium', $highlight_plan); ?> plan-card" id="premium">
+                    <h2>Premium</h2>
+                    <label style="font-size: small; color: gray;">Popular</label>
+                    <p class="price">10 EGP</p>
+                    <p>Billed monthly. Ideal for light readers.</p>
+                    <ul class="features">
+                        <li>Recieve Email Updates</li>
+                        <li>Download Articles</li>
+                        <li>Ads</li>
+                    </ul>
+                    <button type="button" <?php echo $highlight_plan === 'premium' ? 'disabled' : ''; ?>
+                        onclick="confirmChange('premium')" class="select-btn">
+                        <?php echo buttonLabel('premium', $highlight_plan); ?>
+                    </button>
+                </div>
+                <div class="<?php echo planClass('premium_plus', $highlight_plan); ?> plan-card" id="premium_plus">
+                    <h2>Premium+</h2>
+                    <p class="price">50 EGP</p>
+                    <p>Billed monthly. Perfect for avid readers and families.</p>
+                    <ul class="features">
+                        <li>Daily Briefing</li>
+                        <li>Priority customer support</li>
+                        <li>No Ads</li>
+
+                        <li></li>
+                    </ul>
+                    <button type="button" <?php echo $highlight_plan === 'premium_plus' ? 'disabled' : ''; ?>
+                        onclick="confirmChange('premium_plus')" class="select-btn">
+                        <?php echo buttonLabel('premium_plus', $highlight_plan); ?>
+                    </button>
+                </div>
+            </section>
+        </form>
+
+        <?php if ($highlight_plan === 'premium_plus' || $highlight_plan === 'premium'): ?>
+            <div class="auto-renew-container">
+                <h2>Auto-Renewal</h2>
+                <form id="autoRenewForm" method="POST" action="subscription.php">
+                    <input type="hidden" name="auto_renew" id="autoRenewInput"
+                        value="<?php echo $auto_renew ? '1' : '0'; ?>">
+                    <label class="auto-renew-label" for="autoRenewToggle">Enable Auto-Renewal:</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoRenewToggle" <?php echo $auto_renew ? 'checked' : ''; ?>
+                            onchange="toggleAutoRenew(this)">
+                        <span class="slider"></span>
+                    </label>
+                </form>
             </div>
-            <div class="<?php echo planClass('premium', $highlight_plan); ?> plan-card" id="premium">
-                <h2>Premium</h2>
-                <label style="font-size: small; color: gray;">Popular</label>
-                <p class="price">10 EGP</p>
-                <p>Billed monthly. Ideal for light readers.</p>
-                <ul class="features">
-                    <li>Recieve Email Updates</li>
-                    <li>Download Articles</li>
-                    <li>Ads</li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'premium' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('premium')" class="select-btn">
-                    <?php echo buttonLabel('premium', $highlight_plan); ?>
-                </button>
-            </div>
-            <div class="<?php echo planClass('premium_plus', $highlight_plan); ?> plan-card" id="premium_plus">
-                <h2>Premium+</h2>
-                <p class="price">50 EGP</p>
-                <p>Billed monthly. Perfect for avid readers and families.</p>
-                <ul class="features">
-                    <li>Daily Briefing</li>
-                    <li>Priority customer support</li>
-                    <li>No Ads</li>
+            <?php if ($highlight_plan === 'premium_plus'): ?>
 
-                    <li></li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'premium_plus' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('premium_plus')" class="select-btn">
-                    <?php echo buttonLabel('premium_plus', $highlight_plan); ?>
-                </button>
-            </div>
-        </section>
-    </form>
-
-    <?php if ($role === 'subscriber'): ?>
-        <div class="auto-renew-container">
-            <h2>Auto-Renewal</h2>
-            <form id="autoRenewForm" method="POST" action="subscription.php">
-                <input type="hidden" name="auto_renew" id="autoRenewInput" value="<?php echo $auto_renew ? '1' : '0'; ?>">
-                <label class="auto-renew-label" for="autoRenewToggle">Enable Auto-Renewal:</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoRenewToggle" <?php echo $auto_renew ? 'checked' : ''; ?>
-                        onchange="toggleAutoRenew(this)">
-                    <span class="slider"></span>
-                </label>
-            </form>
-        </div>
-        <?php if ($highlight_plan === 'premium_plus'): ?>
-
-            <div id="Daily">
-                <h2>Daily</h2>
-                <?php if (count($articles) > 0): ?>
-                    <?php foreach ($articles as $article): ?>
-                        <article>
-                            <h3><?php echo htmlspecialchars($article['title']); ?></h3>
-                            <p><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No news articles for today.</p>
-                <?php endif; ?>
-            </div>
+                <div id="Daily">
+                    <h2>Daily</h2>
+                    <?php if (count($articles) > 0): ?>
+                        <?php foreach ($articles as $article): ?>
+                            <article>
+                                <h3><?php echo htmlspecialchars($article['title']); ?></h3>
+                                <p><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No news articles for today.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
-    <?php endif; ?>
-
+    </div>
     <div id="messageBox"></div>
 
     <footer>
