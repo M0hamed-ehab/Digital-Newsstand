@@ -9,15 +9,46 @@ $categories_result = $db->query($categories_query);
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? intval($_GET['page']) : 1;
+
+$selected_category_name = '';
+if ($selected_category !== 0) {
+        $categories_result->data_seek(0);
+        while ($category = $categories_result->fetch_assoc()) {
+                if ($category['category_id'] == $selected_category) {
+                        $selected_category_name = $category['category_name'];
+                        break;
+                }
+        }
+}
+
+if ($search_term !== '') {
+        $heading_text = "Results for: \"" . htmlspecialchars($search_term) . "\"";
+} elseif ($selected_category !== 0 && $selected_category_name !== '') {
+        $heading_text = "Category: " . htmlspecialchars($selected_category_name);
+} else {
+        $heading_text = "Latest Headlines";
+}
 $articles_per_page = 5;
 $offset = ($page - 1) * $articles_per_page;
 
 if ($search_term !== '') {
-        $search_term_like = '%' . $search_term . '%';
+        $keywords = preg_split('/\s+/', $search_term, -1, PREG_SPLIT_NO_EMPTY);
 
-        $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?";
+        $count_conditions = [];
+        $count_params = [];
+        $count_types = '';
+        foreach ($keywords as $keyword) {
+                $count_conditions[] = "(a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?)";
+                $like_keyword = '%' . $keyword . '%';
+                $count_params[] = $like_keyword;
+                $count_params[] = $like_keyword;
+                $count_params[] = $like_keyword;
+                $count_types .= 'sss';
+        }
+        $count_where = implode(' AND ', $count_conditions);
+        $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE $count_where";
         $count_stmt = $db->prepare($count_query);
-        $count_stmt->bind_param("sss", $search_term_like, $search_term_like, $search_term_like);
+        $count_stmt->bind_param($count_types, ...$count_params);
         $count_stmt->execute();
         $count_result = $count_stmt->get_result();
         $total_articles = 0;
@@ -26,21 +57,35 @@ if ($search_term !== '') {
         }
         $count_stmt->close();
 
+        $article_conditions = [];
+        $article_params = [];
+        $article_types = '';
+        foreach ($keywords as $keyword) {
+                $article_conditions[] = "(a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?)";
+                $like_keyword = '%' . $keyword . '%';
+                $article_params[] = $like_keyword;
+                $article_params[] = $like_keyword;
+                $article_params[] = $like_keyword;
+                $article_types .= 'sss';
+        }
+        $article_where = implode(' AND ', $article_conditions);
         $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?
+        WHERE $article_where
         ORDER BY a.created_at DESC
         LIMIT ? OFFSET ?
     ";
         $stmt = $db->prepare($articles_query);
-        $stmt->bind_param("sssii", $search_term_like, $search_term_like, $search_term_like, $articles_per_page, $offset);
+        $article_types .= 'ii';
+        $article_params[] = $articles_per_page;
+        $article_params[] = $offset;
+        $stmt->bind_param($article_types, ...$article_params);
         $stmt->execute();
         $articles_result = $stmt->get_result();
 } else {
-        // Get total count for pagination
         $count_query = "SELECT COUNT(*) as total FROM articles WHERE category_id = ? OR ? = 0";
         $count_stmt = $db->prepare($count_query);
         $count_stmt->bind_param("ii", $selected_category, $selected_category);
@@ -532,11 +577,13 @@ if (isset($_SESSION['user_id'])) {
                                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                                                 <li>
-                                                        <a class="nav-link" href="random_article.php" ">Discover</a>
+                                                        <a class="nav-link"
+                                                                href="random_article.php" ">Discover</a>
 </li>
 </ul>
                                         <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                        <li class=" nav-item">
+                                                                                                                                                        <li class="
+                                                                nav-item">
                                                                         <a class="nav-link position-relative" href="noti.php"
                                                                                 title="Notifications">
                                                                                 <i class="fas fa-bell fa-lg"></i>
@@ -646,7 +693,7 @@ if (isset($_SESSION['user_id'])) {
                                         <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                                         <ul>
                                                 <?php
-                                                $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                                                $popular_articles_query = "SELECT id, title FROM articles ORDER BY views DESC LIMIT 3";
                                                 $popular_articles_result = $db->query($popular_articles_query);
 
                                                 if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
@@ -681,7 +728,7 @@ if (isset($_SESSION['user_id'])) {
                         </div>
 
                         <div class="col-md-9 main-content">
-                                <h2>Latest Headlines</h2>
+                                <h2><?= $heading_text ?></h2>
                                 <?php if ($articles_result->num_rows > 0): ?>
                                         <?php while ($article = $articles_result->fetch_assoc()): ?>
                                                 <div class="article-card">
@@ -927,13 +974,8 @@ if (isset($_SESSION['user_id'])) {
                                 }
                         });
 
-                        // Breaking news scrolling animation
-                        const breakingNewsContent = document.getElementById('breakingNewsContent');
-                        if (breakingNewsContent) {
-                                // Disable scrolling animation to keep text centered and fully visible
-                                breakingNewsContent.style.transform = 'none';
-                        }
-                });
+                }
+                );
         </script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
                 integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="

@@ -23,6 +23,12 @@ if (isset($_SESSION['user_id'])) {
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $article_id = $_GET['id'];
 
+    $update_views_query = "UPDATE articles SET views = views + 1 WHERE id = ?";
+    $update_stmt = $db->prepare($update_views_query);
+    $update_stmt->bind_param("i", $article_id);
+    $update_stmt->execute();
+    $update_stmt->close();
+
     $article_query = "
         SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name, a.image_path
         FROM articles a
@@ -285,7 +291,6 @@ if (isset($_SESSION['user_id'])) {
             </div>
         <?php else: ?>
             <?php
-            // Determine view mode: 'web' (default) or 'print'
             $view_mode = 'web';
             if (isset($_GET['view']) && in_array($_GET['view'], ['web', 'print'])) {
                 $view_mode = $_GET['view'];
