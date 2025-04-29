@@ -108,6 +108,8 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="/images/article.png">
+
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
@@ -282,11 +284,21 @@ if (isset($_SESSION['user_id'])) {
                 <?= htmlspecialchars($error_message) ?>
             </div>
         <?php else: ?>
+            <?php
+            // Determine view mode: 'web' (default) or 'print'
+            $view_mode = 'web';
+            if (isset($_GET['view']) && in_array($_GET['view'], ['web', 'print'])) {
+                $view_mode = $_GET['view'];
+            }
+            ?>
+
             <div class="article-header">
                 <div class="article-header-left">
                     <h1><?= htmlspecialchars($article['title']) ?></h1>
                     <p class="article-meta">
-                        By <a href="#"><?= htmlspecialchars($article['author']) ?></a> |
+                        By <a
+                            href="index.php?search=<?= urlencode($article['author']) ?>"><?= htmlspecialchars($article['author']) ?></a>
+                        |
                         Category: <?= htmlspecialchars($article['category_name']) ?> |
                         <i class="far fa-clock"></i> <?= date("F j, Y", strtotime($article['created_at'])) ?>
                     </p>
@@ -303,16 +315,88 @@ if (isset($_SESSION['user_id'])) {
                     <a href="#" title="Add to Bookmark" class="<?= $is_booked ? 'fas' : 'far' ?> fa-bookmark"
                         onclick="toggleBookmark(<?= $article['id'] ?>, this); return false;"></a>
                 </div>
+                <div class="view-toggle" style="margin-left: 1rem;">
+                    <?php if ($view_mode === 'web'): ?>
+                        <a href="?id=<?= $article['id'] ?>&view=print" class="btn btn-outline-secondary btn-sm"
+                            title="Switch to Print View">Print View</a>
+                    <?php else: ?>
+                        <a href="?id=<?= $article['id'] ?>&view=web" class="btn btn-outline-secondary btn-sm"
+                            title="Switch to Web View">Web View</a>
+                    <?php endif; ?>
+                </div>
             </div>
 
-            <div class="article-content">
-                <?php
-                if (!empty($article['image_path'])) {
-                    echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
-                }
-                ?>
-                <?= nl2br(htmlspecialchars($article['content'])) ?>
-            </div>
+            <?php if ($view_mode === 'print'): ?>
+                <style>
+                    body {
+                        font-family: 'Times New Roman', Times, serif;
+                        background: #fff !important;
+                        color: #000 !important;
+                        margin: 2rem;
+                    }
+
+                    .container {
+                        max-width: 100% !important;
+                        box-shadow: none !important;
+                        background: #fff !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+
+                    .article-header,
+                    .article-actions,
+                    .share-icons,
+                    .back-link,
+                    #comment-section,
+                    .ads-section {
+                        display: none !important;
+                    }
+
+                    .article-content img {
+                        max-width: 100% !important;
+                        height: auto !important;
+                        margin-bottom: 1rem;
+                    }
+
+                    .article-content {
+                        font-size: 14pt !important;
+                        line-height: 1.6 !important;
+                        color: #000 !important;
+                    }
+
+
+                    .view-toggle {
+                        margin-bottom: 1rem;
+                    }
+                </style>
+                <div class="container">
+                    <div class="view-toggle">
+                        <a href="?id=<?= $article['id'] ?>&view=web" class="btn btn-outline-secondary btn-sm"
+                            title="Return to Web View">Return to Web View</a>
+                    </div>
+                    <h1><?= htmlspecialchars($article['title']) ?></h1>
+                    <p><strong>By:</strong> <?= htmlspecialchars($article['author']) ?></p>
+                    <p><strong>Category:</strong> <?= htmlspecialchars($article['category_name']) ?></p>
+                    <p><strong>Date:</strong> <?= date("F j, Y", strtotime($article['created_at'])) ?></p>
+                    <div class="article-content">
+                        <?php
+                        if (!empty($article['image_path'])) {
+                            echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
+                        }
+                        ?>
+                        <?= nl2br(htmlspecialchars($article['content'])) ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="article-content">
+                    <?php
+                    if (!empty($article['image_path'])) {
+                        echo '<img src="../images/' . htmlspecialchars($article['image_path']) . '" class="img-fluid mb-3">';
+                    }
+                    ?>
+                    <?= nl2br(htmlspecialchars($article['content'])) ?>
+                </div>
+            <?php endif; ?>
             <?php if ($show_ads): ?>
                 <section class="ads-section"
                     style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
