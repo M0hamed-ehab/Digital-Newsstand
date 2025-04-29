@@ -217,14 +217,6 @@ if (isset($_POST['create_breaking_news'])) {
         <!-- CATEGORY MANAGEMENT -->
         <div class="section">
             <h2>📁 Manage Categories</h2>
-        </div>
-
-
-
-        <!-- ARTICLE MANAGEMENT -->
-        <div class="section">
-            <h2>📰 Manage Articles</h2>
-
             <form method="POST">
                 <div class="mb-3">
                     <label for="category_name" class="form-label">New Category</label>

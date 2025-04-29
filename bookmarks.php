@@ -526,7 +526,7 @@ if (isset($_SESSION['user_id'])) {
                                         Bookmarks</a></li>
                                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                     <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
-                                            Admin Dashboard</a></li>
+                                            Admin Panel</a></li>
                                 <?php endif; ?>
                                 <li>
                                     <hr class="dropdown-divider">

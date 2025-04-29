@@ -71,6 +71,30 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 }
 
 $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+
+
+
+
+
+$show_ads = true;
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
+    $sub_stmt->bind_param("i", $user_id);
+    $sub_stmt->execute();
+    $sub_result = $sub_stmt->get_result();
+    if ($sub_result && $row = $sub_result->fetch_assoc()) {
+        if ($row['subscription_name'] === 'full') {
+            $show_ads = false;
+        }
+    }
+    $sub_stmt->close();
+}
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -289,6 +313,24 @@ $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                 ?>
                 <?= nl2br(htmlspecialchars($article['content'])) ?>
             </div>
+            <?php if ($show_ads): ?>
+                <section class="ads-section"
+                    style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                    <div class="container">
+                        <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
+                        <div style="display: flex; justify-content: center; gap: 1rem;">
+                            <a href="subscription.php" target="_blank">
+
+                                <div
+                                    style="width: 100%; height: 20rem;  border-radius: 0.25rem; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                    <img src="images/g6.png" alt="Ad1" style="width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </section>
+            <?php endif; ?>
 
             <div class="share-icons">
                 <h5>Share this article:</h5>

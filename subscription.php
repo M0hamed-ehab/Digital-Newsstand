@@ -163,9 +163,7 @@ $highlight_plan = 'free';
 
 if ($role === 'member') {
     $highlight_plan = 'free';
-} elseif ($role === 'admin') {
-    $highlight_plan = 'premium_plus';
-} elseif ($role === 'subscriber') {
+} elseif ($role === 'subscriber' || $role === 'admin') {
     $stmt_sub = $conn->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
     $stmt_sub->bind_param("i", $user_id);
     $stmt_sub->execute();
@@ -241,7 +239,8 @@ if (isset($_SESSION['user_id'])) {
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+            background-image: url('images/g5.jpg');
+            background-size: auto;
             color: #343a40;
             line-height: 1.7;
         }
@@ -892,7 +891,7 @@ if (isset($_SESSION['user_id'])) {
                                         Bookmarks</a></li>
                                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                     <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
-                                            Admin Dashboard</a></li>
+                                            Admin Panel</a></li>
                                 <?php endif; ?>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -915,7 +914,8 @@ if (isset($_SESSION['user_id'])) {
             </div>
         </div>
     </nav>
-    <h1>Subscription Plans</h1>
+    <div class="container mt-4">
+        <h1>Subscription Plans</h1>
 
 
 
@@ -926,90 +926,91 @@ if (isset($_SESSION['user_id'])) {
 
 
 
-    <form id="subscriptionForm" method="POST" action="subscription.php">
-        <input type="hidden" name="plan" id="planInput" value="">
-        <section class="plans">
-            <div class="<?php echo planClass('free', $highlight_plan); ?> plan-card" id="free">
-                <h2>Free</h2>
-                <p class="price">0 EGP</p>
-                <p>Free!</p>
+        <form id="subscriptionForm" method="POST" action="subscription.php">
+            <input type="hidden" name="plan" id="planInput" value="">
+            <section class="plans">
+                <div class="<?php echo planClass('free', $highlight_plan); ?> plan-card" id="free">
+                    <h2>Free</h2>
+                    <p class="price">0 EGP</p>
+                    <p>Free!</p>
 
-                <ul class="features">
-                    <li>Access Articles</li>
-                    <li>Translation</li>
-                    <li>Games</li>
-                    <li>Ads</li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'free' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('free')" class="select-btn">
-                    <?php echo buttonLabel('free', $highlight_plan); ?>
-                </button>
+                    <ul class="features">
+                        <li>Access Articles</li>
+                        <li>Translation</li>
+                        <li>Games</li>
+                        <li>Ads</li>
+                    </ul>
+                    <button type="button" <?php echo $highlight_plan === 'free' ? 'disabled' : ''; ?>
+                        onclick="confirmChange('free')" class="select-btn">
+                        <?php echo buttonLabel('free', $highlight_plan); ?>
+                    </button>
+                </div>
+                <div class="<?php echo planClass('premium', $highlight_plan); ?> plan-card" id="premium">
+                    <h2>Premium</h2>
+                    <label style="font-size: small; color: gray;">Popular</label>
+                    <p class="price">10 EGP</p>
+                    <p>Billed monthly. Ideal for light readers.</p>
+                    <ul class="features">
+                        <li>Recieve Email Updates</li>
+                        <li>Download Articles</li>
+                        <li>Ads</li>
+                    </ul>
+                    <button type="button" <?php echo $highlight_plan === 'premium' ? 'disabled' : ''; ?>
+                        onclick="confirmChange('premium')" class="select-btn">
+                        <?php echo buttonLabel('premium', $highlight_plan); ?>
+                    </button>
+                </div>
+                <div class="<?php echo planClass('premium_plus', $highlight_plan); ?> plan-card" id="premium_plus">
+                    <h2>Premium+</h2>
+                    <p class="price">50 EGP</p>
+                    <p>Billed monthly. Perfect for avid readers and families.</p>
+                    <ul class="features">
+                        <li>Daily Briefing</li>
+                        <li>Priority customer support</li>
+                        <li>No Ads</li>
+
+                        <li></li>
+                    </ul>
+                    <button type="button" <?php echo $highlight_plan === 'premium_plus' ? 'disabled' : ''; ?>
+                        onclick="confirmChange('premium_plus')" class="select-btn">
+                        <?php echo buttonLabel('premium_plus', $highlight_plan); ?>
+                    </button>
+                </div>
+            </section>
+        </form>
+
+        <?php if ($highlight_plan === 'premium_plus' || $highlight_plan === 'premium'): ?>
+            <div class="auto-renew-container">
+                <h2>Auto-Renewal</h2>
+                <form id="autoRenewForm" method="POST" action="subscription.php">
+                    <input type="hidden" name="auto_renew" id="autoRenewInput"
+                        value="<?php echo $auto_renew ? '1' : '0'; ?>">
+                    <label class="auto-renew-label" for="autoRenewToggle">Enable Auto-Renewal:</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoRenewToggle" <?php echo $auto_renew ? 'checked' : ''; ?>
+                            onchange="toggleAutoRenew(this)">
+                        <span class="slider"></span>
+                    </label>
+                </form>
             </div>
-            <div class="<?php echo planClass('premium', $highlight_plan); ?> plan-card" id="premium">
-                <h2>Premium</h2>
-                <label style="font-size: small; color: gray;">Popular</label>
-                <p class="price">10 EGP</p>
-                <p>Billed monthly. Ideal for light readers.</p>
-                <ul class="features">
-                    <li>Recieve Email Updates</li>
-                    <li>Download Articles</li>
-                    <li>Ads</li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'premium' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('premium')" class="select-btn">
-                    <?php echo buttonLabel('premium', $highlight_plan); ?>
-                </button>
-            </div>
-            <div class="<?php echo planClass('premium_plus', $highlight_plan); ?> plan-card" id="premium_plus">
-                <h2>Premium+</h2>
-                <p class="price">50 EGP</p>
-                <p>Billed monthly. Perfect for avid readers and families.</p>
-                <ul class="features">
-                    <li>Daily Briefing</li>
-                    <li>Priority customer support</li>
-                    <li>No Ads</li>
+            <?php if ($highlight_plan === 'premium_plus'): ?>
 
-                    <li></li>
-                </ul>
-                <button type="button" <?php echo $highlight_plan === 'premium_plus' ? 'disabled' : ''; ?>
-                    onclick="confirmChange('premium_plus')" class="select-btn">
-                    <?php echo buttonLabel('premium_plus', $highlight_plan); ?>
-                </button>
-            </div>
-        </section>
-    </form>
-
-    <?php if ($role === 'subscriber'): ?>
-        <div class="auto-renew-container">
-            <h2>Auto-Renewal</h2>
-            <form id="autoRenewForm" method="POST" action="subscription.php">
-                <input type="hidden" name="auto_renew" id="autoRenewInput" value="<?php echo $auto_renew ? '1' : '0'; ?>">
-                <label class="auto-renew-label" for="autoRenewToggle">Enable Auto-Renewal:</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoRenewToggle" <?php echo $auto_renew ? 'checked' : ''; ?>
-                        onchange="toggleAutoRenew(this)">
-                    <span class="slider"></span>
-                </label>
-            </form>
-        </div>
-        <?php if ($highlight_plan === 'premium_plus'): ?>
-
-            <div id="Daily">
-                <h2>Daily</h2>
-                <?php if (count($articles) > 0): ?>
-                    <?php foreach ($articles as $article): ?>
-                        <article>
-                            <h3><?php echo htmlspecialchars($article['title']); ?></h3>
-                            <p><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No news articles for today.</p>
-                <?php endif; ?>
-            </div>
+                <div id="Daily">
+                    <h2>Daily</h2>
+                    <?php if (count($articles) > 0): ?>
+                        <?php foreach ($articles as $article): ?>
+                            <article>
+                                <h3><?php echo htmlspecialchars($article['title']); ?></h3>
+                                <p><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No news articles for today.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
-    <?php endif; ?>
-
+    </div>
     <div id="messageBox"></div>
 
     <footer>

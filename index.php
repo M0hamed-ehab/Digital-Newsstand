@@ -8,19 +8,50 @@ $categories_result = $db->query($categories_query);
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
+$page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? intval($_GET['page']) : 1;
+$articles_per_page = 5;
+$offset = ($page - 1) * $articles_per_page;
 
 if ($search_term !== '') {
         $search_term_like = '%' . $search_term . '%';
+
+        $count_query = "SELECT COUNT(*) as total FROM articles WHERE content LIKE ?";
+        $count_stmt = $db->prepare($count_query);
+        $count_stmt->bind_param("s", $search_term_like);
+        $count_stmt->execute();
+        $count_result = $count_stmt->get_result();
+        $total_articles = 0;
+        if ($count_result && $row = $count_result->fetch_assoc()) {
+                $total_articles = $row['total'];
+        }
+        $count_stmt->close();
+
         $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
         FROM articles a
         LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.content LIKE '$search_term_like'
+        WHERE a.content LIKE ?
         ORDER BY a.created_at DESC
+        LIMIT ? OFFSET ?
     ";
-        $articles_result = $db->query($articles_query);
+        $stmt = $db->prepare($articles_query);
+        $stmt->bind_param("sii", $search_term_like, $articles_per_page, $offset);
+        $stmt->execute();
+        $articles_result = $stmt->get_result();
 } else {
+        // Get total count for pagination
+        $count_query = "SELECT COUNT(*) as total FROM articles WHERE category_id = ? OR ? = 0";
+        $count_stmt = $db->prepare($count_query);
+        $count_stmt->bind_param("ii", $selected_category, $selected_category);
+        $count_stmt->execute();
+        $count_result = $count_stmt->get_result();
+        $total_articles = 0;
+        if ($count_result && $row = $count_result->fetch_assoc()) {
+                $total_articles = $row['total'];
+        }
+        $count_stmt->close();
+
         $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
         c.category_name
@@ -28,9 +59,10 @@ if ($search_term !== '') {
         LEFT JOIN category c ON a.category_id = c.category_id
         WHERE c.category_id = ? OR ? = 0
         ORDER BY a.created_at DESC
+        LIMIT ? OFFSET ?
     ";
         $stmt = $db->prepare($articles_query);
-        $stmt->bind_param("ii", $selected_category, $selected_category);
+        $stmt->bind_param("iiii", $selected_category, $selected_category, $articles_per_page, $offset);
         $stmt->execute();
         $articles_result = $stmt->get_result();
 }
@@ -43,6 +75,21 @@ $popular_articles_result = $db->query($popular_articles_query);
 
 if (session_status() === PHP_SESSION_NONE) {
         session_start();
+}
+
+$show_ads = true;
+if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+        $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
+        $sub_stmt->bind_param("i", $user_id);
+        $sub_stmt->execute();
+        $sub_result = $sub_stmt->get_result();
+        if ($sub_result && $row = $sub_result->fetch_assoc()) {
+                if ($row['subscription_name'] === 'full') {
+                        $show_ads = false;
+                }
+        }
+        $sub_stmt->close();
 }
 
 function isUserLoggedIn()
@@ -514,7 +561,7 @@ if (isset($_SESSION['user_id'])) {
                                                                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                                                         <li><a class="dropdown-item" href="admin.php"><i
                                                                                                 class="fas fa-user-shield me-2"></i>
-                                                                                        Admin Dashboard</a></li>
+                                                                                        Admin Panel</a></li>
                                                                 <?php endif; ?>
                                                                 <li>
                                                                         <hr class="dropdown-divider">
@@ -645,6 +692,44 @@ if (isset($_SESSION['user_id'])) {
                                                         </div>
                                                 </div>
                                         <?php endwhile; ?>
+
+                                        <!-- Pagination Controls -->
+                                        <?php
+                                        $total_pages = ceil($total_articles / $articles_per_page);
+                                        if ($total_pages > 1):
+                                                ?>
+                                                <nav aria-label="Page navigation">
+                                                        <ul class="pagination justify-content-center">
+                                                                <?php if ($page > 1): ?>
+                                                                        <li class="page-item">
+                                                                                <a class="page-link"
+                                                                                        href="?category_id=<?= $selected_category ?>&search=<?= urlencode($search_term) ?>&page=<?= $page - 1 ?>"
+                                                                                        aria-label="Previous">
+                                                                                        <span aria-hidden="true">&laquo;</span>
+                                                                                </a>
+                                                                        </li>
+                                                                <?php endif; ?>
+
+                                                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                                                        <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                                                                <a class="page-link"
+                                                                                        href="?category_id=<?= $selected_category ?>&search=<?= urlencode($search_term) ?>&page=<?= $i ?>"><?= $i ?></a>
+                                                                        </li>
+                                                                <?php endfor; ?>
+
+                                                                <?php if ($page < $total_pages): ?>
+                                                                        <li class="page-item">
+                                                                                <a class="page-link"
+                                                                                        href="?category_id=<?= $selected_category ?>&search=<?= urlencode($search_term) ?>&page=<?= $page + 1 ?>"
+                                                                                        aria-label="Next">
+                                                                                        <span aria-hidden="true">&raquo;</span>
+                                                                                </a>
+                                                                        </li>
+                                                                <?php endif; ?>
+                                                        </ul>
+                                                </nav>
+                                        <?php endif; ?>
+
                                 <?php else: ?>
                                         <p class="lead">No articles available in this category.</p>
                                 <?php endif; ?>
@@ -653,6 +738,26 @@ if (isset($_SESSION['user_id'])) {
         </div>
 
         <!-- Latest -->
+        <?php if ($show_ads): ?>
+                <section class="ads-section"
+                        style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                        <div class="container">
+                                <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
+                                <div style="display: flex; justify-content: center; gap: 1rem;">
+                                        <a href="subscription.php" target="_blank">
+
+                                                <div
+                                                        style="width: 100%; height: 20rem;  border-radius: 0.25rem; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                                        <img src="images/g6.png" alt="Ad1"
+                                                                style="width: 100%; height: 100%; object-fit: contain;">
+                                                </div>
+                                        </a>
+
+                                </div>
+                        </div>
+                </section>
+        <?php endif; ?>
+
         <section class="container-games" id="games">
                 <div class="container">
                         <div class="row ify-content-center">

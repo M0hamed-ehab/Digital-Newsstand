@@ -2,8 +2,6 @@
 
 include_once 'config/Database.php';
 
-
-
 $db = (new Database())->connect();
 
 $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
@@ -48,6 +46,21 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$show_ads = true;
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
+    $sub_stmt->bind_param("i", $user_id);
+    $sub_stmt->execute();
+    $sub_result = $sub_stmt->get_result();
+    if ($sub_result && $row = $sub_result->fetch_assoc()) {
+        if ($row['subscription_name'] === 'full') {
+            $show_ads = false;
+        }
+    }
+    $sub_stmt->close();
+}
+
 function isUserLoggedIn()
 {
     return isset($_SESSION['user_id']);
@@ -57,6 +70,9 @@ function isSignedUp()
 {
     return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
 }
+
+
+
 
 $dbx = (new Database())->connect();
 $notfications_count = 0;
@@ -71,9 +87,6 @@ if (isset($_SESSION['user_id'])) {
     }
     $stmt->close();
 }
-
-
-
 
 
 
@@ -564,7 +577,7 @@ if (isset($_SESSION['user_id'])) {
                                         Bookmarks</a></li>
                                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                     <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
-                                            Admin Dashboard</a></li>
+                                            Admin Panel</a></li>
                                 <?php endif; ?>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -594,11 +607,14 @@ if (isset($_SESSION['user_id'])) {
                 <div class="breaking-news">
                     <h4><i class="fas fa-bolt"></i> Breaking News</h4>
                     <ul>
-                        <?php if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
+                        <?php
+                        $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $breaking_news_result = $db->query($breaking_news_query);
+
+                        if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                             <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
-                                <li><a href="#">
-                                        <?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...
-                                    </a></li>
+                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li>No breaking news at the moment.</li>
@@ -609,11 +625,15 @@ if (isset($_SESSION['user_id'])) {
                 <div class="popular-articles">
                     <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                     <ul>
-                        <?php if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
+                        <?php
+                        $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $popular_articles_result = $db->query($popular_articles_query);
+
+                        if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
                             <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
-                                <li><a href="article.php?id=<?= $popular['id'] ?>">
-                                        <?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...
-                                    </a></li>
+                                <li><a
+                                        href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li>No trending stories yet.</li>
@@ -631,7 +651,7 @@ if (isset($_SESSION['user_id'])) {
                         $categories_result->data_seek(0); // Reset again for the category list
                         while ($category = $categories_result->fetch_assoc()): ?>
                             <li class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
-                                <a href="index.php?category_id=<?= $category['category_id'] ?>">
+                                <a href="?category_id=<?= $category['category_id'] ?>">
                                     <?= htmlspecialchars($category['category_name']) ?>
                                 </a>
                             </li>
@@ -639,6 +659,7 @@ if (isset($_SESSION['user_id'])) {
                     </ul>
                 </div>
             </div>
+
             <div id="container-game">
                 <h2 id="h2t">Sudoku Game</h2>
                 <div>
@@ -648,7 +669,28 @@ if (isset($_SESSION['user_id'])) {
                 <button type="button" onclick="fillSolution()">Get Solution</button>
                 <button type="button" onclick="resetBoard()">Reset</button>
                 <p id="result"></p>
+                <?php if ($show_ads): ?>
+                    <section class="ads-section"
+                        style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                        <div class="container">
+                            <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
+                            <div style="display: flex; justify-content: center; gap: 1rem;">
+                                <a href="subscription.php" target="_blank">
+
+                                    <div
+                                        style="width: 100%; height: 20rem;  border-radius: 0.25rem; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                        <img src="images/g6.png" alt="Ad1"
+                                            style="width: 100%; height: 100%; object-fit: contain;">
+                                    </div>
+                                </a>
+
+                            </div>
+                        </div>
+                    </section>
+                <?php endif; ?>
             </div>
+
+
         </div>
     </div>
     </div>

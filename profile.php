@@ -69,7 +69,8 @@ if (isset($_POST['update_profile'])) {
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+            background-image: url('images/g5.jpg');
+            background-size: auto;
             color: #343a40;
             line-height: 1.7;
         }

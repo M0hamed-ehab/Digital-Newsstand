@@ -495,7 +495,7 @@ if (isset($_SESSION['user_id'])) {
                                         Bookmarks</a></li>
                                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                     <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
-                                            Admin Dashboard</a></li>
+                                            Admin Panel</a></li>
                                 <?php endif; ?>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -525,11 +525,14 @@ if (isset($_SESSION['user_id'])) {
                 <div class="breaking-news">
                     <h4><i class="fas fa-bolt"></i> Breaking News</h4>
                     <ul>
-                        <?php if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
+                        <?php
+                        $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $breaking_news_result = $db->query($breaking_news_query);
+
+                        if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                             <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
-                                <li><a href="#">
-                                        <?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...
-                                    </a></li>
+                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li>No breaking news at the moment.</li>
@@ -540,11 +543,15 @@ if (isset($_SESSION['user_id'])) {
                 <div class="popular-articles">
                     <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                     <ul>
-                        <?php if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
+                        <?php
+                        $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $popular_articles_result = $db->query($popular_articles_query);
+
+                        if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
                             <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
-                                <li><a href="article.php?id=<?= $popular['id'] ?>">
-                                        <?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...
-                                    </a></li>
+                                <li><a
+                                        href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li>No trending stories yet.</li>
@@ -562,7 +569,7 @@ if (isset($_SESSION['user_id'])) {
                         $categories_result->data_seek(0); // Reset again for the category list
                         while ($category = $categories_result->fetch_assoc()): ?>
                             <li class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
-                                <a href="index.php?category_id=<?= $category['category_id'] ?>">
+                                <a href="?category_id=<?= $category['category_id'] ?>">
                                     <?= htmlspecialchars($category['category_name']) ?>
                                 </a>
                             </li>
