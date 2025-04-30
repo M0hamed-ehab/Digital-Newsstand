@@ -1,92 +1,19 @@
 <?php
 session_start();
 include_once 'config/Database.php';
-
-
-
-
-
-
+include_once 'classes/Article.php';
+include_once 'classes/User.php';
+include_once 'classes/Subscription.php';
 
 $db = Database::getInstance()->getConnection();
 
-$categories_query = "SELECT * FROM category ORDER BY category_name ASC";
-$categories_result = $db->query($categories_query);
+$articleObj = new Article($db);
+$userObj = new User($db);
+
+$categories_result = $articleObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
-
-if ($search_term !== '') {
-    $search_term_like = '%' . $search_term . '%';
-
-    $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?";
-    $count_stmt = $db->prepare($count_query);
-    $count_stmt->bind_param("sss", $search_term_like, $search_term_like, $search_term_like);
-    $count_stmt->execute();
-    $count_result = $count_stmt->get_result();
-    $total_articles = 0;
-    if ($count_result && $row = $count_result->fetch_assoc()) {
-        $total_articles = $row['total'];
-    }
-    $count_stmt->close();
-
-    $articles_query = "
-    SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-    c.category_name
-    FROM articles a
-    LEFT JOIN category c ON a.category_id = c.category_id
-    WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?
-    ORDER BY a.created_at DESC
-    LIMIT ? OFFSET ?
-";
-    $stmt = $db->prepare($articles_query);
-    $stmt->bind_param("sssii", $search_term_like, $search_term_like, $search_term_like, $articles_per_page, $offset);
-    $stmt->execute();
-    $articles_result = $stmt->get_result();
-} else {
-    $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE c.category_id = ? OR ? = 0
-        ORDER BY a.created_at DESC
-    ";
-    $stmt = $db->prepare($articles_query);
-    $stmt->bind_param("ii", $selected_category, $selected_category);
-    $stmt->execute();
-    $articles_result = $stmt->get_result();
-}
-
-$breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
-$breaking_news_result = $db->query($breaking_news_query);
-
-$popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
-$popular_articles_result = $db->query($popular_articles_query);
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-function isUserLoggedIn()
-{
-    return isset($_SESSION['user_id']);
-}
-
-function isSignedUp()
-{
-    return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
-}
-
-
-
-
-
-
-
-
-
-
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.html");
@@ -94,150 +21,56 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$subscription = new Subscription($db, $user_id);
+
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['plan'])) {
         $new_plan = $_POST['plan'];
-
-        $stmt = $db->prepare("SELECT role FROM users WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $role = $row['role'];
-
-        if ($role === 'admin') {
-            if ($new_plan === 'free') {
-                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium') {
-                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium_plus') {
-                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            }
-            $message = "Your subscription has been changed to " . ucfirst(str_replace('_', ' ', $new_plan)) . ".";
-        } else {
-            if ($new_plan === 'free') {
-                $update_role = $db->prepare("UPDATE users SET role = 'member' WHERE user_id = ?");
-                $update_role->bind_param("i", $user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'member';
-
-                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium') {
-                $update_role = $db->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
-                $update_role->bind_param("i", $user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'subscriber';
-
-                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium_plus') {
-                $update_role = $db->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
-                $update_role->bind_param("i", $user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'subscriber';
-
-                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
-                $update_sub->bind_param("i", $user_id);
-                $update_sub->execute();
-            }
-            $message = "Your subscription has been changed to " . ucfirst(str_replace('_', ' ', $new_plan)) . ".";
-        }
+        $message = $subscription->handlePlanChange($new_plan);
         header("Location: subscription.php?message=" . urlencode($message));
         exit();
     } elseif (isset($_POST['auto_renew'])) {
-        $auto_renew = $_POST['auto_renew'] === '1' ? 1 : 0;
-        $stmt = $db->prepare("UPDATE subscription SET auto_renew = ? WHERE user_id = ?");
-        $stmt->bind_param("ii", $auto_renew, $user_id);
-        $stmt->execute();
-        $message = "Auto-renewal has been " . ($auto_renew ? "enabled" : "disabled") . ".";
+        $auto_renew = $_POST['auto_renew'];
+        $message = $subscription->handleAutoRenewChange($auto_renew);
         header("Location: subscription.php?message=" . urlencode($message));
         exit();
     }
 }
 
-$stmt = $db->prepare("SELECT role FROM users WHERE user_id = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$highlight_plan = $subscription->getHighlightPlan();
+$auto_renew = $subscription->getAutoRenew();
+$articles = $subscription->getTodayArticles();
+$notfications_count = $subscription->getNotificationsCount();
 
-$row = $result->fetch_assoc();
-$role = $row['role'];
-
-$highlight_plan = 'free';
-
-if ($role === 'member') {
-    $highlight_plan = 'free';
-} elseif ($role === 'subscriber' || $role === 'admin') {
-    $stmt_sub = $db->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
-    $stmt_sub->bind_param("i", $user_id);
-    $stmt_sub->execute();
-    $result_sub = $stmt_sub->get_result();
-    if ($result_sub->num_rows > 0) {
-        $sub_row = $result_sub->fetch_assoc();
-        $subscription_name = $sub_row['subscription_name'];
-        $auto_renew = $sub_row['auto_renew'];
-        if ($subscription_name === 'none') {
-            $highlight_plan = 'free';
-        } elseif ($subscription_name === 'semi') {
-            $highlight_plan = 'premium';
-        } elseif ($subscription_name === 'full') {
-            $highlight_plan = 'premium_plus';
-        }
-    } else {
-        $highlight_plan = 'free';
-        $auto_renew = 0;
-    }
-} else {
-    $highlight_plan = 'free';
-    $auto_renew = 0;
+function isUserLoggedIn()
+{
+    global $userObj;
+    return $userObj->isLoggedIn();
 }
 
-$today = date('Y-m-d');
-$articles = [];
-$stmt_articles = $db->prepare("SELECT title, content FROM articles WHERE DATE(created_at) = ?");
-$stmt_articles->bind_param("s", $today);
-$stmt_articles->execute();
-$result_articles = $stmt_articles->get_result();
-while ($row_article = $result_articles->fetch_assoc()) {
-    $articles[] = $row_article;
+function isSignedUp()
+{
+    global $userObj;
+    return $userObj->isSignedUp();
 }
 
 function planClass($plan, $highlight_plan)
 {
-    return $plan === $highlight_plan ? 'plan highlight' : 'plan';
+    global $subscription;
+    return $subscription->planClass($plan);
 }
 
 function buttonLabel($plan, $highlight_plan)
 {
-    return $plan === $highlight_plan ? 'Your Plan' : 'Choose Plan';
+    global $subscription;
+    return $subscription->buttonLabel($plan);
 }
 
 $message = '';
 if (isset($_GET['message'])) {
     $message = htmlspecialchars($_GET['message']);
-}
-$notfications_count = 0;
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $notfications_count = $row['count'];
-    }
-    $stmt->close();
 }
 ?>
 
@@ -887,7 +720,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                <li class=" nav-item">
+                                                                <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>

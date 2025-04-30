@@ -9,6 +9,12 @@ $db = Database::getInstance()->getConnection();
 
 $userFavorites = new user_favs();
 
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
+}
+
 // Handle AJAX add/remove favorite requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['article_id'])) {
     $action = $_POST['action'];
@@ -115,7 +121,7 @@ function isSignedUp()
                         </li>
                     </ul>
                                 <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                                                        <li class="
+                                                                                                                <li class="
                                 nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
