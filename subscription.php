@@ -1,15 +1,14 @@
 <?php
 session_start();
 include_once 'config/Database.php';
-$database = new Database();
-$conn = $database->connect();
 
 
 
 
 
 
-$db = (new Database())->connect();
+
+$db = Database::getInstance()->getConnection();
 
 $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
 $categories_result = $db->query($categories_query);
@@ -228,11 +227,10 @@ $message = '';
 if (isset($_GET['message'])) {
     $message = htmlspecialchars($_GET['message']);
 }
-$dbx = (new Database())->connect();
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
-    $stmt = $dbx->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -889,7 +887,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                            <li class=" nav-item">
+                                        <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>

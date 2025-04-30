@@ -150,11 +150,10 @@ function isSignedUp()
 
 
 
-$dbx = Database::getInstance()->getConnection();
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
-        $stmt = $dbx->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -582,7 +581,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                                         <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                                                                                                        <li class="
+                                                                                                                                                                        <li class="
                                                                 nav-item">
                                                                         <a class="nav-link position-relative" href="noti.php"
                                                                                 title="Notifications">

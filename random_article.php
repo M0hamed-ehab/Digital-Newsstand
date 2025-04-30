@@ -1,7 +1,7 @@
 <?php
 include_once 'config/Database.php';
 
-$db = (new Database())->connect();
+$db = Database::getInstance()->getConnection();
 
 $query = "SELECT id FROM articles ORDER BY RAND() LIMIT 1";
 $result = $db->query($query);
