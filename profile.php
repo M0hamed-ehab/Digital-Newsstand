@@ -2,7 +2,7 @@
 session_start();
 include_once 'config/Database.php';
 
-$conn = Database::getInstance()->getConnection();
+$db = Database::getInstance()->getConnection();
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.html");
@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 $user_query = "SELECT * FROM users WHERE user_id = ?";
-$stmt = $conn->prepare($user_query);
+$stmt = $db->prepare($user_query);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user_result = $stmt->get_result();
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
     if (empty($errors)) {
         $update_query = "UPDATE users SET name = ?, email = ? WHERE user_id = ?";
-        $update_stmt = $conn->prepare($update_query);
+        $update_stmt = $db->prepare($update_query);
         $update_stmt->bind_param("ssi", $new_username, $new_email, $user_id);
 
         if ($update_stmt->execute()) {
