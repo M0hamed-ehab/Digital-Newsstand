@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['plan'])) {
         $new_plan = $_POST['plan'];
 
-        $stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
+        $stmt = $db->prepare("SELECT role FROM users WHERE user_id = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -109,45 +109,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($role === 'admin') {
             if ($new_plan === 'free') {
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
+                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
                 $update_sub->bind_param("i", $user_id);
                 $update_sub->execute();
             } elseif ($new_plan === 'premium') {
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
+                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
                 $update_sub->bind_param("i", $user_id);
                 $update_sub->execute();
             } elseif ($new_plan === 'premium_plus') {
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
+                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
                 $update_sub->bind_param("i", $user_id);
                 $update_sub->execute();
             }
             $message = "Your subscription has been changed to " . ucfirst(str_replace('_', ' ', $new_plan)) . ".";
         } else {
             if ($new_plan === 'free') {
-                $update_role = $conn->prepare("UPDATE users SET role = 'member' WHERE user_id = ?");
+                $update_role = $db->prepare("UPDATE users SET role = 'member' WHERE user_id = ?");
                 $update_role->bind_param("i", $user_id);
                 $update_role->execute();
                 $_SESSION['role'] = 'member';
 
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
+                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
                 $update_sub->bind_param("i", $user_id);
                 $update_sub->execute();
             } elseif ($new_plan === 'premium') {
-                $update_role = $conn->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
+                $update_role = $db->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
                 $update_role->bind_param("i", $user_id);
                 $update_role->execute();
                 $_SESSION['role'] = 'subscriber';
 
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
+                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
                 $update_sub->bind_param("i", $user_id);
                 $update_sub->execute();
             } elseif ($new_plan === 'premium_plus') {
-                $update_role = $conn->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
+                $update_role = $db->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
                 $update_role->bind_param("i", $user_id);
                 $update_role->execute();
                 $_SESSION['role'] = 'subscriber';
 
-                $update_sub = $conn->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
+                $update_sub = $db->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
                 $update_sub->bind_param("i", $user_id);
                 $update_sub->execute();
             }
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     } elseif (isset($_POST['auto_renew'])) {
         $auto_renew = $_POST['auto_renew'] === '1' ? 1 : 0;
-        $stmt = $conn->prepare("UPDATE subscription SET auto_renew = ? WHERE user_id = ?");
+        $stmt = $db->prepare("UPDATE subscription SET auto_renew = ? WHERE user_id = ?");
         $stmt->bind_param("ii", $auto_renew, $user_id);
         $stmt->execute();
         $message = "Auto-renewal has been " . ($auto_renew ? "enabled" : "disabled") . ".";
@@ -166,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
+$stmt = $db->prepare("SELECT role FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -179,7 +179,7 @@ $highlight_plan = 'free';
 if ($role === 'member') {
     $highlight_plan = 'free';
 } elseif ($role === 'subscriber' || $role === 'admin') {
-    $stmt_sub = $conn->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
+    $stmt_sub = $db->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
     $stmt_sub->bind_param("i", $user_id);
     $stmt_sub->execute();
     $result_sub = $stmt_sub->get_result();
@@ -205,7 +205,7 @@ if ($role === 'member') {
 
 $today = date('Y-m-d');
 $articles = [];
-$stmt_articles = $conn->prepare("SELECT title, content FROM articles WHERE DATE(created_at) = ?");
+$stmt_articles = $db->prepare("SELECT title, content FROM articles WHERE DATE(created_at) = ?");
 $stmt_articles->bind_param("s", $today);
 $stmt_articles->execute();
 $result_articles = $stmt_articles->get_result();
@@ -887,7 +887,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                        <li class=" nav-item">
+                                                <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>

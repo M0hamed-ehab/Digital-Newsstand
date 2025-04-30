@@ -21,7 +21,7 @@ $query = "
     ORDER BY a.created_at DESC
 ";
 
-$stmt = $dbb->prepare($query);
+$stmt = $db->prepare($query);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $bookmarks_result = $stmt->get_result();
@@ -524,7 +524,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                        <li class=" nav-item">
+                                                    <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>
