@@ -2,15 +2,14 @@
 session_start();
 include 'config/Database.php';
 
-$database = new Database();
-$db = Database::getInstance()->getConnection();
+$conn = Database::getInstance()->getConnection();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
     $email = trim($_POST['email']);
 
-    if (empty($username) || empty($password)) {
+    if (empty($username) || empty($password) || empty($email)) {
         echo "All fields are required.";
         exit;
     }
@@ -22,8 +21,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($stmt->num_rows > 0) {
         echo "Email already taken.";
+        $stmt->close();
         exit;
     }
+    $stmt->close();
 
     $stmt = $conn->prepare("INSERT INTO users (name, password, email) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $username, $password, $email);

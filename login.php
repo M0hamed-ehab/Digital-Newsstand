@@ -1,8 +1,7 @@
 <?php
 include 'config/Database.php';
 
-$database = new Database();
-$db = Database::getInstance()->getConnection();
+$conn = Database::getInstance()->getConnection();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);

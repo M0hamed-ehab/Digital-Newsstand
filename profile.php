@@ -1,8 +1,8 @@
 <?php
 session_start();
 include_once 'config/Database.php';
-$database = new Database();
-$db = Database::getInstance()->getConnection();
+
+$conn = Database::getInstance()->getConnection();
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.html");
@@ -24,7 +24,7 @@ if (!$user) {
 }
 
 $errors = [];
-if (isset($_POST['update_profile'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $new_username = trim($_POST['username']);
     $new_email = trim($_POST['email']);
 
@@ -45,7 +45,7 @@ if (isset($_POST['update_profile'])) {
 
         if ($update_stmt->execute()) {
             $success_message = "Profile updated successfully!";
-            $user['username'] = $new_username;
+            $user['name'] = $new_username;
             $user['email'] = $new_email;
         } else {
             $error_message = "Error updating profile.";
