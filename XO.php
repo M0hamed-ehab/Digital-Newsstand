@@ -14,15 +14,31 @@ $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 if ($search_term !== '') {
     $search_term_like = '%' . $search_term . '%';
+
+    $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?";
+    $count_stmt = $db->prepare($count_query);
+    $count_stmt->bind_param("sss", $search_term_like, $search_term_like, $search_term_like);
+    $count_stmt->execute();
+    $count_result = $count_stmt->get_result();
+    $total_articles = 0;
+    if ($count_result && $row = $count_result->fetch_assoc()) {
+        $total_articles = $row['total'];
+    }
+    $count_stmt->close();
+
     $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.content LIKE '$search_term_like'
-        ORDER BY a.created_at DESC
-    ";
-    $articles_result = $db->query($articles_query);
+    SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
+    c.category_name
+    FROM articles a
+    LEFT JOIN category c ON a.category_id = c.category_id
+    WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?
+    ORDER BY a.created_at DESC
+    LIMIT ? OFFSET ?
+";
+    $stmt = $db->prepare($articles_query);
+    $stmt->bind_param("sssii", $search_term_like, $search_term_like, $search_term_like, $articles_per_page, $offset);
+    $stmt->execute();
+    $articles_result = $stmt->get_result();
 } else {
     $articles_query = "
         SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
@@ -46,6 +62,20 @@ $popular_articles_result = $db->query($popular_articles_query);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+$show_ads = true;
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
+    $sub_stmt->bind_param("i", $user_id);
+    $sub_stmt->execute();
+    $sub_result = $sub_stmt->get_result();
+    if ($sub_result && $row = $sub_result->fetch_assoc()) {
+        if ($row['subscription_name'] === 'full') {
+            $show_ads = false;
+        }
+    }
+    $sub_stmt->close();
 }
 
 function isUserLoggedIn()
@@ -82,14 +112,16 @@ if (isset($_SESSION['user_id'])) {
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Global Herald - Your Source for Trusted News</title>
+    <title>Tic Tac Toe - The Global Herald</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="/images/games.png">
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+            background-image: url('images/g5.jpg');
+            background-size: auto;
             color: #343a40;
             line-height: 1.7;
         }
@@ -400,7 +432,7 @@ if (isset($_SESSION['user_id'])) {
             width: 100%;
             margin-bottom: 1.5rem;
         }
-        }
+
 
         .user-icons {
             display: flex;
@@ -480,7 +512,7 @@ if (isset($_SESSION['user_id'])) {
                     while ($category = $categories_result->fetch_assoc()): ?>
                         <li class="nav-item">
                             <a class="nav-link <?= $selected_category == $category['category_id'] ? 'active' : '' ?>"
-                                href="?category_id=<?= $category['category_id'] ?>">
+                                href="index.php?category_id=<?= $category['category_id'] ?>">
                                 <?= htmlspecialchars($category['category_name']) ?>
                             </a>
                         </li>
@@ -488,6 +520,7 @@ if (isset($_SESSION['user_id'])) {
                     <li>
                         <a class="nav-link" href="index.php#games">Games</a>
                     </li>
+
                 </ul>
                 <form class="d-flex" method="GET" action="index.php">
                     <input class="form-control me-2" type="search" name="search" placeholder="Search"
@@ -496,54 +529,60 @@ if (isset($_SESSION['user_id'])) {
                     <button class="btn btn-outline-light" type="submit">Search</button>
                 </form>
                 <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <li>
+                            <a class="nav-link" href="random_article.php" ">Discover</a>
+</li>
+</ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="noti.php" title="Notifications">
-                                <i class="fas fa-bell fa-lg"></i>
-                                <?php if ($notfications_count > 0): ?>
-                                    <span
-                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        <?= $notfications_count ?>
-                                        <span class="visually-hidden">unread
-                                            notifications</span>
-                                    </span>
-                                <?php endif; ?>
-                            </a>
-                        </li>
-                        <li class="nav-item user-dropdown">
-                            <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false" title="User Menu">
-                                <i class="fas fa-user-circle fa-lg"></i>
-                            </a>
-                            <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>
-                                        Profile</a></li>
-                                <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i>
-                                        Favorites</a></li>
-                                <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i>
-                                        Bookmarks</a></li>
-                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                                    <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
-                                            Admin Dashboard</a></li>
-                                <?php endif; ?>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>
-                                        Logout</a></li>
-                            </ul>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
-                                Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
-                                Register</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
+                            <li class=" nav-item">
+                                    <a class="nav-link position-relative" href="noti.php" title="Notifications">
+                                        <i class="fas fa-bell fa-lg"></i>
+                                        <?php if ($notfications_count > 0): ?>
+                                            <span
+                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                <?= $notfications_count ?>
+                                                <span class="visually-hidden">unread
+                                                    notifications</span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </a>
+                            </li>
+                            <li class="nav-item user-dropdown">
+                                <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false" title="User Menu">
+                                    <i class="fas fa-user-circle fa-lg"></i>
+                                </a>
+                                <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>
+                                            Profile</a></li>
+                                    <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i>
+                                            Favorites</a></li>
+                                    <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i>
+                                            Bookmarks</a></li>
+                                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                        <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
+                                                Admin Panel</a></li>
+                                    <?php endif; ?>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>
+                                            Logout</a></li>
+                                </ul>
+                            </li>
+                        <?php else: ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                    Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
+                                    Signup</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
             </div>
         </div>
     </nav>
@@ -554,11 +593,14 @@ if (isset($_SESSION['user_id'])) {
                 <div class="breaking-news">
                     <h4><i class="fas fa-bolt"></i> Breaking News</h4>
                     <ul>
-                        <?php if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
+                        <?php
+                        $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $breaking_news_result = $db->query($breaking_news_query);
+
+                        if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                             <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
-                                <li><a href="#">
-                                        <?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...
-                                    </a></li>
+                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li>No breaking news at the moment.</li>
@@ -569,11 +611,15 @@ if (isset($_SESSION['user_id'])) {
                 <div class="popular-articles">
                     <h4><i class="fas fa-fire"></i> Trending Stories</h4>
                     <ul>
-                        <?php if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
+                        <?php
+                        $popular_articles_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $popular_articles_result = $db->query($popular_articles_query);
+
+                        if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
                             <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
-                                <li><a href="article.php?id=<?= $popular['id'] ?>">
-                                        <?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...
-                                    </a></li>
+                                <li><a
+                                        href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
+                                </li>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <li>No trending stories yet.</li>
@@ -625,6 +671,8 @@ if (isset($_SESSION['user_id'])) {
                     </tr>
                 </table>
             </div>
+
+
 
 
 
