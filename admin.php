@@ -8,69 +8,43 @@ $article = new Article($db);
 $category = new Category($db);
 
 if (isset($_POST['create_category'])) {
-    $category->name = $_POST['category_name'];
-    $message = $category->create() ? "Category added successfully." : "Failed to add category.";
+    $message = $category->create($_POST['category_name'])
+        ? "Category added successfully."
+        : "Failed to add category.";
 }
+
 if (isset($_POST['delete_category'])) {
-    $category->category_id = $_POST['category_id'];
-    $message = $category->delete() ? "Category deleted." : "Failed to delete category.";
+    $message = $category->delete($_POST['category_id'])
+        ? "Category deleted."
+        : "Failed to delete category.";
 }
 
 if (isset($_POST['create'])) {
-    $article->title = $_POST['title'];
-    $article->content = $_POST['content'];
-    $article->author = $_POST['author'];
-    $article->category_id = $_POST['category_id'];
-
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $imageName = basename($_FILES['image']['name']);
-        $targetDirectory = "images/";
-        $targetFile = $targetDirectory . $imageName;
-
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-            $article->image_path = $imageName;
-        } else {
-            $article->image_path = null;
-        }
-    } else {
-        $article->image_path = null;
-    }
-
-    $message = $article->create() ? "Article published." : "Failed to publish article.";
+    $message = $article->createFromForm($_POST, $_FILES)
+        ? "Article published."
+        : "Failed to publish article.";
 }
+
 if (isset($_POST['update'])) {
-    $article->id = $_POST['id'];
-    $article->title = $_POST['title'];
-    $article->content = $_POST['content'];
-    $article->author = $_POST['author'];
-    $article->category_id = $_POST['category_id'];
-    $message = $article->update() ? "Article updated." : "Failed to update article.";
+    $message = $article->updateFromForm($_POST)
+        ? "Article updated."
+        : "Failed to update article.";
 }
+
 if (isset($_POST['delete'])) {
-    $article->id = $_POST['id'];
-    $message = $article->delete() ? "Article deleted." : "Failed to delete article.";
+    $message = $article->deleteById($_POST['id'])
+        ? "Article deleted."
+        : "Failed to delete article.";
 }
 
 if (isset($_POST['send'])) {
-    $articleId = $_POST['id'];
-    $stmt = $db->prepare("SELECT id FROM articles WHERE id = ?");
-    $stmt->bind_param("i", $articleId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result && $result->num_rows > 0) {
-        $subscribers = $db->query("SELECT email FROM users WHERE role = 'subscriber'");
-        if ($subscribers && $subscribers->num_rows > 0) {
-            $count = $subscribers->num_rows;
-            $message = "Summary sent to $count  Premium+ subscribers.";
-        } else {
-            $message = "No subscribers found to send the summary.";
-        }
-    }
+    $message = $article->sendSummary($_POST['id']);
 }
 
 $categories = $category->readAll();
 $articles = $article->readAll();
 $categoryList = $category->readAll(); // For dropdown
+
 
 // Handle breaking news creation
 if (isset($_POST['create_breaking_news'])) {
@@ -106,102 +80,7 @@ if (isset($_POST['create_breaking_news'])) {
         href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="/images/admin.png">
-
-    <style>
-        body {
-            background-color: #f4f4f4;
-            font-family: 'Open Sans', sans-serif;
-            color: #333;
-        }
-
-        header {
-            background-color: #343a40;
-            padding: 20px 0;
-            text-align: center;
-            color: #fff;
-            font-family: 'Merriweather', serif;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
-
-        header p {
-            font-size: 1.2rem;
-        }
-
-        .container {
-            padding: 40px 15px;
-        }
-
-        .section {
-            margin-top: 40px;
-        }
-
-        .login-container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-            margin: auto;
-        }
-
-        .login-container h2 {
-            margin-bottom: 30px;
-            font-family: 'Merriweather', serif;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            transition: 0.3s;
-            font-size: 16px;
-        }
-
-        .form-control:focus {
-            border-color: #343a40;
-            box-shadow: 0 0 8px rgba(30, 58, 138, 0.5);
-        }
-
-        .bbbtn {
-            display: flex;
-            gap: 10px;
-            flex-direction: row;
-            justify-content: space-between;
-        }
-
-        .btn-custom {
-            background: #343a40;
-            color: #fff;
-            border-radius: 8px;
-            transition: 0.3s;
-        }
-
-        .btn-custom:hover {
-            background: rgb(66, 74, 82);
-        }
-
-        .input-group-text {
-            background: #f1f1f1;
-            border-radius: 8px 0 0 8px;
-        }
-
-        .form-check p {
-            text-align: left;
-            font-size: 14px;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .login-container {
-                padding: 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="./style/admin.css">
 </head>
 
 <body>
@@ -315,39 +194,36 @@ if (isset($_POST['create_breaking_news'])) {
                 </thead>
                 <tbody>
                     <?php while ($row = $articles->fetch_assoc()): ?>
-                        <tr>
-                            <td><?= $row['id'] ?></td>
-                            <td><input type="text" class="form-control" name="title"
-                                    value="<?= htmlspecialchars($row['title']) ?>"></td>
-                            <td><input type="text" class="form-control" name="content"
-                                    value="<?= htmlspecialchars($row['content']) ?>"></td> <!-- Updated -->
-                            <td><input type="text" class="form-control" name="author"
-                                    value="<?= htmlspecialchars($row['author']) ?>"></td>
-                            <td>
-                                <select class="form-select" name="category_id">
-                                    <?php
-                                    $cats = $category->readAll();
-                                    while ($c = $cats->fetch_assoc()): ?>
-                                        <option value="<?= $c['category_id'] ?>" <?= $c['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($c['category_name']) ?>
-                                        </option>
-                                    <?php endwhile; ?>
-                                </select>
-                            </td>
-                            <form method="POST">
+                        <form method="POST">
+                            <tr>
+                                <td><?= $row['id'] ?></td>
+                                <td><input type="text" class="form-control" name="title" value="<?= htmlspecialchars($row['title']) ?>"></td>
+                                <td><input type="text" class="form-control" name="content" value="<?= htmlspecialchars($row['content']) ?>"></td>
+                                <td><input type="text" class="form-control" name="author" value="<?= htmlspecialchars($row['author']) ?>"></td>
+                                <td>
+                                    <select class="form-select" name="category_id">
+                                        <?php
+                                        $cats = $category->readAll();
+                                        while ($c = $cats->fetch_assoc()):
+                                        ?>
+                                            <option value="<?= $c['category_id'] ?>" <?= $c['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($c['category_name']) ?>
+                                            </option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </td>
                                 <td class="bbbtn">
-
                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                     <button type="submit" name="update" class="btn btn-warning">Update</button>
                                     <button type="submit" name="delete" class="btn btn-danger">Delete</button>
                                     <button type="submit" name="send" class="btn btn-primary">Send</button>
                                 </td>
-
-                            </form>
-                        </tr>
+                            </tr>
+                        </form>
                     <?php endwhile; ?>
                 </tbody>
             </table>
+
         </div>
         <!-- BREAKING NEWS MANAGEMENT -->
         <div class="section">
