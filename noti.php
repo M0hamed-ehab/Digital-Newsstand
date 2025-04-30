@@ -1,78 +1,33 @@
 <?php
 include_once 'config/Database.php';
+include_once 'classes/Article.php';
+include_once 'classes/User.php';
+include_once 'classes/Notification.php';
 
 $db = Database::getInstance()->getConnection();
 
-$categories_query = "SELECT * FROM category ORDER BY category_name ASC";
-$categories_result = $db->query($categories_query);
+
+$articleObj = new Article($db);
+$userObj = new User($db);
+$notificationObj = new Notification($db);
+
+$categories_result = $articleObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-if ($search_term !== '') {
-    $search_term_like = '%' . $search_term . '%';
+$notfications_count = $userObj->getNotificationsCount();
 
-    $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?";
-    $count_stmt = $db->prepare($count_query);
-    $count_stmt->bind_param("sss", $search_term_like, $search_term_like, $search_term_like);
-    $count_stmt->execute();
-    $count_result = $count_stmt->get_result();
-    $total_articles = 0;
-    if ($count_result && $row = $count_result->fetch_assoc()) {
-        $total_articles = $row['total'];
-    }
-    $count_stmt->close();
-
-    $articles_query = "
-    SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-    c.category_name
-    FROM articles a
-    LEFT JOIN category c ON a.category_id = c.category_id
-    WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?
-    ORDER BY a.created_at DESC
-    LIMIT ? OFFSET ?
-";
-    $stmt = $db->prepare($articles_query);
-    $stmt->bind_param("sssii", $search_term_like, $search_term_like, $search_term_like, $articles_per_page, $offset);
-    $stmt->execute();
-    $articles_result = $stmt->get_result();
-} else {
-    $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE c.category_id = ? OR ? = 0
-        ORDER BY a.created_at DESC
-    ";
-    $stmt = $db->prepare($articles_query);
-    $stmt->bind_param("ii", $selected_category, $selected_category);
-    $stmt->execute();
-    $articles_result = $stmt->get_result();
-}
-
-$breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
-$breaking_news_result = $db->query($breaking_news_query);
-
-$popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
-$popular_articles_result = $db->query($popular_articles_query);
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit();
-}
 function isUserLoggedIn()
 {
-    return isset($_SESSION['user_id']);
+    global $userObj;
+    return $userObj->isLoggedIn();
 }
 
 function isSignedUp()
 {
-    return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
+    global $userObj;
+    return $userObj->isSignedUp();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['delete_notfication_id']) || isset($_POST['delete_all']))) {
@@ -81,15 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['delete_notfication_i
     if ($user_id > 0) {
         if (isset($_POST['delete_notfication_id'])) {
             $notfication_id = intval($_POST['delete_notfication_id']);
-            $delete_stmt = $db->prepare("DELETE FROM notfications WHERE notfication_id = ? AND user_id = ?");
-            $delete_stmt->bind_param("ii", $notfication_id, $user_id);
-            $delete_stmt->execute();
-            $delete_stmt->close();
+            $notificationObj->deleteNotification($notfication_id, $user_id);
         } elseif (isset($_POST['delete_all'])) {
-            $delete_all_stmt = $db->prepare("DELETE FROM notfications WHERE user_id = ?");
-            $delete_all_stmt->bind_param("i", $user_id);
-            $delete_all_stmt->execute();
-            $delete_all_stmt->close();
+            $notificationObj->deleteAllNotifications($user_id);
         }
     }
 
@@ -100,26 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['delete_notfication_i
 $notfications = [];
 if (isUserLoggedIn()) {
     $user_id = $_SESSION['user_id'];
-    $notif_stmt = $db->prepare("SELECT notfication_id, article_id, notfication_description FROM notfications WHERE user_id = ? ORDER BY notfication_id DESC");
-    $notif_stmt->bind_param("i", $user_id);
-    $notif_stmt->execute();
-    $notif_result = $notif_stmt->get_result();
-    while ($row = $notif_result->fetch_assoc()) {
-        $notfications[] = $row;
-    }
-    $notif_stmt->close();
+    $notfications = $notificationObj->getNotifications($user_id);
 }
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
-    $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $notfications_count = $row['count'];
-    }
-    $stmt->close();
+    $notfications_count = $userObj->getNotificationsCount();
 }
 ?>
 
@@ -527,7 +462,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                        <li class=" nav-item">
+                                                    <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>
