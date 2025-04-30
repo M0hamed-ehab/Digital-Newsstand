@@ -3,7 +3,7 @@ session_start();
 include 'config/Database.php';
 
 $database = new Database();
-$conn = $database->connect();
+$db = Database::getInstance()->getConnection();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);

@@ -7,7 +7,7 @@ if (isset($_POST['user_id'], $_POST['article_id'], $_POST['action'])) {
     $article_id = $_POST['article_id'];
     $action = $_POST['action'];
 
-    $db = (new Database())->connect();
+    $db = Database::getInstance()->getConnection();
 
     if ($action === 'add') {
         $query = "INSERT INTO bookmarks (user_id, article_id) VALUES (?, ?)";
