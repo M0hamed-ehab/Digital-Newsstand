@@ -48,10 +48,16 @@ class Article {
             $imageName = basename($files['image']['name']);
             $targetDirectory = "images/";
             $targetFile = $targetDirectory . $imageName;
+        
             if (move_uploaded_file($files['image']['tmp_name'], $targetFile)) {
                 $this->image_path = $imageName;
+            } else {
+                echo "File upload failed.";
             }
+        } else {
+            echo "No file uploaded or error occurred.";
         }
+        
 
         return $this->create();
     }

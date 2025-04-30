@@ -115,171 +115,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="/images/article.png">
-
-    <style>
-        body {
-            font-family: 'Open Sans', sans-serif;
-            background-image: url('images/g5.jpg');
-            background-size: auto;
-            color: #343a40;
-            line-height: 1.7;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
-            transition: color 0.3s ease-in-out;
-        }
-
-        a:hover {
-            color: #0056b3;
-        }
-
-        .container {
-            max-width: 960px;
-            margin: 2rem auto;
-            padding: 1.5rem;
-            background-color: #fff;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
-            border-radius: 0.5rem;
-        }
-
-        .article-header {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .article-header-left {
-            flex-grow: 1;
-        }
-
-        .article-header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #212529;
-            margin-bottom: 0.5rem;
-            line-height: 1.2;
-        }
-
-        .article-meta {
-            font-size: 0.95rem;
-            color: #6c757d;
-            margin-bottom: 1rem;
-        }
-
-        .article-meta a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .article-meta a:hover {
-            text-decoration: underline;
-        }
-
-        .article-actions {
-            display: flex;
-            align-items: center;
-        }
-
-        .article-actions i {
-            color: #6C757D;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        #translate-icon {
-            margin-right: 0.5rem;
-            /* Adjust spacing between icon and dropdown */
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: #6c757d;
-            transition: color 0.2s ease-in-out;
-        }
-
-        #translate-icon:hover {
-            color: #007bff;
-        }
-
-        .article-actions a {
-            margin-left: 1rem;
-            font-size: 1.2rem;
-            color: #6c757d;
-            cursor: pointer;
-            transition: color 0.2s ease-in-out;
-        }
-
-        .article-actions a:hover,
-        .article-actions i:hover {
-            color: #007bff;
-        }
-
-        .article-content {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #495057;
-            margin-bottom: 2rem;
-            display: grid;
-        }
-
-        .share-icons {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e9ecef;
-            text-align: center;
-        }
-
-        .share-icons h5 {
-            font-size: 1.1rem;
-            color: #495057;
-            margin-bottom: 1rem;
-        }
-
-        .share-icons a {
-            display: inline-block;
-            margin: 0 0.75rem;
-            font-size: 1.5rem;
-            color: #007bff;
-            transition: color 0.2s ease-in-out;
-        }
-
-        .share-icons a:hover {
-            color: #0056b3;
-        }
-
-        .back-link {
-            margin-top: 1.5rem;
-            display: inline-block;
-        }
-
-        .favorited {
-            color: #e52b6f !important;
-        }
-
-        .bookmarked {
-            color: #007BFF !important;
-        }
-
-        .goog-te-gadget-simple {
-            border: none !important;
-        }
-
-        .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed {
-            display: none !important;
-        }
-
-        .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed span {
-            display: none !important;
-        }
-
-        .goog-te-gadget img {
-            left: 35%;
-            position: relative;
-        }
-    </style>
+    <link rel="stylesheet" href="./article.css">
 </head>
 
 <body>
@@ -483,7 +319,7 @@ if (isset($_SESSION['user_id'])) {
             }
 
             if (isset($_SESSION['user_id'])) {
-                ?>
+            ?>
                 <form method="POST" id="comment-form">
                     <div class="mb-3">
                         <label for="comment_description" class="form-label">Leave a Comment</label>
@@ -492,7 +328,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <button type="submit" class="btn btn-success">Submit Comment</button>
                 </form>
-                <?php
+            <?php
             } else {
                 echo '<p>Please <a href="login.html">log in</a> to leave a comment.</p>';
             }
@@ -513,12 +349,12 @@ if (isset($_SESSION['user_id'])) {
             let action = iconElement.classList.contains('far') ? 'add' : 'remove';
 
             fetch('add_to_favorites.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
-            })
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+                })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -548,12 +384,12 @@ if (isset($_SESSION['user_id'])) {
             let action = iconElement.classList.contains('far') ? 'add' : 'remove';
 
             fetch('add_to_bookmarks.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
-            })
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+                })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -635,10 +471,10 @@ if (isset($_SESSION['user_id'])) {
         synth.addEventListener("cancel", resetIcon);
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const commentToggleBtn = document.getElementById("comment-toggle-btn");
             if (commentToggleBtn) {
-                commentToggleBtn.addEventListener("click", function (e) {
+                commentToggleBtn.addEventListener("click", function(e) {
                     e.preventDefault();
                     const commentSection = document.getElementById("comment-section");
                     if (commentSection.style.display === "none" || commentSection.style.display === "") {
@@ -661,13 +497,15 @@ if (isset($_SESSION['user_id'])) {
 
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-        </script>
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        document.getElementById("download-icon").addEventListener("click", async function () {
-            const { jsPDF } = window.jspdf;
+        document.getElementById("download-icon").addEventListener("click", async function() {
+            const {
+                jsPDF
+            } = window.jspdf;
             const articleElement = document.querySelector(".article-content");
 
             if (!articleElement) {
