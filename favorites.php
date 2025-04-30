@@ -2,103 +2,35 @@
 session_start();
 include_once 'config/Database.php';
 include_once 'classes/user_favs.php';
+include_once 'classes/Article.php';
+include_once 'classes/User.php';
+
+$db = Database::getInstance()->getConnection();
 
 $userFavorites = new user_favs();
 $favorites = $userFavorites->getUserFavorites();
 
+$articleObj = new Article($db);
+$userObj = new User($db);
 
-
-
-
-
-$db = Database::getInstance()->getConnection();
-
-$categories_query = "SELECT * FROM category ORDER BY category_name ASC";
-$categories_result = $db->query($categories_query);
+$categories_result = $articleObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-if ($search_term !== '') {
-    $search_term_like = '%' . $search_term . '%';
-
-    $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?";
-    $count_stmt = $db->prepare($count_query);
-    $count_stmt->bind_param("sss", $search_term_like, $search_term_like, $search_term_like);
-    $count_stmt->execute();
-    $count_result = $count_stmt->get_result();
-    $total_articles = 0;
-    if ($count_result && $row = $count_result->fetch_assoc()) {
-        $total_articles = $row['total'];
-    }
-    $count_stmt->close();
-
-    $articles_query = "
-    SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-    c.category_name
-    FROM articles a
-    LEFT JOIN category c ON a.category_id = c.category_id
-    WHERE a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?
-    ORDER BY a.created_at DESC
-    LIMIT ? OFFSET ?
-";
-    $stmt = $db->prepare($articles_query);
-    $stmt->bind_param("sssii", $search_term_like, $search_term_like, $search_term_like, $articles_per_page, $offset);
-    $stmt->execute();
-    $articles_result = $stmt->get_result();
-} else {
-    $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE c.category_id = ? OR ? = 0
-        ORDER BY a.created_at DESC
-    ";
-    $stmt = $db->prepare($articles_query);
-    $stmt->bind_param("ii", $selected_category, $selected_category);
-    $stmt->execute();
-    $articles_result = $stmt->get_result();
-}
-
-$breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
-$breaking_news_result = $db->query($breaking_news_query);
-
-$popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
-$popular_articles_result = $db->query($popular_articles_query);
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+$notfications_count = $userObj->getNotificationsCount();
 
 function isUserLoggedIn()
 {
-    return isset($_SESSION['user_id']);
+    global $userObj;
+    return $userObj->isLoggedIn();
 }
 
 function isSignedUp()
 {
-    return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
+    global $userObj;
+    return $userObj->isSignedUp();
 }
-
-
-
-
-$dbx = Database::getInstance()->getConnection();
-
-$notfications_count = 0;
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $notfications_count = $row['count'];
-    }
-    $stmt->close();
-}
-
 
 ?>
 
@@ -160,7 +92,7 @@ if (isset($_SESSION['user_id'])) {
                         </li>
                     </ul>
                                 <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                        <li class=" nav-item">
+                                                                                <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>
@@ -221,8 +153,8 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             <?php else: ?>
                 <div class="row">
-                    
-                <?php if (empty($favorites)): ?>
+
+                    <?php if (empty($favorites)): ?>
                         <div class="alert alert-danger" role="alert">
                             You have no Favorites yet. Start adding some to your Favorite
                         </div>
@@ -239,7 +171,8 @@ if (isset($_SESSION['user_id'])) {
                                             <small><?= date("F j, Y", strtotime($favorite['created_at'])) ?></small>
                                         </p>
                                         <a href="article.php?id=<?= $favorite['id'] ?>" class="btn btn-primary">Read More</a>
-                                        <a href="#" class="btn btn-danger" onclick="removeFromFavorites(<?= $favorite['id'] ?>); return false;">
+                                        <a href="#" class="btn btn-danger"
+                                            onclick="removeFromFavorites(<?= $favorite['id'] ?>); return false;">
                                             Remove from Bookmarks
                                         </a>
                                     </div>
