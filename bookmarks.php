@@ -114,7 +114,7 @@ function isSignedUp()
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
 
-                                                                    <li class=" nav-item">
+                                                                        <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>
@@ -242,7 +242,6 @@ function isSignedUp()
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'removed') {
-                        alert('Article removed from bookmarks.');
                         location.reload();
                     } else {
                         alert('Failed to remove the article. Please try again.');

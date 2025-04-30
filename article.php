@@ -313,12 +313,13 @@ $show_ads = $user->shouldShowAds();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleFavorite(articleId, iconElement) {
+            let action = iconElement.classList.contains('far') ? 'add_favorite' : 'remove_favorite';
             fetch('article.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `action=${iconElement.classList.contains('far') ? 'add' : 'remove'}&article_id=${articleId}`,
+                body: `action=${action}&article_id=${articleId}`,
             })
                 .then(response => response.text())
                 .then(data => {
@@ -339,21 +340,14 @@ $show_ads = $user->shouldShowAds();
         }
 
         function toggleBookmark(articleId, iconElement) {
-            const userId = '<?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>';
+            let action = iconElement.classList.contains('far') ? 'add_bookmark' : 'remove_bookmark';
 
-            if (userId === '0') {
-                alert('Please log in to add/remove bookmarks.');
-                return;
-            }
-
-            let action = iconElement.classList.contains('far') ? 'add' : 'remove';
-
-            fetch('add_to_bookmarks.php', {
+            fetch('article.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+                body: `action=${action}&article_id=${articleId}`,
             })
                 .then(response => response.text())
                 .then(data => {
