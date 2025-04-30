@@ -1,9 +1,11 @@
 <?php
 include_once 'config/Database.php';
 include_once 'classes/Article.php';
+include_once 'classes/User.php';
 
 $db = Database::getInstance()->getConnection();
 $articleObj = new Article($db);
+$userObj = new User($db);
 
 $categories_result = $articleObj->getCategories();
 
@@ -41,60 +43,9 @@ $breaking_news_result = $db->query($breaking_news_query);
 $popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
 $popular_articles_result = $db->query($popular_articles_query);
 
-if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-}
+$show_ads = $userObj->shouldShowAds();
 
-$show_ads = true;
-if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
-        $sub_stmt->bind_param("i", $user_id);
-        $sub_stmt->execute();
-        $sub_result = $sub_stmt->get_result();
-        if ($sub_result && $row = $sub_result->fetch_assoc()) {
-                if ($row['subscription_name'] === 'full') {
-                        $show_ads = false;
-                }
-        }
-        $sub_stmt->close();
-}
-
-function isUserLoggedIn()
-{
-        return isset($_SESSION['user_id']);
-}
-
-function isSignedUp()
-{
-        return isset($_SESSION['just_signed_up']) && $_SESSION['just_signed_up'] === true;
-}
-
-
-
-
-$notfications_count = 0;
-if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-                $notfications_count = $row['count'];
-        }
-        $stmt->close();
-}
-
-
-
-
-
-
-
-
-
-
+$notfications_count = $userObj->getNotificationsCount();
 
 ?>
 
@@ -160,7 +111,7 @@ if (isset($_SESSION['user_id'])) {
                                                                 href="article.php?id=<?= $randomArticleId ?>">Discover</a>
                                                 </li>
                                         </ul>
-                                        <?php if (isUserLoggedIn() || isSignedUp()): ?>
+                                        <?php if ($userObj->isLoggedIn() || $userObj->isSignedUp()): ?>
                                                 <li class="
                                                                 nav-item">
                                                         <a class="nav-link position-relative" href="noti.php"
