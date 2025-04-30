@@ -1,0 +1,93 @@
+body {
+    background-color: #f4f4f4;
+    font-family: 'Open Sans', sans-serif;
+    color: #333;
+}
+
+header {
+    background-color: #343a40;
+    padding: 20px 0;
+    text-align: center;
+    color: #fff;
+    font-family: 'Merriweather', serif;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+header p {
+    font-size: 1.2rem;
+}
+
+.container {
+    padding: 40px 15px;
+}
+
+.section {
+    margin-top: 40px;
+}
+
+.login-container {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+}
+
+.login-container h2 {
+    margin-bottom: 30px;
+    font-family: 'Merriweather', serif;
+    font-weight: 700;
+    color: #333;
+}
+
+.form-control {
+    border-radius: 8px;
+    transition: 0.3s;
+    font-size: 16px;
+}
+
+.form-control:focus {
+    border-color: #343a40;
+    box-shadow: 0 0 8px rgba(30, 58, 138, 0.5);
+}
+
+.bbbtn {
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.btn-custom {
+    background: #343a40;
+    color: #fff;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.btn-custom:hover {
+    background: rgb(66, 74, 82);
+}
+
+.input-group-text {
+    background: #f1f1f1;
+    border-radius: 8px 0 0 8px;
+}
+
+.form-check p {
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 20px;
+    }
+}

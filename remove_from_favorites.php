@@ -12,7 +12,6 @@ $article_id = $_POST['article_id'];
 
 $db = Database::getInstance()->getConnection();
 
-// Delete the article from favorites in the 'favorites' table
 $query = "DELETE FROM favorites WHERE user_id = ? AND article_id = ?";
 $stmt = $db->prepare($query);
 $stmt->bind_param("ii", $user_id, $article_id);
