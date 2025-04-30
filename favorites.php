@@ -2,7 +2,7 @@
 session_start();
 include_once 'config/Database.php';
 
-$db = (new Database())->connect();
+$db = Database::getInstance()->getConnection();
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
