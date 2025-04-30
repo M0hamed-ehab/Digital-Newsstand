@@ -1,10 +1,11 @@
 <?php
 include_once 'config/Database.php';
+include_once 'classes/Article.php';
 
 $db = Database::getInstance()->getConnection();
+$articleObj = new Article($db);
 
-$categories_query = "SELECT * FROM category ORDER BY category_name ASC";
-$categories_result = $db->query($categories_query);
+$categories_result = $articleObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -28,89 +29,11 @@ if ($search_term !== '') {
 } else {
         $heading_text = "Latest Headlines";
 }
+
 $articles_per_page = 5;
-$offset = ($page - 1) * $articles_per_page;
 
-if ($search_term !== '') {
-        $keywords = preg_split('/\s+/', $search_term, -1, PREG_SPLIT_NO_EMPTY);
-
-        $count_conditions = [];
-        $count_params = [];
-        $count_types = '';
-        foreach ($keywords as $keyword) {
-                $count_conditions[] = "(a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?)";
-                $like_keyword = '%' . $keyword . '%';
-                $count_params[] = $like_keyword;
-                $count_params[] = $like_keyword;
-                $count_params[] = $like_keyword;
-                $count_types .= 'sss';
-        }
-        $count_where = implode(' AND ', $count_conditions);
-        $count_query = "SELECT COUNT(*) as total FROM articles a LEFT JOIN category c ON a.category_id = c.category_id WHERE $count_where";
-        $count_stmt = $db->prepare($count_query);
-        $count_stmt->bind_param($count_types, ...$count_params);
-        $count_stmt->execute();
-        $count_result = $count_stmt->get_result();
-        $total_articles = 0;
-        if ($count_result && $row = $count_result->fetch_assoc()) {
-                $total_articles = $row['total'];
-        }
-        $count_stmt->close();
-
-        $article_conditions = [];
-        $article_params = [];
-        $article_types = '';
-        foreach ($keywords as $keyword) {
-                $article_conditions[] = "(a.content LIKE ? OR a.author LIKE ? OR c.category_name LIKE ?)";
-                $like_keyword = '%' . $keyword . '%';
-                $article_params[] = $like_keyword;
-                $article_params[] = $like_keyword;
-                $article_params[] = $like_keyword;
-                $article_types .= 'sss';
-        }
-        $article_where = implode(' AND ', $article_conditions);
-        $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE $article_where
-        ORDER BY a.created_at DESC
-        LIMIT ? OFFSET ?
-    ";
-        $stmt = $db->prepare($articles_query);
-        $article_types .= 'ii';
-        $article_params[] = $articles_per_page;
-        $article_params[] = $offset;
-        $stmt->bind_param($article_types, ...$article_params);
-        $stmt->execute();
-        $articles_result = $stmt->get_result();
-} else {
-        $count_query = "SELECT COUNT(*) as total FROM articles WHERE category_id = ? OR ? = 0";
-        $count_stmt = $db->prepare($count_query);
-        $count_stmt->bind_param("ii", $selected_category, $selected_category);
-        $count_stmt->execute();
-        $count_result = $count_stmt->get_result();
-        $total_articles = 0;
-        if ($count_result && $row = $count_result->fetch_assoc()) {
-                $total_articles = $row['total'];
-        }
-        $count_stmt->close();
-
-        $articles_query = "
-        SELECT a.id, a.title, a.author, SUBSTR(a.content, 1, 300) AS short_content, a.created_at,
-        c.category_name
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE c.category_id = ? OR ? = 0
-        ORDER BY a.created_at DESC
-        LIMIT ? OFFSET ?
-    ";
-        $stmt = $db->prepare($articles_query);
-        $stmt->bind_param("iiii", $selected_category, $selected_category, $articles_per_page, $offset);
-        $stmt->execute();
-        $articles_result = $stmt->get_result();
-}
+$total_articles = $articleObj->getTotalArticles($search_term, $selected_category);
+$articles_result = $articleObj->getArticles($search_term, $selected_category, $page, $articles_per_page);
 
 $breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
 $breaking_news_result = $db->query($breaking_news_query);
@@ -230,69 +153,70 @@ if (isset($_SESSION['user_id'])) {
                                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                                                 <li>
+                                                        <?php
+                                                        $randomArticleId = $articleObj->getRandomArticleId();
+                                                        ?>
                                                         <a class="nav-link"
-                                                                href="random_article.php" ">Discover</a>
-</li>
-</ul>
-                                        <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                                                                                                                        <li class="
-                                                                nav-item">
-                                                                        <a class="nav-link position-relative" href="noti.php"
-                                                                                title="Notifications">
-                                                                                <i class="fas fa-bell fa-lg"></i>
-                                                                                <?php if ($notfications_count > 0): ?>
-                                                                                        <span
-                                                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                                                                <?= $notfications_count ?>
-                                                                                                <span class="visually-hidden">unread
-                                                                                                        notifications</span>
-                                                                                        </span>
-                                                                                <?php endif; ?>
-                                                                        </a>
-                                                        </li>
-                                                        <li class="nav-item user-dropdown">
-                                                                <a class="nav-link" href="#" id="userDropdown" role="button"
-                                                                        data-bs-toggle="dropdown" aria-expanded="false"
-                                                                        title="User Menu">
-                                                                        <i class="fas fa-user-circle fa-lg"></i>
-                                                                </a>
-                                                                <ul class="dropdown-menu user-dropdown-menu"
-                                                                        aria-labelledby="userDropdown">
-                                                                        <li><a class="dropdown-item" href="profile.php"><i
-                                                                                                class="fas fa-user me-2"></i>
-                                                                                        Profile</a></li>
-                                                                        <li><a class="dropdown-item" href="favorites.php"><i
-                                                                                                class="fas fa-heart me-2"></i>
-                                                                                        Favorites</a></li>
-                                                                        <li><a class="dropdown-item" href="bookmarks.php"><i
-                                                                                                class="fas fa-bookmark me-2"></i>
-                                                                                        Bookmarks</a></li>
-                                                                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                                                                                <li><a class="dropdown-item" href="admin.php"><i
-                                                                                                        class="fas fa-user-shield me-2"></i>
-                                                                                                Admin Panel</a></li>
-                                                                        <?php endif; ?>
-                                                                        <li>
-                                                                                <hr class="dropdown-divider">
-                                                                        </li>
-                                                                        <li><a class="dropdown-item" href="logout.php"><i
-                                                                                                class="fas fa-sign-out-alt me-2"></i>
-                                                                                        Logout</a></li>
-                                                                </ul>
-                                                        </li>
-                                                <?php else: ?>
-                                                        <li class="nav-item">
-                                                                <a class="nav-link" href="login.html"><i
-                                                                                class="fas fa-sign-in-alt"></i>
-                                                                        Login</a>
-                                                        </li>
-                                                        <li class="nav-item">
-                                                                <a class="nav-link" href="signup.html"><i
-                                                                                class="fas fa-user-plus"></i>
-                                                                        Signup</a>
-                                                        </li>
-                                                <?php endif; ?>
+                                                                href="article.php?id=<?= $randomArticleId ?>">Discover</a>
+                                                </li>
                                         </ul>
+                                        <?php if (isUserLoggedIn() || isSignedUp()): ?>
+                                                <li class="
+                                                                nav-item">
+                                                        <a class="nav-link position-relative" href="noti.php"
+                                                                title="Notifications">
+                                                                <i class="fas fa-bell fa-lg"></i>
+                                                                <?php if ($notfications_count > 0): ?>
+                                                                        <span
+                                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                                                <?= $notfications_count ?>
+                                                                                <span class="visually-hidden">unread
+                                                                                        notifications</span>
+                                                                        </span>
+                                                                <?php endif; ?>
+                                                        </a>
+                                                </li>
+                                                <li class="nav-item user-dropdown">
+                                                        <a class="nav-link" href="#" id="userDropdown" role="button"
+                                                                data-bs-toggle="dropdown" aria-expanded="false"
+                                                                title="User Menu">
+                                                                <i class="fas fa-user-circle fa-lg"></i>
+                                                        </a>
+                                                        <ul class="dropdown-menu user-dropdown-menu"
+                                                                aria-labelledby="userDropdown">
+                                                                <li><a class="dropdown-item" href="profile.php"><i
+                                                                                        class="fas fa-user me-2"></i>
+                                                                                Profile</a></li>
+                                                                <li><a class="dropdown-item" href="favorites.php"><i
+                                                                                        class="fas fa-heart me-2"></i>
+                                                                                Favorites</a></li>
+                                                                <li><a class="dropdown-item" href="bookmarks.php"><i
+                                                                                        class="fas fa-bookmark me-2"></i>
+                                                                                Bookmarks</a></li>
+                                                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                                                        <li><a class="dropdown-item" href="admin.php"><i
+                                                                                                class="fas fa-user-shield me-2"></i>
+                                                                                        Admin Panel</a></li>
+                                                                <?php endif; ?>
+                                                                <li>
+                                                                        <hr class="dropdown-divider">
+                                                                </li>
+                                                                <li><a class="dropdown-item" href="logout.php"><i
+                                                                                        class="fas fa-sign-out-alt me-2"></i>
+                                                                                Logout</a></li>
+                                                        </ul>
+                                                </li>
+                                        <?php else: ?>
+                                                <li class="nav-item">
+                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                                                Login</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                        <a class="nav-link" href="signup.html"><i class="fas fa-user-plus"></i>
+                                                                Signup</a>
+                                                </li>
+                                        <?php endif; ?>
+                                </ul>
                         </div>
                 </div>
         </nav>
