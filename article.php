@@ -1,76 +1,34 @@
 <?php
 include_once 'config/Database.php';
+include_once 'classes/Article.php';
+include_once 'classes/User.php';
 
 $db = Database::getInstance()->getConnection();
-session_start();
+
+$user = new User($db);
+$articleObj = new Article($db);
 
 $full = false;
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $subscription_query = "SELECT subscription_name FROM subscription WHERE user_id = ?";
-    $stmt = $db->prepare($subscription_query);
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $subscription_result = $stmt->get_result();
-    if ($subscription_result->num_rows > 0) {
-        $subscription = $subscription_result->fetch_assoc();
-        if ($subscription['subscription_name'] === 'full') {
-            $full = true;
-        }
-    }
-}
+$is_favorited = false;
+$is_booked = false;
+$article = null;
+$error_message = null;
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $article_id = $_GET['id'];
+    $article_id = (int) $_GET['id'];
 
-    $update_views_query = "UPDATE articles SET views = views + 1 WHERE id = ?";
-    $update_stmt = $db->prepare($update_views_query);
-    $update_stmt->bind_param("i", $article_id);
-    $update_stmt->execute();
-    $update_stmt->close();
+    $articleObj->incrementViews($article_id);
 
-    $article_query = "
-        SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name, a.image_path
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.id = ?
-    ";
-
-    $stmt = $db->prepare($article_query);
-    $stmt->bind_param("i", $article_id);
-    $stmt->execute();
-    $article_result = $stmt->get_result();
-
-    if ($article_result->num_rows > 0) {
-        $article = $article_result->fetch_assoc();
-    } else {
+    $article = $articleObj->getArticleById($article_id);
+    if (!$article) {
         $error_message = "Article not found.";
     }
 
-    $is_favorited = false;
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        $favorite_query = "
-            SELECT 1 FROM favorites WHERE user_id = ? AND article_id = ?
-        ";
-        $stmt = $db->prepare($favorite_query);
-        $stmt->bind_param("ii", $user_id, $article_id);
-        $stmt->execute();
-        $favorite_result = $stmt->get_result();
-        $is_favorited = $favorite_result->num_rows > 0;
-    }
-
-    $is_booked = false;
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        $bookmark_query = "
-            SELECT 1 FROM bookmarks WHERE user_id = ? AND article_id = ?
-        ";
-        $stmt = $db->prepare($bookmark_query);
-        $stmt->bind_param("ii", $user_id, $article_id);
-        $stmt->execute();
-        $book_result = $stmt->get_result();
-        $is_booked = $book_result->num_rows > 0;
+    if ($user->isLoggedIn()) {
+        $user_id = $user->getUserId();
+        $is_favorited = $articleObj->isFavorited($user_id, $article_id);
+        $is_booked = $articleObj->isBookmarked($user_id, $article_id);
+        $full = ($user->getSubscriptionName() === 'full');
     }
 } else {
     $error_message = "Invalid article ID.";
@@ -78,25 +36,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
 $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-
-
-
-
-
-$show_ads = true;
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
-    $sub_stmt->bind_param("i", $user_id);
-    $sub_stmt->execute();
-    $sub_result = $sub_stmt->get_result();
-    if ($sub_result && $row = $sub_result->fetch_assoc()) {
-        if ($row['subscription_name'] === 'full') {
-            $show_ads = false;
-        }
-    }
-    $sub_stmt->close();
-}
+$show_ads = $user->shouldShowAds();
 
 
 
@@ -283,13 +223,10 @@ if (isset($_SESSION['user_id'])) {
             <h3>Comments</h3>
             <?php
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_description'])) {
-                if (isset($_SESSION['user_id'])) {
+                if ($user->isLoggedIn()) {
                     $comment_desc = trim($_POST['comment_description']);
                     if (!empty($comment_desc)) {
-                        $insert_comment_query = "INSERT INTO comment (description, user_id, article_id) VALUES (?, ?, ?)";
-                        $stmt = $db->prepare($insert_comment_query);
-                        $stmt->bind_param("sii", $comment_desc, $_SESSION['user_id'], $article_id);
-                        $stmt->execute();
+                        $articleObj->addComment($article_id, $user->getUserId(), $comment_desc);
                     }
                 } else {
                     echo '<div class="alert alert-warning">You must be logged in to post a comment.</div>';
@@ -303,12 +240,9 @@ if (isset($_SESSION['user_id'])) {
                 WHERE c.article_id = ?
                 ORDER BY c.comment_id DESC
             ";
-            $stmt = $db->prepare($comments_query);
-            $stmt->bind_param("i", $article_id);
-            $stmt->execute();
-            $comments_result = $stmt->get_result();
+            $comments_result = $articleObj->getComments($article_id);
 
-            if ($comments_result->num_rows > 0) {
+            if ($comments_result && $comments_result->num_rows > 0) {
                 echo '<ul class="list-group mb-3">';
                 while ($comment = $comments_result->fetch_assoc()) {
                     echo '<li class="list-group-item"><strong>' . htmlspecialchars($comment['name']) . ':</strong> <br>' . htmlspecialchars($comment['description']) . '</li>';
@@ -319,7 +253,7 @@ if (isset($_SESSION['user_id'])) {
             }
 
             if (isset($_SESSION['user_id'])) {
-            ?>
+                ?>
                 <form method="POST" id="comment-form">
                     <div class="mb-3">
                         <label for="comment_description" class="form-label">Leave a Comment</label>
@@ -328,7 +262,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <button type="submit" class="btn btn-success">Submit Comment</button>
                 </form>
-            <?php
+                <?php
             } else {
                 echo '<p>Please <a href="login.html">log in</a> to leave a comment.</p>';
             }
@@ -349,12 +283,12 @@ if (isset($_SESSION['user_id'])) {
             let action = iconElement.classList.contains('far') ? 'add' : 'remove';
 
             fetch('add_to_favorites.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+            })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -384,12 +318,12 @@ if (isset($_SESSION['user_id'])) {
             let action = iconElement.classList.contains('far') ? 'add' : 'remove';
 
             fetch('add_to_bookmarks.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+            })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -471,10 +405,10 @@ if (isset($_SESSION['user_id'])) {
         synth.addEventListener("cancel", resetIcon);
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const commentToggleBtn = document.getElementById("comment-toggle-btn");
             if (commentToggleBtn) {
-                commentToggleBtn.addEventListener("click", function(e) {
+                commentToggleBtn.addEventListener("click", function (e) {
                     e.preventDefault();
                     const commentSection = document.getElementById("comment-section");
                     if (commentSection.style.display === "none" || commentSection.style.display === "") {
@@ -497,12 +431,12 @@ if (isset($_SESSION['user_id'])) {
 
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-    </script>
+        </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        document.getElementById("download-icon").addEventListener("click", async function() {
+        document.getElementById("download-icon").addEventListener("click", async function () {
             const {
                 jsPDF
             } = window.jspdf;

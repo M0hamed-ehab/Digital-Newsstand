@@ -72,5 +72,10 @@ class User
     {
         return $this->notificationsCount;
     }
+
+    public function getUserId()
+    {
+        return $this->userId;
+    }
 }
 ?>

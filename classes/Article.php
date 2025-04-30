@@ -258,5 +258,52 @@ class Article
         $stmt->execute();
         return $stmt->get_result()->num_rows > 0;
     }
+
+    public function incrementViews($article_id)
+    {
+        $stmt = $this->conn->prepare("UPDATE articles SET views = views + 1 WHERE id = ?");
+        $stmt->bind_param("i", $article_id);
+        return $stmt->execute();
+    }
+
+    public function getArticleById($article_id)
+    {
+        $query = "
+            SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name, a.image_path
+            FROM articles a
+            LEFT JOIN category c ON a.category_id = c.category_id
+            WHERE a.id = ?
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $article_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        return null;
+    }
+
+    public function getComments($article_id)
+    {
+        $query = "
+            SELECT c.description, u.name
+            FROM comment c
+            JOIN users u ON c.user_id = u.user_id
+            WHERE c.article_id = ?
+            ORDER BY c.comment_id DESC
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $article_id);
+        $stmt->execute();
+        return $stmt->get_result();
+    }
+
+    public function addComment($article_id, $user_id, $comment)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO comment (description, user_id, article_id) VALUES (?, ?, ?)");
+        $stmt->bind_param("sii", $comment, $user_id, $article_id);
+        return $stmt->execute();
+    }
 }
 ?>
