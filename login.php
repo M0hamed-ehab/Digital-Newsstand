@@ -1,7 +1,7 @@
 <?php
 include 'config/Database.php';
 
-$conn = Database::getInstance()->getConnection();
+$db = Database::getInstance()->getConnection();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);
@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    $stmt = $conn->prepare("SELECT user_id, password, role FROM users WHERE name = ?");
+    $stmt = $db->prepare("SELECT user_id, password, role FROM users WHERE name = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
@@ -38,5 +38,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
 }
 
-$conn->close();
+$db->close();
 ?>

@@ -11,6 +11,17 @@ $bookmarks = $userBooks->getUserBooks();
 
 
 
+$stmt = $db->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$bookmarks_result = $stmt->get_result();
+
+if ($bookmarks_result->num_rows > 0) {
+    $bookmarks = $bookmarks_result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $message = "You have no bookmarks yet.";
+}
+
 $db = Database::getInstance()->getConnection();
 
 $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
@@ -88,7 +99,7 @@ $dbx = Database::getInstance()->getConnection();
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
-    $stmt = $dbx->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM notfications WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -158,16 +169,35 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                            <li class=" nav-item">
-                                <a class="nav-link position-relative" href="noti.php" title="Notifications">
-                                    <i class="fas fa-bell fa-lg"></i>
-                                    <?php if ($notfications_count > 0): ?>
-                                        <span
-                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                            <?= $notfications_count ?>
-                                            <span class="visually-hidden">unread
-                                                notifications</span>
-                                        </span>
+
+                                                    <li class=" nav-item">
+                                    <a class="nav-link position-relative" href="noti.php" title="Notifications">
+                                        <i class="fas fa-bell fa-lg"></i>
+                                        <?php if ($notfications_count > 0): ?>
+                                            <span
+                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                <?= $notfications_count ?>
+                                                <span class="visually-hidden">unread
+                                                    notifications</span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </a>
+                            </li>
+                            <li class="nav-item user-dropdown">
+                                <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false" title="User Menu">
+                                    <i class="fas fa-user-circle fa-lg"></i>
+                                </a>
+                                <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>
+                                            Profile</a></li>
+                                    <li><a class="dropdown-item" href="favorites.php"><i class="fas fa-heart me-2"></i>
+                                            Favorites</a></li>
+                                    <li><a class="dropdown-item" href="bookmarks.php"><i class="fas fa-bookmark me-2"></i>
+                                            Bookmarks</a></li>
+                                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                        <li><a class="dropdown-item" href="admin.php"><i class="fas fa-user-shield me-2"></i>
+                                                Admin Panel</a></li>
                                     <?php endif; ?>
                                 </a>
                         </li>

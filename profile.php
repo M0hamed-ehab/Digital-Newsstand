@@ -10,6 +10,7 @@ try {
     $user = $profile->getUserInfo();
 } catch (Exception $e) {
     echo $e->getMessage();
+
     exit();
 }
 
