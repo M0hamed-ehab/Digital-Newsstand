@@ -1,7 +1,7 @@
 <?php
 include_once 'config/Database.php';
 
-$db = (new Database())->connect();
+$db = Database::getInstance()->getConnection();
 
 $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
 $categories_result = $db->query($categories_query);
@@ -58,7 +58,7 @@ function isSignedUp()
 
 
 
-$dbx = (new Database())->connect();
+$dbx = Database::getInstance()->getConnection();
 $notfications_count = 0;
 if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
