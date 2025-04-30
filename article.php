@@ -1,12 +1,37 @@
 <?php
+session_start();
 include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
+include_once 'classes/user_favs.php';
 
 $db = Database::getInstance()->getConnection();
 
 $user = new User($db);
 $articleObj = new Article($db);
+$userFavorites = new user_favs();
+
+// Handle AJAX add/remove favorite requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['article_id'])) {
+    $action = $_POST['action'];
+    $article_id = intval($_POST['article_id']);
+    if ($action === 'add') {
+        if ($userFavorites->addFavorite($article_id)) {
+            echo 'added';
+        } else {
+            echo 'error';
+        }
+    } elseif ($action === 'remove') {
+        if ($userFavorites->removeFavorite($article_id)) {
+            echo 'removed';
+        } else {
+            echo 'error';
+        }
+    } else {
+        echo 'error';
+    }
+    exit();
+}
 
 $full = false;
 $is_favorited = false;
@@ -37,6 +62,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
 $show_ads = $user->shouldShowAds();
+
 
 
 
@@ -273,21 +299,12 @@ $show_ads = $user->shouldShowAds();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleFavorite(articleId, iconElement) {
-            const userId = '<?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>';
-
-            if (userId === '0') {
-                alert('Please log in to add/remove favorites.');
-                return;
-            }
-
-            let action = iconElement.classList.contains('far') ? 'add' : 'remove';
-
-            fetch('add_to_favorites.php', {
+            fetch('article.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
+                body: `action=${iconElement.classList.contains('far') ? 'add' : 'remove'}&article_id=${articleId}`,
             })
                 .then(response => response.text())
                 .then(data => {

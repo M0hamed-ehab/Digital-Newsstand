@@ -8,6 +8,29 @@ include_once 'classes/User.php';
 $db = Database::getInstance()->getConnection();
 
 $userFavorites = new user_favs();
+
+// Handle AJAX add/remove favorite requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['article_id'])) {
+    $action = $_POST['action'];
+    $article_id = intval($_POST['article_id']);
+    if ($action === 'add') {
+        if ($userFavorites->addFavorite($article_id)) {
+            echo 'added';
+        } else {
+            echo 'error';
+        }
+    } elseif ($action === 'remove') {
+        if ($userFavorites->removeFavorite($article_id)) {
+            echo 'removed';
+        } else {
+            echo 'error';
+        }
+    } else {
+        echo 'error';
+    }
+    exit();
+}
+
 $favorites = $userFavorites->getUserFavorites();
 
 $articleObj = new Article($db);
@@ -92,7 +115,8 @@ function isSignedUp()
                         </li>
                     </ul>
                                 <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                                <li class=" nav-item">
+                                                                                                        <li class="
+                                nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>
@@ -173,7 +197,7 @@ function isSignedUp()
                                         <a href="article.php?id=<?= $favorite['id'] ?>" class="btn btn-primary">Read More</a>
                                         <a href="#" class="btn btn-danger"
                                             onclick="removeFromFavorites(<?= $favorite['id'] ?>); return false;">
-                                            Remove from Bookmarks
+                                            Remove from Favorites
                                         </a>
                                     </div>
                                 </div>
@@ -191,19 +215,16 @@ function isSignedUp()
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function removeFromFavorites(articleId) {
-            const userId = '<?php echo $_SESSION['user_id']; ?>';
-
-            fetch('remove_from_favorites.php', {
+            fetch('favorites.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `user_id=${userId}&article_id=${articleId}`
+                body: `action=remove&article_id=${articleId}`
             })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'removed') {
-                        alert('Article removed from favorites.');
                         location.reload();
                     } else {
                         alert('Failed to remove the article. Please try again.');
