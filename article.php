@@ -4,25 +4,39 @@ include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
 include_once 'classes/user_favs.php';
+include_once 'classes/user_book.php';
 
 $db = Database::getInstance()->getConnection();
 
 $user = new User($db);
 $articleObj = new Article($db);
 $userFavorites = new user_favs();
+$userBookmarks = new user_book();
 
-// Handle AJAX add/remove favorite requests
+// Handle AJAX add/remove favorite and bookmark requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['article_id'])) {
     $action = $_POST['action'];
     $article_id = intval($_POST['article_id']);
-    if ($action === 'add') {
+    if ($action === 'add_favorite') {
         if ($userFavorites->addFavorite($article_id)) {
             echo 'added';
         } else {
             echo 'error';
         }
-    } elseif ($action === 'remove') {
+    } elseif ($action === 'remove_favorite') {
         if ($userFavorites->removeFavorite($article_id)) {
+            echo 'removed';
+        } else {
+            echo 'error';
+        }
+    } elseif ($action === 'add_bookmark') {
+        if ($userBookmarks->addBookmark($article_id)) {
+            echo 'added';
+        } else {
+            echo 'error';
+        }
+    } elseif ($action === 'remove_bookmark') {
+        if ($userBookmarks->removeBookmark($article_id)) {
             echo 'removed';
         } else {
             echo 'error';
