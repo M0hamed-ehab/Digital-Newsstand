@@ -1,7 +1,7 @@
 <?php
 include_once 'config/Database.php';
 
-$db = (new Database())->connect();
+$db = Database::getInstance()->getConnection();
 session_start();
 
 $full = false;
