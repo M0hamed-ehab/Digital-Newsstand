@@ -98,7 +98,7 @@ if (isset($_POST['create_breaking_news'])) {
         <!-- CATEGORY MANAGEMENT -->
         <div class="section">
             <h2>📁 Manage Categories</h2>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="category_name" class="form-label">New Category</label>
                     <input type="text" class="form-control" name="category_name" placeholder="Enter category name"
@@ -145,7 +145,7 @@ if (isset($_POST['create_breaking_news'])) {
         <div class="section">
             <h2>📰 Manage Articles</h2>
 
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label">Title</label>
                     <input type="text" class="form-control" name="title" placeholder="Enter article title" required>

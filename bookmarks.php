@@ -9,19 +9,6 @@ $bookmarks = $userBooks->getUserBooks();
 
 
 
-
-
-$stmt = $db->prepare($query);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$bookmarks_result = $stmt->get_result();
-
-if ($bookmarks_result->num_rows > 0) {
-    $bookmarks = $bookmarks_result->fetch_all(MYSQLI_ASSOC);
-} else {
-    $message = "You have no bookmarks yet.";
-}
-
 $db = Database::getInstance()->getConnection();
 
 $categories_query = "SELECT * FROM category ORDER BY category_name ASC";
