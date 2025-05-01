@@ -1,6 +1,6 @@
 body {
     font-family: 'Open Sans', sans-serif;
-    background-image: url('images/g5.jpg');
+    background-image: url('../images/g5.jpg');
     background-size: auto;
     color: #343a40;
     line-height: 1.7;
@@ -41,7 +41,6 @@ a {
     display: flex;
     gap: 1.5rem;
     margin-top: 1.5rem;
-    justify-content: center;
 }
 
 .sidebar {
@@ -280,12 +279,12 @@ footer a:hover {
 
 @media (max-width: 992px) {
     .row {
-            flex-direction: column;
+        flex-direction: column;
     }
 
     .sidebar {
-            width: 100%;
-            margin-bottom: 1.5rem;
+        width: 100%;
+        margin-bottom: 1.5rem;
     }
 }
 
