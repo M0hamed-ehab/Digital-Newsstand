@@ -46,24 +46,19 @@ $articles = $article->readAll();
 $categoryList = $category->readAll(); // For dropdown
 
 
+include_once 'classes/News.php';
+
+$news = new News($db);
+
 // Handle breaking news creation
 if (isset($_POST['create_breaking_news'])) {
     $content = trim($_POST['breaking_content']);
     $duration = intval($_POST['breaking_duration']);
-    if ($duration < 1 || $duration > 60) {
-        $message = "Duration must be between 1 and 60 minutes.";
-    } elseif (empty($content)) {
-        $message = "Content cannot be empty.";
-    } else {
-        $stmt = $db->prepare("INSERT INTO breaking_news (content, duration) VALUES (?, ?)");
-        $stmt->bind_param("si", $content, $duration);
-        if ($stmt->execute()) {
-            $message = "Breaking news created successfully.";
-        } else {
-            $message = "Failed to create breaking news.";
-        }
-        $stmt->close();
-    }
+    $message = $news->createBreakingNews($content, $duration);
+}
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
 }
 ?>
 
@@ -197,15 +192,18 @@ if (isset($_POST['create_breaking_news'])) {
                         <form method="POST">
                             <tr>
                                 <td><?= $row['id'] ?></td>
-                                <td><input type="text" class="form-control" name="title" value="<?= htmlspecialchars($row['title']) ?>"></td>
-                                <td><input type="text" class="form-control" name="content" value="<?= htmlspecialchars($row['content']) ?>"></td>
-                                <td><input type="text" class="form-control" name="author" value="<?= htmlspecialchars($row['author']) ?>"></td>
+                                <td><input type="text" class="form-control" name="title"
+                                        value="<?= htmlspecialchars($row['title']) ?>"></td>
+                                <td><input type="text" class="form-control" name="content"
+                                        value="<?= htmlspecialchars($row['content']) ?>"></td>
+                                <td><input type="text" class="form-control" name="author"
+                                        value="<?= htmlspecialchars($row['author']) ?>"></td>
                                 <td>
                                     <select class="form-select" name="category_id">
                                         <?php
                                         $cats = $category->readAll();
                                         while ($c = $cats->fetch_assoc()):
-                                        ?>
+                                            ?>
                                             <option value="<?= $c['category_id'] ?>" <?= $c['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($c['category_name']) ?>
                                             </option>

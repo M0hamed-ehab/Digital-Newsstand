@@ -1,76 +1,73 @@
 <?php
+session_start();
 include_once 'config/Database.php';
+include_once 'classes/Article.php';
+include_once 'classes/User.php';
+include_once 'classes/user_favs.php';
+include_once 'classes/user_book.php';
 
 $db = Database::getInstance()->getConnection();
-session_start();
 
-$full = false;
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $subscription_query = "SELECT subscription_name FROM subscription WHERE user_id = ?";
-    $stmt = $db->prepare($subscription_query);
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $subscription_result = $stmt->get_result();
-    if ($subscription_result->num_rows > 0) {
-        $subscription = $subscription_result->fetch_assoc();
-        if ($subscription['subscription_name'] === 'full') {
-            $full = true;
+$user = new User($db);
+$articleObj = new Article($db);
+$userFavorites = new user_favs();
+$userBookmarks = new user_book();
+
+// Handle AJAX add/remove favorite and bookmark requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['article_id'])) {
+    $action = $_POST['action'];
+    $article_id = intval($_POST['article_id']);
+    if ($action === 'add_favorite') {
+        if ($userFavorites->addFavorite($article_id)) {
+            echo 'added';
+        } else {
+            echo 'error';
         }
+    } elseif ($action === 'remove_favorite') {
+        if ($userFavorites->removeFavorite($article_id)) {
+            echo 'removed';
+        } else {
+            echo 'error';
+        }
+    } elseif ($action === 'add_bookmark') {
+        if ($userBookmarks->addBookmark($article_id)) {
+            echo 'added';
+        } else {
+            echo 'error';
+        }
+    } elseif ($action === 'remove_bookmark') {
+        if ($userBookmarks->removeBookmark($article_id)) {
+            echo 'removed';
+        } else {
+            echo 'error';
+        }
+    } else {
+        echo 'error';
     }
+    exit();
 }
 
+$full = false;
+$is_favorited = false;
+$is_booked = false;
+$article = null;
+$error_message = null;
+
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $article_id = $_GET['id'];
+    $article_id = (int) $_GET['id'];
 
-    $update_views_query = "UPDATE articles SET views = views + 1 WHERE id = ?";
-    $update_stmt = $db->prepare($update_views_query);
-    $update_stmt->bind_param("i", $article_id);
-    $update_stmt->execute();
-    $update_stmt->close();
+    $articleObj->incrementViews($article_id);
 
-    $article_query = "
-        SELECT a.id, a.title, a.author, a.content, a.created_at, c.category_name, a.image_path
-        FROM articles a
-        LEFT JOIN category c ON a.category_id = c.category_id
-        WHERE a.id = ?
-    ";
-
-    $stmt = $db->prepare($article_query);
-    $stmt->bind_param("i", $article_id);
-    $stmt->execute();
-    $article_result = $stmt->get_result();
-
-    if ($article_result->num_rows > 0) {
-        $article = $article_result->fetch_assoc();
-    } else {
+    $article = $articleObj->getArticleById($article_id);
+    if (!$article) {
         $error_message = "Article not found.";
     }
 
-    $is_favorited = false;
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        $favorite_query = "
-            SELECT 1 FROM favorites WHERE user_id = ? AND article_id = ?
-        ";
-        $stmt = $db->prepare($favorite_query);
-        $stmt->bind_param("ii", $user_id, $article_id);
-        $stmt->execute();
-        $favorite_result = $stmt->get_result();
-        $is_favorited = $favorite_result->num_rows > 0;
-    }
-
-    $is_booked = false;
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        $bookmark_query = "
-            SELECT 1 FROM bookmarks WHERE user_id = ? AND article_id = ?
-        ";
-        $stmt = $db->prepare($bookmark_query);
-        $stmt->bind_param("ii", $user_id, $article_id);
-        $stmt->execute();
-        $book_result = $stmt->get_result();
-        $is_booked = $book_result->num_rows > 0;
+    if ($user->isLoggedIn()) {
+        $user_id = $user->getUserId();
+        $is_favorited = $articleObj->isFavorited($user_id, $article_id);
+        $is_booked = $articleObj->isBookmarked($user_id, $article_id);
+        $full = ($user->getSubscriptionName() === 'full');
     }
 } else {
     $error_message = "Invalid article ID.";
@@ -78,25 +75,8 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
 $article_url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
+$show_ads = $user->shouldShowAds();
 
-
-
-
-
-$show_ads = true;
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $sub_stmt = $db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
-    $sub_stmt->bind_param("i", $user_id);
-    $sub_stmt->execute();
-    $sub_result = $sub_stmt->get_result();
-    if ($sub_result && $row = $sub_result->fetch_assoc()) {
-        if ($row['subscription_name'] === 'full') {
-            $show_ads = false;
-        }
-    }
-    $sub_stmt->close();
-}
 
 
 
@@ -115,7 +95,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="/images/article.png">
-    <link rel="stylesheet" href="./article.css">
+    <link rel="stylesheet" href="style/article.css">
 </head>
 
 <body>
@@ -283,13 +263,10 @@ if (isset($_SESSION['user_id'])) {
             <h3>Comments</h3>
             <?php
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_description'])) {
-                if (isset($_SESSION['user_id'])) {
+                if ($user->isLoggedIn()) {
                     $comment_desc = trim($_POST['comment_description']);
                     if (!empty($comment_desc)) {
-                        $insert_comment_query = "INSERT INTO comment (description, user_id, article_id) VALUES (?, ?, ?)";
-                        $stmt = $db->prepare($insert_comment_query);
-                        $stmt->bind_param("sii", $comment_desc, $_SESSION['user_id'], $article_id);
-                        $stmt->execute();
+                        $articleObj->addComment($article_id, $user->getUserId(), $comment_desc);
                     }
                 } else {
                     echo '<div class="alert alert-warning">You must be logged in to post a comment.</div>';
@@ -303,12 +280,9 @@ if (isset($_SESSION['user_id'])) {
                 WHERE c.article_id = ?
                 ORDER BY c.comment_id DESC
             ";
-            $stmt = $db->prepare($comments_query);
-            $stmt->bind_param("i", $article_id);
-            $stmt->execute();
-            $comments_result = $stmt->get_result();
+            $comments_result = $articleObj->getComments($article_id);
 
-            if ($comments_result->num_rows > 0) {
+            if ($comments_result && $comments_result->num_rows > 0) {
                 echo '<ul class="list-group mb-3">';
                 while ($comment = $comments_result->fetch_assoc()) {
                     echo '<li class="list-group-item"><strong>' . htmlspecialchars($comment['name']) . ':</strong> <br>' . htmlspecialchars($comment['description']) . '</li>';
@@ -319,7 +293,7 @@ if (isset($_SESSION['user_id'])) {
             }
 
             if (isset($_SESSION['user_id'])) {
-            ?>
+                ?>
                 <form method="POST" id="comment-form">
                     <div class="mb-3">
                         <label for="comment_description" class="form-label">Leave a Comment</label>
@@ -328,7 +302,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <button type="submit" class="btn btn-success">Submit Comment</button>
                 </form>
-            <?php
+                <?php
             } else {
                 echo '<p>Please <a href="login.html">log in</a> to leave a comment.</p>';
             }
@@ -339,22 +313,14 @@ if (isset($_SESSION['user_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleFavorite(articleId, iconElement) {
-            const userId = '<?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>';
-
-            if (userId === '0') {
-                alert('Please log in to add/remove favorites.');
-                return;
-            }
-
-            let action = iconElement.classList.contains('far') ? 'add' : 'remove';
-
-            fetch('add_to_favorites.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
-                })
+            let action = iconElement.classList.contains('far') ? 'add_favorite' : 'remove_favorite';
+            fetch('article.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=${action}&article_id=${articleId}`,
+            })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -374,22 +340,15 @@ if (isset($_SESSION['user_id'])) {
         }
 
         function toggleBookmark(articleId, iconElement) {
-            const userId = '<?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; ?>';
+            let action = iconElement.classList.contains('far') ? 'add_bookmark' : 'remove_bookmark';
 
-            if (userId === '0') {
-                alert('Please log in to add/remove bookmarks.');
-                return;
-            }
-
-            let action = iconElement.classList.contains('far') ? 'add' : 'remove';
-
-            fetch('add_to_bookmarks.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `user_id=${userId}&article_id=${articleId}&action=${action}`,
-                })
+            fetch('article.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=${action}&article_id=${articleId}`,
+            })
                 .then(response => response.text())
                 .then(data => {
                     if (data === 'added') {
@@ -471,10 +430,10 @@ if (isset($_SESSION['user_id'])) {
         synth.addEventListener("cancel", resetIcon);
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const commentToggleBtn = document.getElementById("comment-toggle-btn");
             if (commentToggleBtn) {
-                commentToggleBtn.addEventListener("click", function(e) {
+                commentToggleBtn.addEventListener("click", function (e) {
                     e.preventDefault();
                     const commentSection = document.getElementById("comment-section");
                     if (commentSection.style.display === "none" || commentSection.style.display === "") {
@@ -497,12 +456,12 @@ if (isset($_SESSION['user_id'])) {
 
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-    </script>
+        </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        document.getElementById("download-icon").addEventListener("click", async function() {
+        document.getElementById("download-icon").addEventListener("click", async function () {
             const {
                 jsPDF
             } = window.jspdf;

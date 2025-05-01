@@ -1,0 +1,271 @@
+#result {
+    position: absolute;
+}
+
+
+.row {
+
+    flex-wrap: nowrap;
+    align-items: center;
+    flex-direction: row;
+}
+
+
+
+button {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 0.7rem 1.4rem;
+    border-radius: 0.3rem;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+
+.row>* {
+    max-width: 70%;
+}
+
+h1 {
+    margin: 2%;
+}
+
+
+
+.plans {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+
+.plan {
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    width: 200px;
+    text-align: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.plan.highlight {
+    border-color: #007bff;
+    box-shadow: 0 0 10px #007bff;
+    background-color: #e6f0ff;
+}
+
+.plan h2 {
+    margin-top: 0;
+}
+
+.plan p {
+    font-size: 14px;
+    color: #555;
+}
+
+.plan button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.plan button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.plan button:disabled {
+    background-color: #6c757d;
+    cursor: default;
+}
+
+#messageBox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #007bff;
+    color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
+    display: none;
+    z-index: 1000;
+}
+
+#messageBox button {
+    margin: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#messageBox .closeBtn {
+    background-color: #28a745;
+    color: white;
+}
+
+.auto-renew-container {
+    margin: 30px auto;
+    width: 300px;
+    text-align: center;
+}
+
+.auto-renew-label {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #007bff;
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+#Daily {
+    margin: 40px auto;
+    width: 80%;
+    max-width: 800px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 150px;
+}
+
+#Daily h2 {
+    margin-top: 0;
+}
+
+
+.plans {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px;
+}
+
+.plan-card {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    width: 250px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+#premium {
+    border-color: #B8860B;
+
+}
+
+.plan-card h2 {
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+.plan-card .price {
+    font-size: 26px;
+    font-weight: bold;
+    color: rgb(32, 113, 218);
+    margin: 10px 0;
+}
+
+.plan-card button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+
+.plan-card .features {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.plan-card .features li {
+    font-size: 16px;
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.plan-card .features li::before {
+    content: "✔";
+    font-size: 18px;
+    color: rgb(30, 67, 235);
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.plan-card .features li:hover {
+    color: #333;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
