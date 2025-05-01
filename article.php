@@ -265,21 +265,14 @@ $show_ads = $user->shouldShowAds();
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_description'])) {
                 if ($user->isLoggedIn()) {
                     $comment_desc = trim($_POST['comment_description']);
-                    if (!empty($comment_desc)) {
-                        $articleObj->addComment($article_id, $user->getUserId(), $comment_desc);
+                    if (!$user->submitComment($article_id, $user->getUserId(), $comment_desc)) {
+                        echo '<div class="alert alert-warning">Comment cannot be empty.</div>';
                     }
                 } else {
                     echo '<div class="alert alert-warning">You must be logged in to post a comment.</div>';
                 }
             }
 
-            $comments_query = "
-                SELECT c.description, u.name
-                FROM comment c
-                JOIN users u ON c.user_id = u.user_id
-                WHERE c.article_id = ?
-                ORDER BY c.comment_id DESC
-            ";
             $comments_result = $articleObj->getComments($article_id);
 
             if ($comments_result && $comments_result->num_rows > 0) {

@@ -313,7 +313,7 @@ footer a:hover {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
     min-width: 10rem;
-    z-index: 1000;
+    z-index: 1060;
     display: none;
 }
 
