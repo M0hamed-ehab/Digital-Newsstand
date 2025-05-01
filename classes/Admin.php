@@ -88,21 +88,32 @@ class Admin
         return $this->update();
     }
 
-    public function sendSummary($articleId)
+    public function createBreakingNews($content, $duration)
     {
-        $stmt = $this->conn->prepare("SELECT id FROM articles WHERE id = ?");
-        $stmt->bind_param("i", $articleId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result && $result->num_rows > 0) {
-            $subscribers = $this->conn->query("SELECT email FROM users WHERE role = 'subscriber'");
-            if ($subscribers && $subscribers->num_rows > 0) {
-                $count = $subscribers->num_rows;
-                return "Summary sent to $count Premium+ subscribers.";
-            } else {
-                return "No subscribers found to send the summary.";
-            }
+        if ($duration < 1 || $duration > 60) {
+            return "Duration must be between 1 and 60 minutes.";
         }
-        return "Invalid article selected.";
+        if (empty(trim($content))) {
+            return "Content cannot be empty.";
+        }
+
+        $stmt = $this->conn->prepare("INSERT INTO breaking_news (content, duration) VALUES (?, ?)");
+        $stmt->bind_param("si", $content, $duration);
+        if ($stmt->execute()) {
+            $stmt->close();
+            return "Breaking news created successfully.";
+        } else {
+            $stmt->close();
+            return "Failed to create breaking news.";
+        }
+    }
+
+    public function getBNQ()
+    {
+        return "
+            SELECT content FROM breaking_news
+            WHERE NOW() < DATE_ADD(creation_date, INTERVAL duration MINUTE)
+            ORDER BY creation_date DESC
+        ";
     }
 }

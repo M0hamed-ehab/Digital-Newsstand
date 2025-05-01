@@ -4,6 +4,7 @@ include_once 'config/Database.php';
 include_once 'classes/user_book.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
+include_once 'classes/Admin.php';
 
 $db = Database::getInstance()->getConnection();
 
@@ -31,11 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
 }
 
 $bookmarks = $userBooks->getUserBooks();
-
 $articleObj = new Article($db);
+$adminObj = new Admin($db);
 $userObj = new User($db);
 
-$categories_result = $articleObj->getCategories();
+$categories_result = $adminObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
