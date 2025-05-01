@@ -27,5 +27,14 @@ class News
             return "Failed to create breaking news.";
         }
     }
+
+    public function getBNQ()
+    {
+        return "
+            SELECT content FROM breaking_news
+            WHERE NOW() < DATE_ADD(creation_date, INTERVAL duration MINUTE)
+            ORDER BY creation_date DESC
+        ";
+    }
 }
 ?>

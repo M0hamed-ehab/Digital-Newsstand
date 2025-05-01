@@ -37,8 +37,12 @@ $articles_per_page = 5;
 $total_articles = $articleObj->getTotalArticles($search_term, $selected_category);
 $articles_result = $articleObj->getArticles($search_term, $selected_category, $page, $articles_per_page);
 
-$breaking_news_query = "SELECT title FROM articles ORDER BY created_at DESC";
-$breaking_news_result = $db->query($breaking_news_query);
+include_once 'classes/News.php';
+
+$newsObj = new News($db);
+
+$BNQ = $newsObj->getBNQ();
+$BNR = $db->query($BNQ);
 
 $popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
 $popular_articles_result = $db->query($popular_articles_query);
@@ -173,11 +177,7 @@ $notfications_count = $userObj->getNotificationsCount();
         </nav>
 
         <?php
-        $BNQ = "
-            SELECT content FROM breaking_news
-            WHERE NOW() < DATE_ADD(creation_date, INTERVAL duration MINUTE)
-            ORDER BY creation_date DESC
-        ";
+        $BNQ = $newsObj->getBNQ();
         $BNR = $db->query($BNQ);
         if ($BNR && $BNR->num_rows > 0):
                 ?>

@@ -77,5 +77,21 @@ class User
     {
         return $this->userId;
     }
+
+    public function addComment($article_id, $user_id, $comment)
+    {
+        $stmt = $this->db->prepare("INSERT INTO comment (description, user_id, article_id) VALUES (?, ?, ?)");
+        $stmt->bind_param("sii", $comment, $user_id, $article_id);
+        return $stmt->execute();
+    }
+
+    public function submitComment($article_id, $user_id, $comment_desc)
+    {
+        $comment_desc = trim($comment_desc);
+        if (empty($comment_desc)) {
+            return false;
+        }
+        return $this->addComment($article_id, $user_id, $comment_desc);
+    }
 }
 ?>

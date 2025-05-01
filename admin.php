@@ -3,6 +3,8 @@ include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/Category.php';
 
+
+
 $db = Database::getInstance()->getConnection();
 $article = new Article($db);
 $category = new Category($db);
@@ -56,10 +58,14 @@ if (isset($_POST['create_breaking_news'])) {
     $duration = intval($_POST['breaking_duration']);
     $message = $news->createBreakingNews($content, $duration);
 }
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.html");
     exit();
 }
+
+
+
+
 ?>
 
 <!DOCTYPE html>

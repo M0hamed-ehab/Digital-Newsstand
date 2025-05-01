@@ -6,7 +6,11 @@ class Article
 
     public function __construct($db)
     {
+
         $this->conn = $db;
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
     public function getCategories()
     {
@@ -299,11 +303,5 @@ class Article
         return $stmt->get_result();
     }
 
-    public function addComment($article_id, $user_id, $comment)
-    {
-        $stmt = $this->conn->prepare("INSERT INTO comment (description, user_id, article_id) VALUES (?, ?, ?)");
-        $stmt->bind_param("sii", $comment, $user_id, $article_id);
-        return $stmt->execute();
-    }
 }
 ?>
