@@ -74,7 +74,7 @@ function isSignedUp()
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="/images/fav.png">
-    <link rel="stylesheet" href="./favs.css">
+    <link rel="stylesheet" href="style/favs.css">
 </head>
 
 <body>
@@ -117,11 +117,12 @@ function isSignedUp()
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                         <li>
-                            <a class="nav-link" href="random_article.php" ">Discover</a>
+                            <a class="nav-link"
+                                href="random_article.php" ">Discover</a>
                         </li>
                     </ul>
                                 <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                                                                <li class="
+                                                                                                                                        <li class="
                                 nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>

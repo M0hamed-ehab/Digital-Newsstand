@@ -56,6 +56,10 @@ if (isset($_POST['create_breaking_news'])) {
     $duration = intval($_POST['breaking_duration']);
     $message = $news->createBreakingNews($content, $duration);
 }
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>

@@ -10,12 +10,11 @@ class user_book
     {
         $this->db = Database::getInstance()->getConnection();
 
-        if (!isset($_SESSION['user_id'])) {
-            header("Location: login.html");
-            exit();
+        if (isset($_SESSION['user_id'])) {
+            $this->user_id = $_SESSION['user_id'];
+        } else {
+            $this->user_id = null;
         }
-
-        $this->user_id = $_SESSION['user_id'];
     }
 
     public function getUserBooks()

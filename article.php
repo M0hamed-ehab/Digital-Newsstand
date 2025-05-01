@@ -95,7 +95,7 @@ $show_ads = $user->shouldShowAds();
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="/images/article.png">
-    <link rel="stylesheet" href="./article.css">
+    <link rel="stylesheet" href="style/article.css">
 </head>
 
 <body>
