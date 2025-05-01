@@ -3,8 +3,10 @@ include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
 include_once 'classes/Game.php';
+include_once 'classes/Admin.php';
 
 $db = Database::getInstance()->getConnection();
+$adminObj = new Admin($db);
 $articleObj = new Article($db);
 $userObj = new User($db);
 $gameObj = new Game($db);
@@ -14,7 +16,7 @@ if (isset($_GET['play']) && is_numeric($_GET['play'])) {
         exit();
 }
 
-$categories_result = $articleObj->getCategories();
+$categories_result = $adminObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -48,7 +50,7 @@ $games_result = $gameObj->getAllGames();
 
 include_once 'classes/News.php';
 
-$newsObj = new News($db);
+$newsObj = new Admin($db);
 
 $BNQ = $newsObj->getBNQ();
 $BNR = $db->query($BNQ);
