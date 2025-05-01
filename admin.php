@@ -1,12 +1,12 @@
 <?php
 include_once 'config/Database.php';
-include_once 'classes/Article.php';
 include_once 'classes/Category.php';
+include_once 'classes/Admin.php';
 
 
 
 $db = Database::getInstance()->getConnection();
-$article = new Article($db);
+$admin = new Admin($db);
 $category = new Category($db);
 
 if (isset($_POST['create_category'])) {
@@ -22,29 +22,29 @@ if (isset($_POST['delete_category'])) {
 }
 
 if (isset($_POST['create'])) {
-    $message = $article->createFromForm($_POST, $_FILES)
+    $message = $admin->createFromForm($_POST, $_FILES)
         ? "Article published."
         : "Failed to publish article.";
 }
 
 if (isset($_POST['update'])) {
-    $message = $article->updateFromForm($_POST)
+    $message = $admin->updateFromForm($_POST)
         ? "Article updated."
         : "Failed to update article.";
 }
 
 if (isset($_POST['delete'])) {
-    $message = $article->deleteById($_POST['id'])
+    $message = $admin->deleteById($_POST['id'])
         ? "Article deleted."
         : "Failed to delete article.";
 }
 
 if (isset($_POST['send'])) {
-    $message = $article->sendSummary($_POST['id']);
+    $message = $admin->sendSummary($_POST['id']);
 }
 
 $categories = $category->readAll();
-$articles = $article->readAll();
+$articles = $admin->readAll();
 $categoryList = $category->readAll(); // For dropdown
 
 
