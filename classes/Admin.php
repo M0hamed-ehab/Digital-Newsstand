@@ -54,6 +54,7 @@ class Admin
         return $this->conn->query($sql);
     }
 
+
     public function createFromForm($post, $files)
     {
         $this->title = $post['title'];
@@ -65,7 +66,6 @@ class Admin
             $imageName = basename($files['image']['name']);
             $targetDirectory = "images/";
             $targetFile = $targetDirectory . $imageName;
-
             if (move_uploaded_file($files['image']['tmp_name'], $targetFile)) {
                 $this->image_path = $imageName;
             } else {
@@ -74,7 +74,6 @@ class Admin
         } else {
             echo "No file uploaded or error occurred.";
         }
-
 
         return $this->create();
     }
@@ -106,5 +105,4 @@ class Admin
         }
         return "Invalid article selected.";
     }
-
 }
