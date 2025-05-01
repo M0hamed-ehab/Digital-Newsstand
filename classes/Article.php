@@ -4,6 +4,33 @@ class Article
     private $conn;
     public $id, $title, $content, $author, $category_id, $image_path;
 
+    public function __construct($db)
+    {
+
+        $this->conn = $db;
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    public function sendSummary($articleId)
+    {
+        $stmt = $this->conn->prepare("SELECT id FROM articles WHERE id = ?");
+        $stmt->bind_param("i", $articleId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $subscribers = $this->conn->query("SELECT email FROM users WHERE role = 'subscriber'");
+            if ($subscribers && $subscribers->num_rows > 0) {
+                $count = $subscribers->num_rows;
+                return "Summary sent to $count Premium+ subscribers.";
+            } else {
+                return "No subscribers found to send the summary.";
+            }
+        }
+        return "Invalid article selected.";
+    }
+
     public function getTotalArticles($search_term = '', $category_id = 0)
     {
         if ($search_term !== '') {

@@ -2,11 +2,13 @@
 include_once 'config/Database.php';
 include_once 'classes/Category.php';
 include_once 'classes/Admin.php';
+include_once 'classes/Article.php';
 
 
 
 $db = Database::getInstance()->getConnection();
 $admin = new Admin($db);
+$article = new Article($db);
 $category = new Category($db);
 
 if (isset($_POST['create_category'])) {
@@ -40,7 +42,7 @@ if (isset($_POST['delete'])) {
 }
 
 if (isset($_POST['send'])) {
-    $message = $admin->sendSummary($_POST['id']);
+    $message = $article->sendSummary($_POST['id']);
 }
 
 $categories = $category->readAll();
@@ -48,15 +50,14 @@ $articles = $admin->readAll();
 $categoryList = $category->readAll(); // For dropdown
 
 
-include_once 'classes/News.php';
 
-$news = new News($db);
+$news = new Admin($db);
 
 // Handle breaking news creation
 if (isset($_POST['create_breaking_news'])) {
     $content = trim($_POST['breaking_content']);
     $duration = intval($_POST['breaking_duration']);
-    $message = $news->createBreakingNews($content, $duration);
+    $message = $admin->createBreakingNews($content, $duration);
 }
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.html");
