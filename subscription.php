@@ -4,13 +4,15 @@ include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
 include_once 'classes/Subscription.php';
+include_once 'classes/Admin.php';
 
 $db = Database::getInstance()->getConnection();
 
 $articleObj = new Article($db);
 $userObj = new User($db);
+$adminObj = new Admin($db);
 
-$categories_result = $articleObj->getCategories();
+$categories_result = $adminObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -27,8 +29,14 @@ $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['plan'])) {
+        $plan_id_map = [
+            'free' => 1,
+            'premium' => 2,
+            'premium_plus' => 3
+        ];
         $new_plan = $_POST['plan'];
-        $message = $subscription->handlePlanChange($new_plan);
+        $new_plan_id = isset($plan_id_map[$new_plan]) ? $plan_id_map[$new_plan] : 1;
+        $message = $subscription->handlePlanChange($new_plan_id);
         header("Location: subscription.php?message=" . urlencode($message));
         exit();
     } elseif (isset($_POST['auto_renew'])) {

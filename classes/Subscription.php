@@ -4,7 +4,7 @@ class Subscription
     private $db;
     private $user_id;
     private $role;
-    private $subscription_name;
+    private $plan_ID;
     private $auto_renew;
     private $highlight_plan;
     private $articles = [];
@@ -36,20 +36,20 @@ class Subscription
     private function loadSubscriptionDetails()
     {
         if ($this->role === 'subscriber' || $this->role === 'admin') {
-            $stmt_sub = $this->db->prepare("SELECT subscription_name, auto_renew FROM subscription WHERE user_id = ?");
+            $stmt_sub = $this->db->prepare("SELECT plan_ID, auto_renew FROM subscription WHERE user_id = ?");
             $stmt_sub->bind_param("i", $this->user_id);
             $stmt_sub->execute();
             $result_sub = $stmt_sub->get_result();
             if ($result_sub->num_rows > 0) {
                 $sub_row = $result_sub->fetch_assoc();
-                $this->subscription_name = $sub_row['subscription_name'];
+                $this->plan_ID = (int) $sub_row['plan_ID'];
                 $this->auto_renew = $sub_row['auto_renew'];
             } else {
-                $this->subscription_name = 'none';
+                $this->plan_ID = 1; // default to free
                 $this->auto_renew = 0;
             }
         } else {
-            $this->subscription_name = 'none';
+            $this->plan_ID = 1; // default to free
             $this->auto_renew = 0;
         }
     }
@@ -59,12 +59,15 @@ class Subscription
         if ($this->role === 'member') {
             return 'free';
         } elseif ($this->role === 'subscriber' || $this->role === 'admin') {
-            if ($this->subscription_name === 'none') {
-                return 'free';
-            } elseif ($this->subscription_name === 'semi') {
-                return 'premium';
-            } elseif ($this->subscription_name === 'full') {
-                return 'premium_plus';
+            switch ($this->plan_ID) {
+                case 1:
+                    return 'free';
+                case 2:
+                    return 'premium';
+                case 3:
+                    return 'premium_plus';
+                default:
+                    return 'free';
             }
         }
         return 'free';
@@ -121,50 +124,26 @@ class Subscription
     public function handlePlanChange($new_plan)
     {
         if ($this->role === 'admin') {
-            if ($new_plan === 'free') {
-                $update_sub = $this->db->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
-                $update_sub->bind_param("i", $this->user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium') {
-                $update_sub = $this->db->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
-                $update_sub->bind_param("i", $this->user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium_plus') {
-                $update_sub = $this->db->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
-                $update_sub->bind_param("i", $this->user_id);
-                $update_sub->execute();
-            }
+            $update_sub = $this->db->prepare("UPDATE subscription SET plan_ID = ? WHERE user_id = ?");
+            $update_sub->bind_param("ii", $new_plan, $this->user_id);
+            $update_sub->execute();
         } else {
-            if ($new_plan === 'free') {
+            if ($new_plan === 1) {
                 $update_role = $this->db->prepare("UPDATE users SET role = 'member' WHERE user_id = ?");
                 $update_role->bind_param("i", $this->user_id);
                 $update_role->execute();
                 $_SESSION['role'] = 'member';
-
-                $update_sub = $this->db->prepare("UPDATE subscription SET subscription_name = 'none' WHERE user_id = ?");
-                $update_sub->bind_param("i", $this->user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium') {
+            } else {
                 $update_role = $this->db->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
                 $update_role->bind_param("i", $this->user_id);
                 $update_role->execute();
                 $_SESSION['role'] = 'subscriber';
-
-                $update_sub = $this->db->prepare("UPDATE subscription SET subscription_name = 'semi' WHERE user_id = ?");
-                $update_sub->bind_param("i", $this->user_id);
-                $update_sub->execute();
-            } elseif ($new_plan === 'premium_plus') {
-                $update_role = $this->db->prepare("UPDATE users SET role = 'subscriber' WHERE user_id = ?");
-                $update_role->bind_param("i", $this->user_id);
-                $update_role->execute();
-                $_SESSION['role'] = 'subscriber';
-
-                $update_sub = $this->db->prepare("UPDATE subscription SET subscription_name = 'full' WHERE user_id = ?");
-                $update_sub->bind_param("i", $this->user_id);
-                $update_sub->execute();
             }
+            $update_sub = $this->db->prepare("UPDATE subscription SET plan_ID = ? WHERE user_id = ?");
+            $update_sub->bind_param("ii", $new_plan, $this->user_id);
+            $update_sub->execute();
         }
-        return "Your subscription has been changed to " . ucfirst(str_replace('_', ' ', $new_plan)) . ".";
+        return "Your subscription has been changed to plan ID " . $new_plan . ".";
     }
 
     public function handleAutoRenewChange($auto_renew)

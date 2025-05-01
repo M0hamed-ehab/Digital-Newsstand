@@ -48,7 +48,6 @@ $articles_result = $articleObj->getArticles($search_term, $selected_category, $p
 
 $games_result = $gameObj->getAllGames();
 
-include_once 'classes/News.php';
 
 $newsObj = new Admin($db);
 
