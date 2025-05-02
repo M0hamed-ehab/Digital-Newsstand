@@ -65,7 +65,6 @@ class User
 
     public function shouldShowAds()
     {
-        // Show ads if plan_ID is not 3 (premium_plus/full)
         return !($this->subscriptionName === 3);
     }
 

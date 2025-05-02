@@ -5,12 +5,15 @@ include_once 'classes/Article.php';
 include_once 'classes/User.php';
 include_once 'classes/Subscription.php';
 include_once 'classes/Admin.php';
+include_once 'classes/Plans.php';
 
 $db = Database::getInstance()->getConnection();
 
 $articleObj = new Article($db);
 $userObj = new User($db);
 $adminObj = new Admin($db);
+$plansObj = new Plans($db);
+$plans = $plansObj->getPlans();
 
 $categories_result = $adminObj->getCategories();
 
@@ -29,13 +32,14 @@ $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['plan'])) {
-        $plan_id_map = [
-            'free' => 1,
-            'premium' => 2,
-            'premium_plus' => 3
-        ];
-        $new_plan = $_POST['plan'];
-        $new_plan_id = isset($plan_id_map[$new_plan]) ? $plan_id_map[$new_plan] : 1;
+        $plan_name = $_POST['plan'];
+        $new_plan_id = 1; // default
+        foreach ($plans as $plan) {
+            if (strtolower(str_replace(' ', '_', $plan['plan_name'])) === $plan_name) {
+                $new_plan_id = $plan['plan_ID'];
+                break;
+            }
+        }
         $message = $subscription->handlePlanChange($new_plan_id);
         header("Location: subscription.php?message=" . urlencode($message));
         exit();
@@ -66,14 +70,20 @@ function isSignedUp()
 
 function planClass($plan, $highlight_plan)
 {
-    global $subscription;
-    return $subscription->planClass($plan);
+    if ($highlight_plan === 'free' || $highlight_plan === 'premium') {
+        return $plan === $highlight_plan ? 'plan highlight' : 'plan';
+    } else {
+        return $plan === 'premium+' ? 'plan highlight' : 'plan';
+    }
 }
 
 function buttonLabel($plan, $highlight_plan)
 {
-    global $subscription;
-    return $subscription->buttonLabel($plan);
+    if ($highlight_plan === 'free' || $highlight_plan === 'premium') {
+        return $plan === $highlight_plan ? 'Your Plan' : 'Choose Plan';
+    } else {
+        return $plan === 'premium+' ? 'Your Plan' : 'Choose Plan';
+    }
 }
 
 $message = '';
@@ -209,57 +219,33 @@ if (isset($_GET['message'])) {
         <form id="subscriptionForm" method="POST" action="subscription.php">
             <input type="hidden" name="plan" id="planInput" value="">
             <section class="plans">
-                <div class="<?php echo planClass('free', $highlight_plan); ?> plan-card" id="free">
-                    <h2>Free</h2>
-                    <p class="price">0 EGP</p>
-                    <p>Free!</p>
-
-                    <ul class="features">
-                        <li>Access Articles</li>
-                        <li>Translation</li>
-                        <li>Games</li>
-                        <li>Ads</li>
-                    </ul>
-                    <button type="button" <?php echo $highlight_plan === 'free' ? 'disabled' : ''; ?>
-                        onclick="confirmChange('free')" class="select-btn">
-                        <?php echo buttonLabel('free', $highlight_plan); ?>
-                    </button>
-                </div>
-                <div class="<?php echo planClass('premium', $highlight_plan); ?> plan-card" id="premium">
-                    <h2>Premium</h2>
-                    <label style="font-size: small; color: gray;">Popular</label>
-                    <p class="price">10 EGP</p>
-                    <p>Billed monthly. Ideal for light readers.</p>
-                    <ul class="features">
-                        <li>Recieve Email Updates</li>
-                        <li>Download Articles</li>
-                        <li>Ads</li>
-                    </ul>
-                    <button type="button" <?php echo $highlight_plan === 'premium' ? 'disabled' : ''; ?>
-                        onclick="confirmChange('premium')" class="select-btn">
-                        <?php echo buttonLabel('premium', $highlight_plan); ?>
-                    </button>
-                </div>
-                <div class="<?php echo planClass('premium_plus', $highlight_plan); ?> plan-card" id="premium_plus">
-                    <h2>Premium+</h2>
-                    <p class="price">50 EGP</p>
-                    <p>Billed monthly. Perfect for avid readers and families.</p>
-                    <ul class="features">
-                        <li>Daily Briefing</li>
-                        <li>Priority customer support</li>
-                        <li>No Ads</li>
-
-                        <li></li>
-                    </ul>
-                    <button type="button" <?php echo $highlight_plan === 'premium_plus' ? 'disabled' : ''; ?>
-                        onclick="confirmChange('premium_plus')" class="select-btn">
-                        <?php echo buttonLabel('premium_plus', $highlight_plan); ?>
-                    </button>
-                </div>
+                <?php foreach ($plans as $plan):
+                    $plan_key = strtolower(str_replace(' ', '_', $plan['plan_name']));
+                    $is_popular = $plan['popular'];
+                    ?>
+                    <div class="<?php echo planClass($plan_key, $highlight_plan); ?> plan-card"
+                        id="<?php echo htmlspecialchars($plan_key); ?>">
+                        <h2><?php echo htmlspecialchars($plan['plan_name']); ?></h2>
+                        <?php if ($is_popular): ?>
+                            <label style="font-size: small; color: gray;">Popular</label>
+                        <?php endif; ?>
+                        <p class="price"><?php echo htmlspecialchars($plan['price']); ?> EGP</p>
+                        <p><?php echo htmlspecialchars($plan['description']); ?></p>
+                        <ul class="features">
+                            <?php foreach ($plan['features'] as $feature): ?>
+                                <li><?php echo htmlspecialchars($feature); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <button type="button" <?php echo $highlight_plan === $plan_key ? 'disabled' : ''; ?>
+                            onclick="confirmChange('<?php echo htmlspecialchars($plan_key); ?>')" class="select-btn">
+                            <?php echo buttonLabel($plan_key, $highlight_plan); ?>
+                        </button>
+                    </div>
+                <?php endforeach; ?>
             </section>
         </form>
 
-        <?php if ($highlight_plan === 'premium_plus' || $highlight_plan === 'premium'): ?>
+        <?php if ($highlight_plan === 'premium+' || $highlight_plan === 'premium'): ?>
             <div class="auto-renew-container">
                 <h2>Auto-Renewal</h2>
                 <form id="autoRenewForm" method="POST" action="subscription.php">
@@ -273,7 +259,7 @@ if (isset($_GET['message'])) {
                     </label>
                 </form>
             </div>
-            <?php if ($highlight_plan === 'premium_plus'): ?>
+            <?php if ($highlight_plan === 'premium+'): ?>
 
                 <div id="Daily">
                     <h2>Daily</h2>

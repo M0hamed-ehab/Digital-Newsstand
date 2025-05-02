@@ -65,7 +65,7 @@ class Subscription
                 case 2:
                     return 'premium';
                 case 3:
-                    return 'premium_plus';
+                    return 'premium+';
                 default:
                     return 'free';
             }
