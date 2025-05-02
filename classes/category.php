@@ -4,7 +4,7 @@ class Category
     private $conn;
     private $table = "category";
 
-    public $category_id;
+    private $category_id;
     public $name;
 
     public function __construct($db)

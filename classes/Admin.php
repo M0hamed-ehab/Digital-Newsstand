@@ -1,8 +1,8 @@
 <?php
 class Admin
 {
-    private $conn;
-    public $id, $title, $content, $author, $category_id, $image_path;
+    private $id, $conn;
+    public $title, $content, $author, $category_id, $image_path;
 
 
     public function __construct($db)
@@ -68,11 +68,7 @@ class Admin
             $targetFile = $targetDirectory . $imageName;
             if (move_uploaded_file($files['image']['tmp_name'], $targetFile)) {
                 $this->image_path = $imageName;
-            } else {
-                echo "File upload failed.";
             }
-        } else {
-            echo "No file uploaded or error occurred.";
         }
 
         return $this->create();

@@ -2,7 +2,7 @@
 class Article
 {
     private $conn;
-    public $id, $title, $content, $author, $category_id, $image_path;
+    public $title, $content, $author, $category_id;
 
     public function __construct($db)
     {
