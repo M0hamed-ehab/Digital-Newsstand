@@ -2,12 +2,19 @@
 include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
+include_once 'classes/Game.php';
 include_once 'classes/Admin.php';
 
 $db = Database::getInstance()->getConnection();
 $adminObj = new Admin($db);
 $articleObj = new Article($db);
 $userObj = new User($db);
+$gameObj = new Game($db);
+
+if (isset($_GET['play']) && is_numeric($_GET['play'])) {
+        Game::play(intval($_GET['play']));
+        exit();
+}
 
 $categories_result = $adminObj->getCategories();
 
@@ -38,6 +45,8 @@ $articles_per_page = 5;
 
 $total_articles = $articleObj->getTotalArticles($search_term, $selected_category);
 $articles_result = $articleObj->getArticles($search_term, $selected_category, $page, $articles_per_page);
+
+$games_result = $gameObj->getAllGames();
 
 
 $newsObj = new Admin($db);
@@ -355,128 +364,35 @@ $notfications_count = $userObj->getNotificationsCount();
                                         </div>
 
                                         <div class="row p-t-35">
-                                                <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                                                        <!-- Item latest -->
-                                                        <div class="m-b-45">
-                                                                <a href="sudoku.php#h2t"
-                                                                        class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g1.jpg" alt="Sudoku"
-                                                                                class="game-img">
-                                                                </a>
-
-                                                                <div class="p-t-16">
-                                                                        <h5 class="p-b-5">
-                                                                                <a href="sudoku.php#h2t"
-                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
-                                                                                        Sodoku
+                                                <?php if ($games_result && $games_result->num_rows > 0): ?>
+                                                        <?php while ($game = $games_result->fetch_assoc()): ?>
+                                                                <div class="col-sm-6 p-r-25 p-r-15-sr991">
+                                                                        <div class="m-b-45">
+                                                                                <a href="index.php?play=<?= htmlspecialchars($game['GameID']) ?>"
+                                                                                        class="wrap-pic-w hov1 trans-03">
+                                                                                        <img src="<?= htmlspecialchars($game['img']) ?>"
+                                                                                                alt="<?= htmlspecialchars($game['Title']) ?>"
+                                                                                                class="game-img">
                                                                                 </a>
-                                                                        </h5>
-                                                                        <span class="cl8">
-
-
-                                                                                <span class="f1-s-3">
-                                                                                        A logic-based number puzzle
-                                                                                        where you fill a 9×9 grid so
-                                                                                        each row,
-                                                                                        column, and 3×3 box contains
-                                                                                        digits 1 to 9 without repetition
-                                                                                </span>
-                                                                        </span>
-
+                                                                                <div class="p-t-16">
+                                                                                        <h5 class="p-b-5">
+                                                                                                <a href="index.php?play=<?= htmlspecialchars($game['GameID']) ?>"
+                                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
+                                                                                                        <?= htmlspecialchars($game['Title']) ?>
+                                                                                                </a>
+                                                                                        </h5>
+                                                                                        <span class="cl8">
+                                                                                                <span class="f1-s-3">
+                                                                                                        <?= nl2br(htmlspecialchars($game['Description'])) ?>
+                                                                                                </span>
+                                                                                        </span>
+                                                                                </div>
+                                                                        </div>
                                                                 </div>
-                                                        </div>
-                                                </div>
-
-                                                <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                                                        <!-- Item latest -->
-                                                        <div class="m-b-45">
-                                                                <a href="XO.php#game-container"
-                                                                        class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g2.jpg" alt="XO"
-                                                                                class="game-img">
-                                                                </a>
-
-                                                                <div class="p-t-16">
-                                                                        <h5 class="p-b-5">
-                                                                                <a href="XO.php#game-container"
-                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
-                                                                                        Tic Tac Toe
-                                                                                </a>
-                                                                        </h5>
-                                                                        <span class="cl8">
-
-
-                                                                                <span class="f1-s-3">
-                                                                                        You play against the computer,
-                                                                                        trying to align three X's or O's
-                                                                                        while the
-                                                                                        computer blocks or counters your
-                                                                                        moves </span>
-                                                                        </span>
-                                                                </div>
-                                                        </div>
-                                                </div>
-
-                                                <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                                                        <!-- Item latest -->
-                                                        <div class="m-b-45">
-                                                                <a href="Wordle.php#h3w"
-                                                                        class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g3.webp" alt="Wordle"
-                                                                                class="game-img">
-                                                                </a>
-
-                                                                <div class="p-t-16">
-                                                                        <h5 class="p-b-5">
-                                                                                <a href="Wordle.php#h3w"
-                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
-                                                                                        Wordle
-                                                                                </a>
-                                                                        </h5>
-
-                                                                        <span class="cl8">
-
-
-                                                                                <span class="f1-s-3">
-                                                                                        A word puzzle where you guess a
-                                                                                        five-letter word in six tries,
-                                                                                        with color hints for accuracy
-                                                                                </span>
-                                                                        </span>
-                                                                </div>
-                                                        </div>
-                                                </div>
-
-                                                <div class="col-sm-6 p-r-25 p-r-15-sr991">
-                                                        <!-- Item latest -->
-                                                        <div class="m-b-45">
-                                                                <a href="Mine.php#h2m" class="wrap-pic-w hov1 trans-03">
-                                                                        <img src="images/g4.jpg" alt="Minesweeper"
-                                                                                class="game-img">
-                                                                </a>
-
-                                                                <div class="p-t-16">
-                                                                        <h5 class="p-b-5">
-                                                                                <a href="Mine.php#h2m"
-                                                                                        class="f1-m-3 cl2 hov-cl10 trans-03">
-                                                                                        Minesweeper
-                                                                                </a>
-                                                                        </h5>
-
-                                                                        <span class="cl8">
-
-
-                                                                                <span class="f1-s-3">
-                                                                                        A puzzle game where you uncover
-                                                                                        tiles on a grid, avoiding hidden
-                                                                                        mines and
-                                                                                        using number clues to find safe
-                                                                                        spots
-                                                                                </span>
-                                                                        </span>
-                                                                </div>
-                                                        </div>
-                                                </div>
+                                                        <?php endwhile; ?>
+                                                <?php else: ?>
+                                                        <p class="lead">No games available at the moment.</p>
+                                                <?php endif; ?>
                                         </div>
                                 </div>
                         </div>

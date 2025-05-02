@@ -3,15 +3,16 @@
 include_once 'config/Database.php';
 include_once 'classes/Article.php';
 include_once 'classes/User.php';
-
+include_once 'classes/Admin.php';
 
 $db = Database::getInstance()->getConnection();
 
 
 $articleObj = new Article($db);
 $userObj = new User($db);
+$adminObj = new Admin($db);
 
-$categories_result = $articleObj->getCategories();
+$categories_result = $adminObj->getCategories();
 
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';

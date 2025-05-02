@@ -26,12 +26,12 @@ class User
 
     private function loadSubscription()
     {
-        $sub_stmt = $this->db->prepare("SELECT subscription_name FROM subscription WHERE user_id = ?");
+        $sub_stmt = $this->db->prepare("SELECT plan_ID FROM subscription WHERE user_id = ?");
         $sub_stmt->bind_param("i", $this->userId);
         $sub_stmt->execute();
         $sub_result = $sub_stmt->get_result();
         if ($sub_result && $row = $sub_result->fetch_assoc()) {
-            $this->subscriptionName = $row['subscription_name'];
+            $this->subscriptionName = (int) $row['plan_ID'];
         }
         $sub_stmt->close();
     }
@@ -65,7 +65,7 @@ class User
 
     public function shouldShowAds()
     {
-        return !($this->subscriptionName === 'full');
+        return !($this->subscriptionName === 3);
     }
 
     public function getNotificationsCount()
