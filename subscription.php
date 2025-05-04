@@ -56,36 +56,6 @@ $auto_renew = $subscription->getAutoRenew();
 $articles = $subscription->getTodayArticles();
 $notfications_count = $subscription->getNotificationsCount();
 
-function isUserLoggedIn()
-{
-    global $userObj;
-    return $userObj->isLoggedIn();
-}
-
-function isSignedUp()
-{
-    global $userObj;
-    return $userObj->isSignedUp();
-}
-
-function planClass($plan, $highlight_plan)
-{
-    if ($highlight_plan === 'free' || $highlight_plan === 'premium') {
-        return $plan === $highlight_plan ? 'plan highlight' : 'plan';
-    } else {
-        return $plan === 'premium+' ? 'plan highlight' : 'plan';
-    }
-}
-
-function buttonLabel($plan, $highlight_plan)
-{
-    if ($highlight_plan === 'free' || $highlight_plan === 'premium') {
-        return $plan === $highlight_plan ? 'Your Plan' : 'Choose Plan';
-    } else {
-        return $plan === 'premium+' ? 'Your Plan' : 'Choose Plan';
-    }
-}
-
 $message = '';
 if (isset($_GET['message'])) {
     $message = htmlspecialchars($_GET['message']);
@@ -207,15 +177,6 @@ if (isset($_GET['message'])) {
     <div class="container mt-4">
         <h1>Subscription Plans</h1>
 
-
-
-
-
-
-
-
-
-
         <form id="subscriptionForm" method="POST" action="subscription.php">
             <input type="hidden" name="plan" id="planInput" value="">
             <section class="plans">
@@ -223,7 +184,7 @@ if (isset($_GET['message'])) {
                     $plan_key = strtolower(str_replace(' ', '_', $plan['plan_name']));
                     $is_popular = $plan['popular'];
                     ?>
-                    <div class="<?php echo planClass($plan_key, $highlight_plan); ?> plan-card"
+                    <div class="<?php echo $subscription->planClass($plan_key); ?> plan-card"
                         id="<?php echo htmlspecialchars($plan_key); ?>">
                         <h2><?php echo htmlspecialchars($plan['plan_name']); ?></h2>
                         <?php if ($is_popular): ?>
@@ -238,7 +199,7 @@ if (isset($_GET['message'])) {
                         </ul>
                         <button type="button" <?php echo $highlight_plan === $plan_key ? 'disabled' : ''; ?>
                             onclick="confirmChange('<?php echo htmlspecialchars($plan_key); ?>')" class="select-btn">
-                            <?php echo buttonLabel($plan_key, $highlight_plan); ?>
+                            <?php echo $subscription->buttonLabel($plan_key); ?>
                         </button>
                     </div>
                 <?php endforeach; ?>
@@ -301,9 +262,6 @@ if (isset($_GET['message'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-
-
 
 </body>
 
