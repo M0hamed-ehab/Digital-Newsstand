@@ -17,13 +17,12 @@ class Plans
         $result = $this->db->query($query);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                // Explode features by '**' separator into an array
                 $features = explode('**', $row['features']);
                 $this->plans[] = [
-                    'plan_ID' => (int)$row['plan_ID'],
+                    'plan_ID' => (int) $row['plan_ID'],
                     'plan_name' => $row['plan_name'],
                     'price' => $row['price'],
-                    'popular' => (bool)$row['popular'],
+                    'popular' => (bool) $row['popular'],
                     'features' => $features,
                     'description' => $row['description']
                 ];

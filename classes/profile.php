@@ -1,27 +1,29 @@
 <?php
-class profile {
+class profile
+{
     private $db;
     private $user_id;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
-        
+
         if (!isset($_SESSION['user_id'])) {
             header("Location: login.html");
             exit();
         }
-        
+
         $this->user_id = $_SESSION['user_id'];
     }
 
-    // Fetch user data
-    public function getUserInfo() {
+    public function getUserInfo()
+    {
         $query = "SELECT * FROM users WHERE user_id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result && $user = $result->fetch_assoc()) {
             return $user;
         } else {
@@ -29,8 +31,8 @@ class profile {
         }
     }
 
-    // Update user profile
-    public function updateProfile($username, $email) {
+    public function updateProfile($username, $email)
+    {
         $errors = [];
 
         $new_username = trim($username);

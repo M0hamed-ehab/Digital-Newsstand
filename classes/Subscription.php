@@ -45,11 +45,11 @@ class Subscription
                 $this->plan_ID = (int) $sub_row['plan_ID'];
                 $this->auto_renew = $sub_row['auto_renew'];
             } else {
-                $this->plan_ID = 1; // default to free
+                $this->plan_ID = 1;
                 $this->auto_renew = 0;
             }
         } else {
-            $this->plan_ID = 1; // default to free
+            $this->plan_ID = 1;
             $this->auto_renew = 0;
         }
     }

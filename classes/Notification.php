@@ -2,7 +2,6 @@
 class Notification
 {
     private $conn;
-    private $table_name = "notfications";
 
     public function __construct($db)
     {
@@ -12,7 +11,7 @@ class Notification
     public function getNotifications($user_id)
     {
         $notifications = [];
-        $stmt = $this->conn->prepare("SELECT notfication_id, article_id, notfication_description FROM {$this->table_name} WHERE user_id = ? ORDER BY notfication_id DESC");
+        $stmt = $this->conn->prepare("SELECT notfication_id, article_id, notfication_description FROM notfications WHERE user_id = ? ORDER BY notfication_id DESC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -25,7 +24,7 @@ class Notification
 
     public function deleteNotification($notification_id, $user_id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM {$this->table_name} WHERE notfication_id = ? AND user_id = ?");
+        $stmt = $this->conn->prepare("DELETE FROM notfications WHERE notfication_id = ? AND user_id = ?");
         $stmt->bind_param("ii", $notification_id, $user_id);
         $stmt->execute();
         $stmt->close();
@@ -33,7 +32,7 @@ class Notification
 
     public function deleteAllNotifications($user_id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM {$this->table_name} WHERE user_id = ?");
+        $stmt = $this->conn->prepare("DELETE FROM notfications WHERE user_id = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $stmt->close();
