@@ -17,15 +17,25 @@ try {
 $errors = [];
 $success_message = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $response = $profile->updateProfile($_POST['username'], $_POST['email']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['update_profile'])) {
+        $response = $profile->updateProfile($_POST['username'], $_POST['email']);
 
-    if ($response['success']) {
-        $success_message = $response['message'];
-        $user['name'] = $_POST['username'];
-        $user['email'] = $_POST['email'];
-    } else {
-        $errors = $response['errors'];
+        if ($response['success']) {
+            $success_message = $response['message'];
+            $user['name'] = $_POST['username'];
+            $user['email'] = $_POST['email'];
+        } else {
+            $errors = $response['errors'];
+        }
+    } elseif (isset($_POST['change_password'])) {
+        $response = $profile->changePassword($_POST['current_password'], $_POST['new_password'], $_POST['confirm_password']);
+
+        if ($response['success']) {
+            $success_message = $response['message'];
+        } else {
+            $errors = $response['errors'];
+        }
     }
 }
 ?>
@@ -82,6 +92,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             <button type="submit" class="btn btn-primary" name="update_profile">Update Profile</button>
             <button type="button" class="btn btn-primary" name="Subscription"
                 onclick="window.location.href='subscription.php'">Subscription</button>
+            <div class="mt-3">
+                <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </form>
+
+        <hr>
+
+        <h3>Change Password</h3>
+        <form method="post">
+            <div class="form-group">
+                <label for="current_password">Current Password:</label>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password">New Password:</label>
+                <input type="password" class="form-control" id="new_password" name="new_password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password:</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" name="change_password">Change Password</button>
         </form>
 
         <div class="mt-3">

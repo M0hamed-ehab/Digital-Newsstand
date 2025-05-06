@@ -283,7 +283,7 @@ $notfications_count = $userObj->getNotificationsCount();
                                                         <div class="article-content">
                                                                 <p><?= nl2br(htmlspecialchars($article['short_content'])) ?>...</p>
                                                                 <a href="article.php?id=<?= $article['id'] ?>"
-                                                                        class="read-more-btn">Continue Reading <i
+                                                                        class="read-more-btn">Read More <i
                                                                                 class="fas fa-arrow-right"></i></a>
                                                         </div>
                                                 </div>

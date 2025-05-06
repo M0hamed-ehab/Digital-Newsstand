@@ -12,14 +12,12 @@ class Game
         }
     }
 
-    // Fetch all games
     public function getAllGames()
     {
         $query = "SELECT GameID, Title, Description, img, page FROM game";
         return $this->conn->query($query);
     }
 
-    // Fetch a single game by ID
     public function getGameById($id)
     {
         $stmt = $this->conn->prepare("SELECT GameID, Title, Description, img, page FROM game WHERE GameID = ?");
@@ -32,7 +30,6 @@ class Game
         return null;
     }
 
-    // Static method to play a game by redirecting to its page
     public static function play($id)
     {
         $db = Database::getInstance()->getConnection();
@@ -44,7 +41,6 @@ class Game
             header("Location: " . $row['page']);
             exit();
         } else {
-            // Redirect to a default page or show error if game not found
             header("Location: index.php");
             exit();
         }
