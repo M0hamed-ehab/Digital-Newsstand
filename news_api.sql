@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2025 at 01:27 PM
+-- Generation Time: May 07, 2025 at 08:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,15 +43,15 @@ CREATE TABLE `articles` (
 --
 
 INSERT INTO `articles` (`id`, `title`, `content`, `author`, `created_at`, `category_id`, `image_path`, `views`) VALUES
-(21, 'newsportal', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'Mai', '2025-04-23 09:55:23', 3, '', 1),
+(21, 'newsportal', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'Mai', '2025-04-23 09:55:23', 3, '', 2),
 (24, 'Surveying Engineer', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odio', 'mmm', '2025-04-23 15:04:10', 1, '', 1),
 (26, 'Data Specialist', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'john', '2025-04-23 20:23:36', 6, '', 6),
-(27, 'Cats', 'Cats are one of the most popular and lovable pets in the world. They are small, furry animals known for their playful and curious nature. Cats have sharp claws and teeth, which they use for hunting and climbing. They are very clean animals and groom themselves by licking their fur.', 'Meow', '2025-04-25 22:58:54', 3, '', 4),
-(28, 'Dogs', 'Dogs are sometimes referred to as man\'s best friend because they are kept as domestic pets and are usually loyal and like being around humans. They are also helpful in reducing stress, anxiety, and depression, loneliness, encourage exercise and playfulness and even improve your cardiovascular health.', 'Bark', '2025-04-25 23:00:35', 3, '', 21),
-(41, 'Test ', 'Test Test Test ', 'Test ', '2025-04-26 13:46:25', 6, 'g2.jpg', 10),
-(42, 'img-fluid mb-3', 'img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:52:23', 6, 'g3.webp', 8),
-(43, 'img-fluid mb-3', 'img-fluid mb-3img-fluid mb-3img-fluid mb-3img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:54:24', 3, '', 20),
-(44, 'a', 'b', 'c', '2025-04-28 16:52:16', 1, '', 94);
+(27, 'Cats', 'Cats are one of the most popular and lovable pets in the world. They are small, furry animals known for their playful and curious nature. Cats have sharp claws and teeth, which they use for hunting and climbing. They are very clean animals and groom themselves by licking their fur.', 'Meow', '2025-04-25 22:58:54', 3, '', 7),
+(28, 'Dogs', 'Dogs are sometimes referred to as man\'s best friend because they are kept as domestic pets and are usually loyal and like being around humans. They are also helpful in reducing stress, anxiety, and depression, loneliness, encourage exercise and playfulness and even improve your cardiovascular health.', 'Bark', '2025-04-25 23:00:35', 3, '', 28),
+(41, 'Test ', 'Test Test Test ', 'Test ', '2025-04-26 13:46:25', 6, 'g2.jpg', 11),
+(42, 'img-fluid mb-3', 'img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:52:23', 6, 'g3.webp', 10),
+(43, 'img-fluid mb-3', 'img-fluid mb-3img-fluid mb-3img-fluid mb-3img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:54:24', 3, '', 21),
+(44, 'a', 'b', 'c', '2025-04-28 16:52:16', 1, '', 143);
 
 --
 -- Triggers `articles`
@@ -87,8 +87,8 @@ CREATE TABLE `bookmarks` (
 
 INSERT INTO `bookmarks` (`bookmark_id`, `user_id`, `article_id`, `added_at`) VALUES
 (1, 33, 27, '2025-04-25 23:24:03'),
-(19, 7, 44, '2025-04-30 23:45:33'),
-(20, 20, 44, '2025-05-01 22:01:41');
+(20, 20, 44, '2025-05-01 22:01:41'),
+(24, 7, 44, '2025-05-07 15:22:30');
 
 -- --------------------------------------------------------
 
@@ -113,7 +113,8 @@ INSERT INTO `breaking_news` (`id`, `content`, `duration`, `creation_date`) VALUE
 (3, 'Test?', 1, '2025-05-01 01:07:39'),
 (4, 'yes?', 1, '2025-05-01 16:33:34'),
 (5, 'again', 1, '2025-05-01 16:35:50'),
-(6, '2', 1, '2025-05-02 01:02:11');
+(6, '2', 1, '2025-05-02 01:02:11'),
+(7, 'ok?', 1, '2025-05-07 18:05:53');
 
 -- --------------------------------------------------------
 
@@ -157,7 +158,13 @@ INSERT INTO `comment` (`comment_id`, `description`, `user_id`, `article_id`) VAL
 (2, 'img?', 7, 43),
 (3, 'd', 7, 44),
 (4, 'e', 7, 44),
-(5, 'f', 7, 44);
+(5, 'f', 7, 44),
+(6, 'Cats are the best B)', 7, 27),
+(7, 'g', 7, 44),
+(8, 'h', 7, 44),
+(9, 'i', 7, 44),
+(10, 'j', 7, 44),
+(11, 'k', 7, 44);
 
 -- --------------------------------------------------------
 
@@ -178,8 +185,8 @@ CREATE TABLE `favorites` (
 
 INSERT INTO `favorites` (`favorite_id`, `user_id`, `article_id`, `saved_at`) VALUES
 (1, 33, 27, '2025-04-25 23:24:04'),
-(15, 7, 44, '2025-04-30 23:45:33'),
-(16, 20, 44, '2025-05-01 22:01:42');
+(16, 20, 44, '2025-05-01 22:01:42'),
+(21, 7, 44, '2025-05-07 15:22:08');
 
 -- --------------------------------------------------------
 
@@ -276,10 +283,13 @@ CREATE TABLE `subscription` (
 --
 
 INSERT INTO `subscription` (`subscription_id`, `user_id`, `auto_renew`, `SubscriptionStartDate`, `plan_ID`) VALUES
-(1, 7, 1, '2025-05-02', 3),
+(1, 7, 1, '2025-05-07', 3),
 (2, 8, 1, '2025-05-02', 3),
 (3, 20, 1, '2025-05-02', 3),
-(4, 33, 1, '2025-05-02', 1);
+(4, 33, 1, '2025-05-02', 1),
+(8, 34, 1, '2025-05-05', 2),
+(11, 37, 1, '2025-05-07', 1),
+(12, 38, 1, '2025-05-07', 1);
 
 --
 -- Triggers `subscription`
@@ -313,10 +323,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `name`, `password`, `created_at`, `email`, `role`) VALUES
-(7, 'mm', 'mm', '2025-04-24 18:36:53', 'bakerymai0@gmail.com', 'admin'),
+(7, 'mm', 'mm', '2025-05-06 18:44:38', 'bakerymai0@gmail.com', 'admin'),
 (8, 'Mai', 'm', '2025-04-24 18:37:05', 'bakerymai0@gmail.comm', 'admin'),
 (20, 'mo', 'momo', '2025-05-02 00:01:01', 'momoehab@gmail.com', 'subscriber'),
-(33, 'member', '123', '2025-04-24 18:43:10', 'A@a.com', 'member');
+(33, 'member', '123', '2025-04-24 18:43:10', 'A@a.com', 'member'),
+(34, 'Tamer', 'TP41N', '2025-05-04 22:02:58', 'T4tamer@gmail.com', 'subscriber'),
+(37, 'ab', 'ab', '2025-05-07 13:14:27', 'ab@gmail.com', 'member'),
+(38, 'abc', 'ab', '2025-05-07 13:15:07', 'abc@gmail.com', 'member');
 
 --
 -- Triggers `users`
@@ -418,37 +431,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `articles`
 --
 ALTER TABLE `articles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `bookmarks`
 --
 ALTER TABLE `bookmarks`
-  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `breaking_news`
 --
 ALTER TABLE `breaking_news`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `comment`
 --
 ALTER TABLE `comment`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `favorite_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `favorite_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `game`
@@ -460,7 +473,7 @@ ALTER TABLE `game`
 -- AUTO_INCREMENT for table `notfications`
 --
 ALTER TABLE `notfications`
-  MODIFY `notfication_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `notfication_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `plans`
@@ -472,13 +485,13 @@ ALTER TABLE `plans`
 -- AUTO_INCREMENT for table `subscription`
 --
 ALTER TABLE `subscription`
-  MODIFY `subscription_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `subscription_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- Constraints for dumped tables
@@ -494,15 +507,15 @@ ALTER TABLE `articles`
 -- Constraints for table `bookmarks`
 --
 ALTER TABLE `bookmarks`
-  ADD CONSTRAINT `bookmarks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `bookmarks_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`);
+  ADD CONSTRAINT `bookmarks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `bookmarks_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `comment`
 --
 ALTER TABLE `comment`
-  ADD CONSTRAINT `articlllllll` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`),
-  ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `articlllllll` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `favorites`
@@ -515,15 +528,15 @@ ALTER TABLE `favorites`
 -- Constraints for table `notfications`
 --
 ALTER TABLE `notfications`
-  ADD CONSTRAINT `notfications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `notfications_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`);
+  ADD CONSTRAINT `notfications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `notfications_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `subscription`
 --
 ALTER TABLE `subscription`
-  ADD CONSTRAINT `subscription_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `subscription_ibfk_2` FOREIGN KEY (`plan_ID`) REFERENCES `plans` (`plan_ID`);
+  ADD CONSTRAINT `subscription_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `subscription_ibfk_2` FOREIGN KEY (`plan_ID`) REFERENCES `plans` (`plan_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
