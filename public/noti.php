@@ -1,9 +1,9 @@
 <?php
-include_once 'config/Database.php';
-include_once 'classes/Article.php';
-include_once 'classes/User.php';
-include_once 'classes/Notification.php';
-include_once 'classes/Admin.php';
+include_once '../config/Database.php';
+include_once '../src/Models/Article.php';
+include_once '../src/Models/User.php';
+include_once '../src/Models/Notification.php';
+include_once '../src/Models/Admin.php';
 $db = Database::getInstance()->getConnection();
 
 
@@ -129,7 +129,7 @@ if (isset($_SESSION['user_id'])) {
 </li>
 </ul>
                     <?php if (isUserLoggedIn() || isSignedUp()): ?>
-                                                                            <li class=" nav-item">
+                                                                                <li class=" nav-item">
                                     <a class="nav-link position-relative" href="noti.php" title="Notifications">
                                         <i class="fas fa-bell fa-lg"></i>
                                         <?php if ($notfications_count > 0): ?>

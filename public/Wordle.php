@@ -1,24 +1,24 @@
 <?php
 
-include_once 'config/Database.php';
-include_once 'classes/Article.php';
-include_once 'classes/User.php';
-include_once 'classes/Admin.php';
+include_once '../config/Database.php';
+include_once '../src/Models/Article.php';
+include_once '../src/Models/User.php';
+include_once '../src/Models/Admin.php';
 
 $db = Database::getInstance()->getConnection();
 
 
 $articleObj = new Article($db);
 $userObj = new User($db);
+
 $adminObj = new Admin($db);
 
 $categories_result = $adminObj->getCategories();
-
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 $notfications_count = $userObj->getNotificationsCount();
-
+$show_ads = $userObj->shouldShowAds();
 
 
 function isUserLoggedIn()
@@ -46,7 +46,7 @@ function isSignedUp()
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minesweeper - The Global Herald</title>
+    <title>Wordle - The Global Herald</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -58,6 +58,7 @@ function isSignedUp()
 </head>
 
 <body>
+
 
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
@@ -156,7 +157,6 @@ function isSignedUp()
         </div>
     </nav>
 
-
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-3 sidebar">
@@ -216,9 +216,77 @@ function isSignedUp()
                 </div>
             </div>
 
-            <div class="game-container">
-                <h2 id="h2m">Minesweeper Game</h2>
+            <div class="game-container" id="wordle-game" style="margin-top: 2rem; max-width: 400px;">
+
+                <h3 id="h3w">Wordle Game</h3>
+                <p>Guess the 5-letter word in 6 tries.</p>
+
+                <div id="wordle-grid"
+                    style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 1rem;">
+                    <!-- 6 rows of 5 cells each -->
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                    <div class="wordle-cell"></div>
+                </div>
+
+                <input type="text" id="wordle-input" maxlength="5"
+                    style="text-transform: uppercase; width: 100%; padding: 0.5rem; font-size: 1.2rem; letter-spacing: 0.3rem;"
+                    autofocus autocomplete="off" />
+                <button id="wordle-submit" class="btn btn-primary mt-2" style="width: 100%;">Submit Guess</button>
+                <p id="wordle-message" style="margin-top: 1rem; font-weight: bold;"></p>
+
+                <style>
+
+                </style>
+
             </div>
+
+            <?php if ($show_ads): ?>
+                <section class="ads-section"
+                    style="background-color: #f8f9fa;  padding: 1rem;  border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; ">
+                    <div class="container">
+                        <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
+                        <div style="display: flex; justify-content: center; gap: 1rem;">
+                            <a href="subscription.php" target="_blank">
+
+                                <div
+                                    style="width: 100%; height: 20rem;  border-radius: 0.25rem; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                    <img src="images/g6.png" alt="Ad1"
+                                        style="width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </section>
+            <?php endif; ?>
 
 
 
@@ -251,7 +319,7 @@ function isSignedUp()
         <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
                 Service</a></p>
     </footer>
-    <script src="sweeper.js"></script>
+    <script src="worlde.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -271,5 +339,6 @@ function isSignedUp()
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+</body>
 
 </html>

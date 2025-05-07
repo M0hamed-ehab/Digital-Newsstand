@@ -1,83 +1,63 @@
 <?php
-session_start();
-include_once 'config/Database.php';
-include_once 'classes/Article.php';
-include_once 'classes/User.php';
-include_once 'classes/Subscription.php';
-include_once 'classes/Admin.php';
-include_once 'classes/Plans.php';
+
+include_once '../config/Database.php';
+include_once '../src/Models/Article.php';
+include_once '../src/Models/User.php';
+include_once '../src/Models/Admin.php';
 
 $db = Database::getInstance()->getConnection();
 
+
 $articleObj = new Article($db);
 $userObj = new User($db);
+
 $adminObj = new Admin($db);
-$plansObj = new Plans($db);
-$plans = $plansObj->getPlans();
 
 $categories_result = $adminObj->getCategories();
-
 $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit();
+$notfications_count = $userObj->getNotificationsCount();
+$show_ads = $userObj->shouldShowAds();
+
+
+function isUserLoggedIn()
+{
+    global $userObj;
+    return $userObj->isLoggedIn();
 }
 
-$user_id = $_SESSION['user_id'];
-$subscription = new Subscription($db, $user_id);
-
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['plan'])) {
-        $plan_name = $_POST['plan'];
-        $new_plan_id = 1; // default
-        foreach ($plans as $plan) {
-            if (strtolower(str_replace(' ', '_', $plan['plan_name'])) === $plan_name) {
-                $new_plan_id = $plan['plan_ID'];
-                break;
-            }
-        }
-        $message = $subscription->handlePlanChange($new_plan_id);
-        header("Location: subscription.php?message=" . urlencode($message));
-        exit();
-    } elseif (isset($_POST['auto_renew'])) {
-        $auto_renew = $_POST['auto_renew'];
-        $message = $subscription->handleAutoRenewChange($auto_renew);
-        header("Location: subscription.php?message=" . urlencode($message));
-        exit();
-    }
+function isSignedUp()
+{
+    global $userObj;
+    return $userObj->isSignedUp();
 }
 
-$highlight_plan = $subscription->getHighlightPlan();
-$auto_renew = $subscription->getAutoRenew();
-$articles = $subscription->getTodayArticles();
-$notfications_count = $subscription->getNotificationsCount();
 
-$message = '';
-if (isset($_GET['message'])) {
-    $message = htmlspecialchars($_GET['message']);
-}
 ?>
 
+
 <!DOCTYPE html>
+
 <html lang="en">
 
+
 <head>
+
     <meta charset="UTF-8">
-    <title>Subscription Plans - The Global Herald</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - The Global Herald</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="icon" type="image/png" href="/images/subs.png">
+    <link rel="icon" type="image/png" href="/images/games.png">
     <link rel="stylesheet" href="style/index.css">
-    <link rel="stylesheet" href="style/subs.css">
-    <script src="subs.js"></script>
+    <link rel="stylesheet" href="style/games.css">
 </head>
 
 <body>
+
+
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">
@@ -174,71 +154,121 @@ if (isset($_GET['message'])) {
             </div>
         </div>
     </nav>
+
     <div class="container mt-4">
-        <h1>Subscription Plans</h1>
+        <div class="row">
+            <div class="col-md-3 sidebar">
+                <div class="breaking-news">
+                    <h4><i class="fas fa-bolt"></i> Breaking News</h4>
+                    <ul>
+                        <?php
+                        $breaking_news_query = "SELECT id, title FROM articles ORDER BY created_at DESC LIMIT 3";
+                        $breaking_news_result = $db->query($breaking_news_query);
 
-        <form id="subscriptionForm" method="POST" action="subscription.php">
-            <input type="hidden" name="plan" id="planInput" value="">
-            <section class="plans">
-                <?php foreach ($plans as $plan):
-                    $plan_key = strtolower(str_replace(' ', '_', $plan['plan_name']));
-                    $is_popular = $plan['popular'];
-                    ?>
-                    <div class="<?php echo $subscription->planClass($plan_key); ?> plan-card"
-                        id="<?php echo htmlspecialchars($plan_key); ?>">
-                        <h2><?php echo htmlspecialchars($plan['plan_name']); ?></h2>
-                        <?php if ($is_popular): ?>
-                            <label style="font-size: small; color: gray;">Popular</label>
+                        if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
+                            <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
+                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
+                                </li>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <li>No breaking news at the moment.</li>
                         <?php endif; ?>
-                        <p class="price"><?php echo htmlspecialchars($plan['price']); ?> EGP</p>
-                        <p><?php echo htmlspecialchars($plan['description']); ?></p>
-                        <ul class="features">
-                            <?php foreach ($plan['features'] as $feature): ?>
-                                <li><?php echo htmlspecialchars($feature); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                        <button type="button" <?php echo $highlight_plan === $plan_key ? 'disabled' : ''; ?>
-                            onclick="confirmChange('<?php echo htmlspecialchars($plan_key); ?>')" class="select-btn">
-                            <?php echo $subscription->buttonLabel($plan_key); ?>
-                        </button>
-                    </div>
-                <?php endforeach; ?>
-            </section>
-        </form>
-
-        <?php if ($highlight_plan === 'premium+' || $highlight_plan === 'premium'): ?>
-            <div class="auto-renew-container">
-                <h2>Auto-Renewal</h2>
-                <form id="autoRenewForm" method="POST" action="subscription.php">
-                    <input type="hidden" name="auto_renew" id="autoRenewInput"
-                        value="<?php echo $auto_renew ? '1' : '0'; ?>">
-                    <label class="auto-renew-label" for="autoRenewToggle">Enable Auto-Renewal:</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="autoRenewToggle" <?php echo $auto_renew ? 'checked' : ''; ?>
-                            onchange="toggleAutoRenew(this)">
-                        <span class="slider"></span>
-                    </label>
-                </form>
-            </div>
-            <?php if ($highlight_plan === 'premium+'): ?>
-
-                <div id="Daily">
-                    <h2>Daily</h2>
-                    <?php if (count($articles) > 0): ?>
-                        <?php foreach ($articles as $article): ?>
-                            <article>
-                                <h3><?php echo htmlspecialchars($article['title']); ?></h3>
-                                <p><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
-                            </article>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>No news articles for today.</p>
-                    <?php endif; ?>
+                    </ul>
                 </div>
-            <?php endif; ?>
-        <?php endif; ?>
+
+                <div class="popular-articles">
+                    <h4><i class="fas fa-fire"></i> Trending Stories</h4>
+                    <ul>
+                        <?php
+                        $popular_articles_query = "SELECT id, title FROM articles ORDER BY views DESC LIMIT 3";
+                        $popular_articles_result = $db->query($popular_articles_query);
+
+                        if ($popular_articles_result && $popular_articles_result->num_rows > 0): ?>
+                            <?php while ($popular = $popular_articles_result->fetch_assoc()): ?>
+                                <li><a
+                                        href="article.php?id=<?= $popular['id'] ?>"><?= htmlspecialchars(substr($popular['title'], 0, 50)) ?>...</a>
+                                </li>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <li>No trending stories yet.</li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4><i class="fas fa-list-alt"></i> Categories</h4>
+                    <ul class="category-list">
+                        <li class="<?= $selected_category == 0 ? 'active' : '' ?>">
+                            <a href="index.php">All</a>
+                        </li>
+                        <?php
+                        $categories_result->data_seek(0); // Reset again for the category list
+                        while ($category = $categories_result->fetch_assoc()): ?>
+                            <li class="<?= $selected_category == $category['category_id'] ? 'active' : '' ?>">
+                                <a href="index.php?category_id=<?= $category['category_id'] ?>">
+                                    <?= htmlspecialchars($category['category_name']) ?>
+                                </a>
+                            </li>
+                        <?php endwhile; ?>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="game-container">
+
+                <table id="XO">
+                    <caption>Winner: <span id="result"></span>
+                        <br>
+                        <button id="reset" onclick="window.location.reload();">Reset</button>
+                    </caption>
+
+
+                    <tr>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                    </tr>
+                    <tr>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                    </tr>
+                    <tr>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                        <td data-cell></td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+
+
+
+
+
+        </div>
     </div>
-    <div id="messageBox"></div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <footer>
         <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
@@ -259,6 +289,7 @@ if (isset($_GET['message'])) {
             });
         });
     </script>
+    <script src="xo-game.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />

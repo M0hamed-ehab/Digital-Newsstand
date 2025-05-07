@@ -1,10 +1,10 @@
 <?php
 session_start();
-include_once 'config/Database.php';
-include_once 'classes/Article.php';
-include_once 'classes/User.php';
-include_once 'classes/user_favs.php';
-include_once 'classes/user_book.php';
+include_once '../config/Database.php';
+include_once '../src/Models/Article.php';
+include_once '../src/Models/User.php';
+include_once '../src/Models/user_favs.php';
+include_once '../src/Models/user_book.php';
 
 $db = Database::getInstance()->getConnection();
 

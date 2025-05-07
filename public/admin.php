@@ -1,8 +1,8 @@
 <?php
-include_once 'config/Database.php';
-include_once 'classes/Category.php';
-include_once 'classes/Admin.php';
-include_once 'classes/Article.php';
+include_once '../config/Database.php';
+include_once '../src/Models/Category.php';
+include_once '../src/Models/Admin.php';
+include_once '../src/Models/Article.php';
 
 
 

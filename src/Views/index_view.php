@@ -1,68 +1,3 @@
-<?php
-include_once 'config/Database.php';
-include_once 'classes/Article.php';
-include_once 'classes/User.php';
-include_once 'classes/Game.php';
-include_once 'classes/Admin.php';
-
-$db = Database::getInstance()->getConnection();
-$adminObj = new Admin($db);
-$articleObj = new Article($db);
-$userObj = new User($db);
-$gameObj = new Game($db);
-
-if (isset($_GET['play']) && is_numeric($_GET['play'])) {
-        Game::play(intval($_GET['play']));
-        exit();
-}
-
-$categories_result = $adminObj->getCategories();
-
-$selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
-$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
-$page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? intval($_GET['page']) : 1;
-
-$selected_category_name = '';
-if ($selected_category !== 0) {
-        $categories_result->data_seek(0);
-        while ($category = $categories_result->fetch_assoc()) {
-                if ($category['category_id'] == $selected_category) {
-                        $selected_category_name = $category['category_name'];
-                        break;
-                }
-        }
-}
-
-if ($search_term !== '') {
-        $heading_text = "Results for: \"" . htmlspecialchars($search_term) . "\"";
-} elseif ($selected_category !== 0 && $selected_category_name !== '') {
-        $heading_text = "Category: " . htmlspecialchars($selected_category_name);
-} else {
-        $heading_text = "Latest Headlines";
-}
-
-$articles_per_page = 5;
-
-$total_articles = $articleObj->getTotalArticles($search_term, $selected_category);
-$articles_result = $articleObj->getArticles($search_term, $selected_category, $page, $articles_per_page);
-
-$games_result = $gameObj->getAllGames();
-
-
-$newsObj = new Admin($db);
-
-$BNQ = $newsObj->getBNQ();
-$BNR = $db->query($BNQ);
-
-$popular_articles_query = "SELECT id, title FROM articles ORDER BY id DESC";
-$popular_articles_result = $db->query($popular_articles_query);
-
-$show_ads = $userObj->shouldShowAds();
-
-$notfications_count = $userObj->getNotificationsCount();
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,7 +9,7 @@ $notfications_count = $userObj->getNotificationsCount();
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="icon" type="image/png" href="/images/home.png">
-        <link rel="stylesheet" href="style/index.css">
+        <link rel="stylesheet" href="../style/index.css">
 </head>
 
 <body>
@@ -131,10 +66,10 @@ $notfications_count = $userObj->getNotificationsCount();
                                                         <a class="nav-link position-relative" href="noti.php"
                                                                 title="Notifications">
                                                                 <i class="fas fa-bell fa-lg"></i>
-                                                                <?php if ($notfications_count > 0): ?>
+                                                                <?php if ($notifications_count > 0): ?>
                                                                         <span
                                                                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                                                <?= $notfications_count ?>
+                                                                                <?= $notifications_count ?>
                                                                                 <span class="visually-hidden">unread
                                                                                         notifications</span>
                                                                         </span>
@@ -173,7 +108,8 @@ $notfications_count = $userObj->getNotificationsCount();
                                                 </li>
                                         <?php else: ?>
                                                 <li class="nav-item">
-                                                        <a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i>
+                                                        <a class="nav-link" href="../../login.html"><i
+                                                                        class="fas fa-sign-in-alt"></i>
                                                                 Login</a>
                                                 </li>
                                                 <li class="nav-item">
@@ -403,8 +339,6 @@ $notfications_count = $userObj->getNotificationsCount();
                 <p>&copy; <?= date("Y") ?> The Global Herald. <a href="#">Privacy Policy</a> | <a href="#">Terms of
                                 Service</a></p>
         </footer>
-
-
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>

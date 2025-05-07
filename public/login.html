@@ -15,6 +15,20 @@
 </head>
 
 <body>
+    <script>
+        window.onload = function () {
+            fetch('login.php', { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.loggedIn) {
+                        window.location.href = 'index.php';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking login status:', error);
+                });
+        };
+    </script>
 
     <!-- Header Section -->
     <header>
