@@ -50,7 +50,7 @@ class Admin
         $sql = "SELECT a.*, c.category_name 
                 FROM articles a 
                 LEFT JOIN category c ON a.category_id = c.category_id
-                ORDER BY a.created_at DESC";
+                ORDER BY a.id DESC";
         return $this->conn->query($sql);
     }
 
