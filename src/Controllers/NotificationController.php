@@ -51,7 +51,7 @@ class NotificationController
         $selected_category = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
         $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-        $notfications_count = $this->userObj->getNotificationsCount();
+        $notifications_count = $this->userObj->getNotificationsCount();
 
         $notfications = [];
         if ($this->userObj->isLoggedIn()) {
@@ -63,7 +63,7 @@ class NotificationController
             'categories_result' => $categories_result,
             'selected_category' => $selected_category,
             'search_term' => $search_term,
-            'notfications_count' => $notfications_count,
+            'notifications_count' => $notifications_count,
             'notfications' => $notfications,
             'articleObj' => $this->articleObj,
             'userObj' => $this->userObj,
