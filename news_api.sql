@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2025 at 08:16 PM
+-- Generation Time: May 07, 2025 at 11:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,15 +43,13 @@ CREATE TABLE `articles` (
 --
 
 INSERT INTO `articles` (`id`, `title`, `content`, `author`, `created_at`, `category_id`, `image_path`, `views`) VALUES
-(21, 'newsportal', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'Mai', '2025-04-23 09:55:23', 3, '', 2),
-(24, 'Surveying Engineer', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odioLorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor magna eget elit efficitur, at accumsan sem placerat. Nulla tellus libero, mattis nec molestie at, facilisis ut turpis. Vestibulum dolor metus, tincidunt eget odio', 'mmm', '2025-04-23 15:04:10', 1, '', 1),
-(26, 'Data Specialist', 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperioresLorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores.Lorem ipsum, dolor sit amet consectetur adipisicing elit. Et dolores odit rerum obcaecati ullam cumque maiores illum nobis laudantium asperiores..', 'john', '2025-04-23 20:23:36', 6, '', 6),
-(27, 'Cats', 'Cats are one of the most popular and lovable pets in the world. They are small, furry animals known for their playful and curious nature. Cats have sharp claws and teeth, which they use for hunting and climbing. They are very clean animals and groom themselves by licking their fur.', 'Meow', '2025-04-25 22:58:54', 3, '', 7),
 (28, 'Dogs', 'Dogs are sometimes referred to as man\'s best friend because they are kept as domestic pets and are usually loyal and like being around humans. They are also helpful in reducing stress, anxiety, and depression, loneliness, encourage exercise and playfulness and even improve your cardiovascular health.', 'Bark', '2025-04-25 23:00:35', 3, '', 28),
-(41, 'Test ', 'Test Test Test ', 'Test ', '2025-04-26 13:46:25', 6, 'g2.jpg', 11),
-(42, 'img-fluid mb-3', 'img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:52:23', 6, 'g3.webp', 10),
-(43, 'img-fluid mb-3', 'img-fluid mb-3img-fluid mb-3img-fluid mb-3img-fluid mb-3', 'img-fluid mb-3', '2025-04-26 13:54:24', 3, '', 21),
-(44, 'a', 'b', 'c', '2025-04-28 16:52:16', 1, '', 143);
+(47, 'GAZA', 'Amid Gaza’s worsening fuel crisis under the Israeli blockade, Palestinians are converting plastic into diesel to try and keep essential services running. The production process is dangerous to humans and vehicles alike.', 'Mai', '2025-05-07 21:17:03', 6, 'gaza.webp', 2),
+(48, 'Disney new theme park', 'Disney’s parks, as well as its streaming businesses — including Disney+ and Hulu — helped the company deliver $23.6 billion in revenue, a 7% on-year increase, and $4.4 billion in operating income, a 15% on-year increase.The company’s entertainment streaming businesses performed strongly, delivering $10.7 billion in revenue and $1.3 billion in operating income. While Disney+ lost 700,000 subscribers during 2025’s first quarter, the streaming platform made that up and more in the second quarter, adding 1.4 million subscribers, bringing the streamer to 126 million subscribers. Hulu, meanwhile, added 1.3 million subscribers, a 3% increase. And the company’s direct-to-consumer operating revenue also climbed, jumping to $336 million, up from $47 million the prior year.Meanwhile, the company’s sports revenue increased 5% to $4.5 billion as segment operating income decreased $91 million, to $687 million. Disney attributed the drop to increased programming and production costs from three additional college football playoff games and an added NFL game during the quarter — though these helped increase domestic advertising revenue 29%.While the company expects growth to continue during the third quarter, projecting a modest increase in Disney+ subscribers during the third quarter and double-digit increases to both entertainment and sports, Disney remains cautious about the future in the face of economic headwinds.', 'Mai', '2025-05-07 21:19:26', 3, '', 1),
+(49, 'Barcelona\'s Final', 'Fittingly, after three-and-a-half hours, the 13 goals and the three invasions from the substitutes’ bench, the heavens opened: a downpour that also felt like a kind of baptism. Inter and Barcelona had drained themselves many times over, and discovered every time that they still had more to give. We were in a place beyond plans and maps, beyond shapes and tactics, beyond sanity.And so ended what turned out to be less a Champions League semi-final and more of an elongated scream, the sort of game that emerges when both sides give up on perfection and in so doing somehow manage to produce it.Inter head coach Simone Inzaghi (right) celebrates with Francesco Acerbi, whose late leveller took the game to extra time.Simone Inzaghi hails Inter for beating ‘best two sides in Europe’ on way to finalRead morePerfect theatre, perfect tension, perfect imperfection, a perfect clash of styles and a perfect balance: between flamboyant, fearless youth and grizzled, grimacing experience.Still it had to be settled, and so after Inter went two up through Lautaro Martínez and Hakan Calhanoglu, after Barcelona stunningly drew themselves level through Eric García and Dani Olmo, after the sprawling saves from Yann Sommer, after Raphinha in the 87th minute and Francesco Acerbi in the 93rd, came Davide Frattesi in the 99th. Injured at the weekend, in a game he had no right to play, Frattesi took time he had no right to take, showed composure he had no right to possess.', 'Mai', '2025-05-07 21:22:29', 1, '', 1),
+(50, 'Grand Theft Auto V', 'Grand Theft Auto VI is now set to release on May 26, 2026.We are very sorry that this is later than you expected. The interest and excitement surrounding a new Grand Theft Auto has been truly humbling for our entire team. We want to thank you for your support and your patience as we work to finish the game.With every game we have released, the goal has always been to try and exceed your expectations, and Grand Theft Auto VI is no exception. We hope you understand that we need this extra time to deliver at the level of quality you expect and deserve.We look forward to sharing more information with you soon.', 'Mai', '2025-05-07 21:24:26', 3, 'gta.webp', 1),
+(51, 'How Indian might stacks up against Pakistan', '	Please use the sharing tools found via the share button at the top or side of articles. Copying articles to share with others is a breach of FT.com T&Cs and Copyright Policy. Email licensing@ft.com to buy additional rights. Subscribers may share up to 10 or 20 articles per month using the gift article service. More information can be found at https://www.ft.com/tour.	https://www.ft.com/content/9f1f4841-ed05-4ed1-9c71-e2cb9bb14f88	The Indian armed forces on Wednesday said they had targeted nine “terrorist camps” in air strikes in Pakistan-administered Kashmir and some deep inside the international boundary between India and Pakistan. “The targets were neutralised with clinical efficiency . . . no military establishments were targeted,” air force commander Vyomika Singh said on Wednesday.She said Indian forces used “niche” technology weapons and carefully chose targets to avoid collateral damage to civilians but did not elaborate on the specific arms or methods used in the strikes.“India has demonstrated considerable restraint in its response,” she added. “However, it must be said that the Indian armed forces are fully prepared to respond to Pakistani misadventures, if any that will escalate the situation.”Pakistani military and diplomatic officials told the Financial Times they shot down five Indian fighter jets during Wednesday’s clashes, including three French-made Rafales and two Russian-made planes. The FT could not independently verify the claim.', 'Mai', '2025-05-07 21:27:52', 6, '', 2),
+(52, 'Hakimi seals PSG’s Champions', 'It was a night when Arsenal gave everything, battling until the very last, even when it looked over. Nobody should fault the spirit of Mikel Arteta’s players. They emerged with honour. But it was a night when they simply could not bend this showpiece occasion to the force of their energy and will.When it really was all over, this raucous venue pounded to a delirious beat. Paris Saint-Germain are going to their second Champions League final, deserved winners across the two legs. They will fancy their chances of a first title when they meet Inter in Munich.', 'Mai', '2025-05-07 21:29:35', 1, 'sport.avif', 1);
 
 --
 -- Triggers `articles`
@@ -80,15 +78,6 @@ CREATE TABLE `bookmarks` (
   `article_id` int(11) NOT NULL,
   `added_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `bookmarks`
---
-
-INSERT INTO `bookmarks` (`bookmark_id`, `user_id`, `article_id`, `added_at`) VALUES
-(1, 33, 27, '2025-04-25 23:24:03'),
-(20, 20, 44, '2025-05-01 22:01:41'),
-(24, 7, 44, '2025-05-07 15:22:30');
 
 -- --------------------------------------------------------
 
@@ -149,23 +138,6 @@ CREATE TABLE `comment` (
   `article_id` int(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `comment`
---
-
-INSERT INTO `comment` (`comment_id`, `description`, `user_id`, `article_id`) VALUES
-(1, 'img?', 7, 43),
-(2, 'img?', 7, 43),
-(3, 'd', 7, 44),
-(4, 'e', 7, 44),
-(5, 'f', 7, 44),
-(6, 'Cats are the best B)', 7, 27),
-(7, 'g', 7, 44),
-(8, 'h', 7, 44),
-(9, 'i', 7, 44),
-(10, 'j', 7, 44),
-(11, 'k', 7, 44);
-
 -- --------------------------------------------------------
 
 --
@@ -178,15 +150,6 @@ CREATE TABLE `favorites` (
   `article_id` int(11) NOT NULL,
   `saved_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `favorites`
---
-
-INSERT INTO `favorites` (`favorite_id`, `user_id`, `article_id`, `saved_at`) VALUES
-(1, 33, 27, '2025-04-25 23:24:04'),
-(16, 20, 44, '2025-05-01 22:01:42'),
-(21, 7, 44, '2025-05-07 15:22:08');
 
 -- --------------------------------------------------------
 
@@ -230,15 +193,50 @@ CREATE TABLE `notfications` (
 --
 
 INSERT INTO `notfications` (`notfication_id`, `user_id`, `notfication_description`, `article_id`) VALUES
-(5, 8, 'Cats Written by: Meow', 27),
-(6, 20, 'Cats Written by: Meow', 27),
-(7, 33, 'Cats Written by: Meow', 27),
 (12, 8, 'Dogs Written by: Bark', 28),
 (13, 20, 'Dogs Written by: Bark', 28),
-(18, 7, 'a Written by: c', 44),
-(19, 8, 'a Written by: c', 44),
-(20, 20, 'a Written by: c', 44),
-(21, 33, 'a Written by: c', 44);
+(36, 7, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(37, 8, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(38, 20, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(39, 33, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(40, 34, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(41, 37, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(42, 38, 'Palestinians turn plastic into diesel amid fuel shortage in Gaza Written by: Mai', 47),
+(43, 7, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(44, 8, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(45, 20, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(46, 33, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(47, 34, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(48, 37, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(49, 38, 'Disney announces a new theme park in Abu Dhabi, its first new resort in a generation Written by: Mai', 48),
+(50, 7, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(51, 8, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(52, 20, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(53, 33, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(54, 34, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(55, 37, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(56, 38, ' Frattesi fires Inter into final as Barcelona fall short in seven-goal instant classic Written by: Mai', 49),
+(57, 7, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(58, 8, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(59, 20, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(60, 33, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(61, 34, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(62, 37, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(63, 38, 'Grand Theft Auto VI is Now Coming May 26, 2026 Written by: Mai', 50),
+(64, 7, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(65, 8, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(66, 20, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(67, 33, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(68, 34, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(69, 37, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(70, 38, 'Military briefing: How Indian might stacks up against Pakistan Written by: Mai', 51),
+(71, 7, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52),
+(72, 8, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52),
+(73, 20, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52),
+(74, 33, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52),
+(75, 34, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52),
+(76, 37, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52),
+(77, 38, 'Hakimi seals PSG’s Champions League final spot as bold Arsenal fall short Written by: Mai', 52);
 
 -- --------------------------------------------------------
 
@@ -431,7 +429,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `articles`
 --
 ALTER TABLE `articles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `bookmarks`
@@ -473,7 +471,7 @@ ALTER TABLE `game`
 -- AUTO_INCREMENT for table `notfications`
 --
 ALTER TABLE `notfications`
-  MODIFY `notfication_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `notfication_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `plans`
