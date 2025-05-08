@@ -50,7 +50,7 @@ class ProfileController
         $success_message = $this->success_message;
         $error_message = isset($this->errors) && !empty($this->errors) ? implode(', ', $this->errors) : null;
         $errors = $this->errors;
-        include '../src/views/profile_view.php';
+        include '../src/Views/profile_view.php';
     }
 }
 ?>

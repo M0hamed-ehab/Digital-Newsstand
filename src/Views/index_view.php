@@ -47,7 +47,7 @@
 
                                                 if ($breaking_news_result && $breaking_news_result->num_rows > 0): ?>
                                                         <?php while ($news = $breaking_news_result->fetch_assoc()): ?>
-                                                                <li><a href="#"><?= htmlspecialchars(substr($news['title'], 0, 60)) ?>...</a>
+                                                                <li><a href="article.php?id=<?= $news['id'] ?>"><?= htmlspecialchars(substr($news['title'], 0, 50)) ?>...</a>
                                                                 </li>
                                                         <?php endwhile; ?>
                                                 <?php else: ?>
