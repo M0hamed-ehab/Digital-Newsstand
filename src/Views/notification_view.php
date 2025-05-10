@@ -10,12 +10,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="icon" type="image/png" href="/images/bell.png" />
     <link rel="stylesheet" href="style/index.css" />
-
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/index-dark.css">
+    <?php endif; ?>
     <style>
         .container {
             margin: 5% 5% 10% 5%;
         }
     </style>
+
 </head>
 
 <body>

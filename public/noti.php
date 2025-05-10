@@ -11,6 +11,7 @@ $notifications_count = $data['notifications_count'];
 $notfications = $data['notfications'];
 $articleObj = $data['articleObj'];
 $userObj = $data['userObj'];
+$dark_mode = isset($_SESSION['dark_mode']) ? $_SESSION['dark_mode'] : false;
 
 require_once '../src/Views/notification_view.php';
 ?>

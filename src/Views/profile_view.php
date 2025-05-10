@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="/images/user.png">
     <link rel="stylesheet" href="style/profile.css">
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/profile-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>
@@ -50,6 +53,12 @@
             <button type="submit" class="btn btn-primary" name="update_profile">Update Profile</button>
             <button type="button" class="btn btn-primary" name="Subscription"
                 onclick="window.location.href='subscription.php'">Subscription</button>
+            <form id="darkModeForm" method="post" style="display:inline;">
+                <input type="hidden" name="toggle_dark_mode" value="1" />
+                <button type="submit" id="darkModeToggle" class="btn btn-primary">
+                    <?= $dark_mode ? 'Light Mode' : 'Dark Mode' ?>
+                </button>
+            </form>
             <div class="mt-3">
                 <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </div>
@@ -83,6 +92,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>

@@ -6,8 +6,6 @@ body {
     line-height: 1.7;
 }
 
-
-
 a {
     color: #007bff;
     text-decoration: none;
@@ -66,6 +64,7 @@ a {
 .category-list {
     list-style: none;
     padding: 0;
+    overflow: hidden;
 }
 
 .category-list li {
@@ -156,6 +155,7 @@ a {
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
     max-height: 15rem;
+    overflow: hidden;
 }
 
 .breaking-news h4 {
@@ -188,6 +188,8 @@ a {
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
     max-height: 15rem;
+    overflow: hidden;
+
 }
 
 .popular-articles h4 {
@@ -283,6 +285,7 @@ footer a:hover {
 @media (max-width: 992px) {
     .row {
         flex-direction: column;
+        align-items: center;
     }
 
     .sidebar {
@@ -291,56 +294,95 @@ footer a:hover {
     }
 }
 
-.user-icons {
-    display: flex;
-    align-items: center;
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .row {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .sidebar {
+        flex: 0 0 100%;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+
+    .main-content {
+        padding: 0.75rem;
+    }
+
+    .article-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .game-img {
+        height: 150px;
+    }
+
+    .game-title {
+        font-size: 1.1rem;
+    }
+
+    .game-description {
+        font-size: 0.85rem;
+    }
 }
 
-.user-icons .nav-link {
-    padding: 0.7rem 0.8rem;
-}
+@media (max-width: 576px) {
+    .container {
+        padding: 0.5rem;
+    }
 
-.user-dropdown {
-    position: relative;
-}
+    .row {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+    }
 
-.user-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 0.25rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-    padding: 0.5rem 0;
-    min-width: 10rem;
-    z-index: 1060;
-    display: none;
-}
+    .sidebar {
+        flex: 0 0 100%;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+    }
 
-.dropdown-menu[data-bs-popper] {
-    left: -360%;
-}
+    .main-content {
+        padding: 0.5rem;
+    }
 
-.user-dropdown-menu.show {
-    display: block;
-}
+    .article-header h2 {
+        font-size: 1.25rem;
+    }
 
-.user-dropdown-menu a.dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 0.25rem 1.5rem;
-    clear: both;
-    font-weight: 400;
-    color: #212529;
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    text-decoration: none;
-}
+    .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
 
-.user-dropdown-menu a.dropdown-item:hover,
-.user-dropdown-menu a.dropdown-item:focus {
-    background-color: #e9ecef;
-    color: #1e2125;
+    .game-img {
+        height: 120px;
+    }
+
+    .game-title {
+        font-size: 1rem;
+    }
+
+    .game-description {
+        font-size: 0.8rem;
+    }
+
+
+
+    .read-more-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
 }

@@ -11,6 +11,10 @@
     <link rel="icon" type="image/png" href="/images/games.png" />
     <link rel="stylesheet" href="style/index.css" />
     <link rel="stylesheet" href="style/games.css" />
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/index-dark.css">
+        <link rel="stylesheet" href="style/games-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>
@@ -121,8 +125,7 @@
             </div>
 
             <?php if ($show_ads): ?>
-                <section class="ads-section"
-                    style="background-color: #f8f9fa;  padding: 1rem;  border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; ">
+                <section class="ads-section">
                     <div class="container">
                         <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
                         <div style="display: flex; justify-content: center; gap: 1rem;">

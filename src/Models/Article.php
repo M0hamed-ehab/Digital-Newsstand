@@ -23,7 +23,7 @@ class Article
             $subscribers = $this->conn->query("SELECT email FROM users WHERE role = 'subscriber'");
             if ($subscribers && $subscribers->num_rows > 0) {
                 $count = $subscribers->num_rows;
-                return "Summary sent to $count Premium+ subscribers.";
+                return "Summary sent to $count Subscribers.";
             } else {
                 return "No subscribers found to send the summary.";
             }

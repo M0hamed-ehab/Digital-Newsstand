@@ -10,6 +10,9 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="icon" type="image/png" href="/images/index.png">
         <link rel="stylesheet" href="../style/index.css">
+        <?php if ($dark_mode): ?>
+                <link rel="stylesheet" href="style/index-dark.css">
+        <?php endif; ?>
 </head>
 
 <body>
@@ -118,7 +121,6 @@
                                                 </div>
                                         <?php endwhile; ?>
 
-                                        <!-- Pagination Controls -->
                                         <?php
                                         $total_pages = ceil($total_articles / $articles_per_page);
                                         if ($total_pages > 1):
@@ -164,8 +166,7 @@
 
         <!-- Latest -->
         <?php if ($show_ads): ?>
-                <section class="ads-section"
-                        style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                <section class="ads-section">
                         <div class="container">
                                 <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
                                 <div style="display: flex; justify-content: center; gap: 1rem;">
