@@ -83,6 +83,13 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
         rel="stylesheet">
     <link rel="icon" type="image/png" href="/images/admin.png">
     <link rel="stylesheet" href="./style/admin.css">
+<<<<<<< Updated upstream:admin.php
+=======
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/admin-dark.css">
+    <?php endif; ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+>>>>>>> Stashed changes:src/Views/admin_view.php
 </head>
 
 <body>
@@ -97,6 +104,54 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
             <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
 
+<<<<<<< Updated upstream:admin.php
+=======
+        <!-- USER STATS-->
+        <div class="section mb-4">
+            <h2>👥 User Statistics</h2>
+            <button id="showUserStatsBtn" class="btn btn-info mb-3">Show User Stats</button>
+            <div id="userStatsSummary" style="display:none;">
+                <p>Total Users: <span
+                        id="totalUsers"><?= isset($userStats['total_users']) ? $userStats['total_users'] : 0 ?></span>
+                </p>
+                <p>Subscribers: <span
+                        id="subscribers"><?= isset($userStats['subscribers']) ? $userStats['subscribers'] : 0 ?></span>
+                </p>
+                <p>Admins: <span id="admins"><?= isset($userStats['admins']) ? $userStats['admins'] : 0 ?></span></p>
+                <button id="showMoreUsersBtn" class="btn btn-secondary">Show More</button>
+                <button id="downloadPdfBtn" class="btn btn-success">Download PDF</button>
+            </div>
+            <div id="userDetails" style="display:none; max-height: 300px; overflow-y: auto; margin-top: 10px;">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email</th>
+                            <th>Role</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (isset($userStats['users']) && is_array($userStats['users'])): ?>
+                            <?php foreach ($userStats['users'] as $user): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($user['user_id']) ?></td>
+                                    <td><?= htmlspecialchars($user['email']) ?></td>
+                                    <td><?= htmlspecialchars($user['role']) ?></td>
+
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="2">No user data available.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+>>>>>>> Stashed changes:src/Views/admin_view.php
         <!-- CATEGORY MANAGEMENT -->
         <div class="section">
             <h2>📁 Manage Categories</h2>
@@ -254,6 +309,82 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<<<<<<< Updated upstream:admin.php
+=======
+
+    <script>
+        document.getElementById('showUserStatsBtn').addEventListener('click', function () {
+            var summary = document.getElementById('userStatsSummary');
+            if (summary.style.display === 'none') {
+                summary.style.display = 'block';
+                this.textContent = 'Hide User Stats';
+            } else {
+                summary.style.display = 'none';
+                this.textContent = 'Show User Stats';
+                document.getElementById('userDetails').style.display = 'none';
+                document.getElementById('showMoreUsersBtn').textContent = 'Show More';
+            }
+        });
+
+        document.getElementById('showMoreUsersBtn').addEventListener('click', function () {
+            var details = document.getElementById('userDetails');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                this.textContent = 'Show Less';
+            } else {
+                details.style.display = 'none';
+                this.textContent = 'Show More';
+            }
+        });
+
+    document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.text('User Statistics Report', 105, 15, null, null, 'center');
+    
+    doc.setFontSize(12);
+    doc.text(`Report generated on: ${new Date().toLocaleString()}`, 105, 25, null, null, 'center');
+    
+    doc.setFontSize(14);
+    doc.text('Summary Statistics', 14, 35);
+    doc.setFontSize(12);
+    doc.text(`Total Users: ${document.getElementById('totalUsers').textContent}`, 14, 45);
+    doc.text(`Subscribers: ${document.getElementById('subscribers').textContent}`, 14, 55);
+    doc.text(`Admins: ${document.getElementById('admins').textContent}`, 14, 65);
+    
+    const userDetails = document.getElementById('userDetails');
+    if (userDetails.style.display !== 'none') {
+        doc.setFontSize(14);
+        doc.text('User Details', 14, 80);
+        
+        doc.setFontSize(12);
+        doc.text('User ID', 14, 90);
+        doc.text('Email', 50, 90);
+        doc.text('Role', 140, 90);
+        
+        const rows = userDetails.querySelectorAll('tbody tr');
+        let yPosition = 100;
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            doc.text(cells[0].textContent, 14, yPosition);
+            doc.text(cells[1].textContent, 50, yPosition);
+            doc.text(cells[2].textContent, 140, yPosition);
+            yPosition += 10;
+            
+            if (yPosition > 280) {
+                doc.addPage();
+                yPosition = 20;
+            }
+        });
+    }
+    
+    doc.save('user-statistics-report.pdf');
+});
+    </script>
+>>>>>>> Stashed changes:src/Views/admin_view.php
 </body>
 
 </html>
