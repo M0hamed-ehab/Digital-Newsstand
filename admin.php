@@ -89,6 +89,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
         <link rel="stylesheet" href="style/admin-dark.css">
     <?php endif; ?>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<<<<<<< Updated upstream:admin.php
+>>>>>>> Stashed changes:src/Views/admin_view.php
+=======
 >>>>>>> Stashed changes:src/Views/admin_view.php
 </head>
 
