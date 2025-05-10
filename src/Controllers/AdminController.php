@@ -15,6 +15,7 @@ class AdminController
     public $articles;
     public $categoryList;
     public $breakingNews;
+    public $userStats;
 
     public function __construct()
     {
@@ -44,6 +45,7 @@ class AdminController
         $bnq = $this->admin->getBNQ();
         $result = $this->db->query($bnq);
         $this->breakingNews = $result;
+        $this->userStats = $this->admin->getUserStatsAndDetails();
     }
 
     private function load()

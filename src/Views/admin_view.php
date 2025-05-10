@@ -29,6 +29,50 @@
             <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
 
+        <!-- USER STATS-->
+        <div class="section mb-4">
+            <h2>👥 User Statistics</h2>
+            <button id="showUserStatsBtn" class="btn btn-info mb-3">Show User Stats</button>
+            <div id="userStatsSummary" style="display:none;">
+                <p>Total Users: <span
+                        id="totalUsers"><?= isset($userStats['total_users']) ? $userStats['total_users'] : 0 ?></span>
+                </p>
+                <p>Subscribers: <span
+                        id="subscribers"><?= isset($userStats['subscribers']) ? $userStats['subscribers'] : 0 ?></span>
+                </p>
+                <p>Admins: <span id="admins"><?= isset($userStats['admins']) ? $userStats['admins'] : 0 ?></span></p>
+                <button id="showMoreUsersBtn" class="btn btn-secondary">Show More</button>
+            </div>
+            <div id="userDetails" style="display:none; max-height: 300px; overflow-y: auto; margin-top: 10px;">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email</th>
+                            <th>Role</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (isset($userStats['users']) && is_array($userStats['users'])): ?>
+                            <?php foreach ($userStats['users'] as $user): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($user['user_id']) ?></td>
+                                    <td><?= htmlspecialchars($user['email']) ?></td>
+                                    <td><?= htmlspecialchars($user['role']) ?></td>
+
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="2">No user data available.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- CATEGORY MANAGEMENT -->
         <div class="section">
             <h2>📁 Manage Categories</h2>
@@ -171,6 +215,32 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.getElementById('showUserStatsBtn').addEventListener('click', function () {
+            var summary = document.getElementById('userStatsSummary');
+            if (summary.style.display === 'none') {
+                summary.style.display = 'block';
+                this.textContent = 'Hide User Stats';
+            } else {
+                summary.style.display = 'none';
+                this.textContent = 'Show User Stats';
+                document.getElementById('userDetails').style.display = 'none';
+                document.getElementById('showMoreUsersBtn').textContent = 'Show More';
+            }
+        });
+
+        document.getElementById('showMoreUsersBtn').addEventListener('click', function () {
+            var details = document.getElementById('userDetails');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                this.textContent = 'Show Less';
+            } else {
+                details.style.display = 'none';
+                this.textContent = 'Show More';
+            }
+        });
+    </script>
 </body>
 
 </html>

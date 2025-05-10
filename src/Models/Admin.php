@@ -112,4 +112,41 @@ class Admin
             ORDER BY creation_date DESC
         ";
     }
+
+    public function getUserStatsAndDetails()
+    {
+        $stats = [
+            'total_users' => 0,
+            'subscribers' => 0,
+            'admins' => 0,
+            'users' => []
+        ];
+
+        $result = $this->conn->query("SELECT COUNT(*) as count FROM users");
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $stats['total_users'] = (int) $row['count'];
+        }
+
+        $result = $this->conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'subscriber'");
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $stats['subscribers'] = (int) $row['count'];
+        }
+
+        $result = $this->conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'");
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $stats['admins'] = (int) $row['count'];
+        }
+
+        $result = $this->conn->query("SELECT user_id, email, role FROM users");
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $stats['users'][] = ['user_id' => $row['user_id'], 'email' => $row['email'], 'role' => $row['role']];
+            }
+        }
+
+        return $stats;
+    }
 }
