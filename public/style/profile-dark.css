@@ -1,0 +1,90 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    background-image: none;
+    line-height: 1.7;
+}
+
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #1e1e1e;
+    box-shadow: none;
+    border-radius: 0.5rem;
+}
+
+h2 {
+    color: #e0e0e0;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #e0e0e0;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #555555;
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    background-color: #333333;
+    color: #e0e0e0;
+}
+
+.btn-primary {
+    background-color: #bb86fc;
+    color: #000;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #9a67ea;
+}
+
+.alert {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.3rem;
+}
+
+.alert-success {
+    background-color: #2e7d32;
+    color: #a5d6a7;
+    border: 1px solid #81c784;
+}
+
+.alert-danger {
+    background-color: #c62828;
+    color: #ef9a9a;
+    border: 1px solid #e57373;
+}
+
+.logout-link {
+    margin-top: 0.3rem;
+    text-align: center;
+    color: #ef9a9a;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    transition: color 0.2s ease-in-out;
+}
+
+.logout-link:hover {
+    color: #f44336;
+}

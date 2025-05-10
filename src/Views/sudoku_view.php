@@ -11,6 +11,10 @@
     <link rel="icon" type="image/png" href="/images/games.png" />
     <link rel="stylesheet" href="style/index.css" />
     <link rel="stylesheet" href="style/games.css" />
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/index-dark.css">
+        <link rel="stylesheet" href="style/games-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>
@@ -81,8 +85,7 @@
                 <button type="button" onclick="resetBoard()">Reset</button>
                 <p id="result"></p>
                 <?php if ($show_ads): ?>
-                    <section class="ads-section"
-                        style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                    <section class="ads-section">
                         <div class="container">
                             <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
                             <div style="display: flex; justify-content: center; gap: 1rem;">

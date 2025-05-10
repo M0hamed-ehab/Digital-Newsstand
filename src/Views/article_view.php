@@ -21,6 +21,9 @@ $show_ads = $data['show_ads'];
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="/images/article.png">
     <link rel="stylesheet" href="style/article.css">
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/article-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>
@@ -75,7 +78,6 @@ $show_ads = $data['show_ads'];
             <?php if ($view_mode === 'print'): ?>
                 <style>
                     body {
-                        font-family: 'Times New Roman', Times, serif;
                         background: #fff !important;
                         color: #000 !important;
                         margin: 2rem;
@@ -95,19 +97,19 @@ $show_ads = $data['show_ads'];
                     .back-link,
                     #comment-section,
                     .ads-section {
-                        display: none !important;
+                        display: none;
                     }
 
                     .article-content img {
-                        max-width: 100% !important;
-                        height: auto !important;
+                        max-width: 100%;
+                        height: auto;
                         margin-bottom: 1rem;
                     }
 
                     .article-content {
-                        font-size: 14pt !important;
-                        line-height: 1.6 !important;
-                        color: #000 !important;
+                        font-size: 14pt;
+                        line-height: 1.6;
+                        color: #000;
                     }
 
 
@@ -144,8 +146,7 @@ $show_ads = $data['show_ads'];
                 </div>
             <?php endif; ?>
             <?php if ($show_ads): ?>
-                <section class="ads-section"
-                    style="background-color: #f8f9fa; justify-self: center; padding: 1rem; margin: 2rem 2rem; border: 1px solid #ddd; border-radius: 0.5rem; width: fit-content; align-self: center;">
+                <section class="ads-section">
                     <div class="container">
                         <h3 style="text-align: center; margin-bottom: 1rem;">Sponsored Ads</h3>
                         <div style="display: flex; justify-content: center; gap: 1rem;">

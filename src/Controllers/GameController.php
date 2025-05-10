@@ -52,6 +52,7 @@ class GameController
         $articleObj = $this->articleObj;
         $userObj = $this->userObj;
         $db = $this->db;
+        $dark_mode = isset($_SESSION['dark_mode']) ? $_SESSION['dark_mode'] : false;
         switch (strtolower($game)) {
             case 'mine':
                 include '../src/Views/mine_view.php';

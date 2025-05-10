@@ -11,6 +11,7 @@ $search_term = $data['search_term'];
 $notifications_count = $data['notifications_count'];
 $articleObj = $data['articleObj'];
 $userObj = $data['userObj'];
+$dark_mode = isset($_SESSION['dark_mode']) ? $_SESSION['dark_mode'] : false;
 
 require_once '../src/Views/bookmarks_view.php';
 ?>

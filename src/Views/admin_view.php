@@ -12,6 +12,9 @@
         rel="stylesheet">
     <link rel="icon" type="image/png" href="/images/admin.png">
     <link rel="stylesheet" href="./style/admin.css">
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/admin-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>

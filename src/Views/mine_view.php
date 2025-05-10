@@ -11,6 +11,10 @@
     <link rel="icon" type="image/png" href="/images/games.png">
     <link rel="stylesheet" href="style/index.css">
     <link rel="stylesheet" href="style/games.css">
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/index-dark.css">
+        <link rel="stylesheet" href="style/games-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>

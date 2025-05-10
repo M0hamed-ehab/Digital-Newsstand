@@ -44,12 +44,19 @@ class ProfileController
                 } else {
                     $this->errors = $response['errors'];
                 }
+            } elseif (isset($_POST['toggle_dark_mode'])) {
+                if (isset($_SESSION['dark_mode']) && $_SESSION['dark_mode'] === true) {
+                    $_SESSION['dark_mode'] = false;
+                } else {
+                    $_SESSION['dark_mode'] = true;
+                }
             }
         }
         $user = $this->user;
         $success_message = $this->success_message;
         $error_message = isset($this->errors) && !empty($this->errors) ? implode(', ', $this->errors) : null;
         $errors = $this->errors;
+        $dark_mode = isset($_SESSION['dark_mode']) ? $_SESSION['dark_mode'] : false;
         include '../src/Views/profile_view.php';
     }
 }

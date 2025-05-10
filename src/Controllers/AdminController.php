@@ -29,7 +29,7 @@ class AdminController
         $this->article = new Article($this->db);
         $this->category = new Category($this->db);
 
-        $this->handleRequest();
+        $this->load();
 
         $this->categories = $this->category->readAll();
         $this->articles = $this->admin->readAll();
@@ -46,7 +46,7 @@ class AdminController
         $this->breakingNews = $result;
     }
 
-    private function handleRequest()
+    private function load()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_POST['create_category'])) {
@@ -77,6 +77,7 @@ class AdminController
                 $this->message = $this->admin->createBreakingNews($content, $duration);
             }
         }
+
     }
 }
 ?>

@@ -95,6 +95,7 @@ class SubscriptionController
         $articles = $articles;
         $notifications_count = $notifications_count;
         $subscription = $this->subscription;
+        $dark_mode = isset($_SESSION['dark_mode']) ? $_SESSION['dark_mode'] : false;
 
         include '../src/Views/subscription_view.php';
     }

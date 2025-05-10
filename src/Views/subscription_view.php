@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="style/index.css">
     <link rel="stylesheet" href="style/subs.css">
     <script src="subs.js"></script>
+    <?php if ($dark_mode): ?>
+        <link rel="stylesheet" href="style/index-dark.css">
+        <link rel="stylesheet" href="style/subs-dark.css">
+    <?php endif; ?>
 </head>
 
 <body>
